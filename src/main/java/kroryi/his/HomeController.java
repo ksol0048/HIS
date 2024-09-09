@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 @Log4j2
 public class HomeController {
-    //tewst
     @GetMapping("/home")
     public String home() {
         return "admin_management";
