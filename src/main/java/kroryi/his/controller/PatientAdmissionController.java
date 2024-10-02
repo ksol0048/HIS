@@ -48,8 +48,6 @@ public class PatientAdmissionController {
         patientAdmissionDTO.setViTime(LocalDateTime.now());
         patientAdmissionDTO.setTreatStatus("2"); // 진료중은 2
 
-
-
         // DB에 저장
         patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
 
@@ -64,7 +62,7 @@ public class PatientAdmissionController {
     }
 
 //    진료완료
-    @PostMapping("/completed/start")
+    @PostMapping("/completeTreatment")
     public ResponseEntity<String> completed(@RequestBody PatientAdmissionDTO patientAdmissionDTO) {
     System.out.println("진료 완료 요청 수신: " + patientAdmissionDTO);
 
@@ -78,8 +76,8 @@ public class PatientAdmissionController {
     return ResponseEntity.ok("환자가 진료 완료 상태로 등록되었습니다.");
 }
 
-    // 진료 중 대기 환자 목록 반환
-    @GetMapping("/completed/waiting")
+
+    @GetMapping("/completeTreatment/waiting")
     public ResponseEntity<List<PatientAdmission>> getWaitingPatientsForCompleted() {
         List<PatientAdmission> waitingPatients = patientAdmissionService.getWaitingPatients();
         return ResponseEntity.ok(waitingPatients);

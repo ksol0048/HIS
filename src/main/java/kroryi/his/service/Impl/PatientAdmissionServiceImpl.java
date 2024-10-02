@@ -43,6 +43,18 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
     }
 
     @Override
+    public void completePatientAdmission(PatientAdmissionDTO patientAdmissionDTO) {
+        List<PatientAdmission> admissions = patientAdmissionRepository.findByTreatStatus("2");
+
+        for(PatientAdmission admission : admissions) {
+            admission.setCompletionTime(patientAdmissionDTO.getCompletionTime());
+            admission.setTreatStatus("3");
+            patientAdmissionRepository.save(admission);
+        }
+
+    }
+
+    @Override
     public List<PatientAdmission> getWaitingPatients() {
         return patientAdmissionRepository.findByTreatStatus("1");
     }

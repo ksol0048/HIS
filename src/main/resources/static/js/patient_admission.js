@@ -194,14 +194,20 @@ document.addEventListener("DOMContentLoaded", function () {
     function deletePatientFromWaitingTable(rowIndex) {
         if (waitingPatientsTable.rows.length > rowIndex && rowIndex >= 0) {
             waitingPatientsTable.deleteRow(rowIndex);
-            waitingPatientCount--; // 환자 수 업데이트
+
             updateWaitingPatientCount();
         } else {
             console.error(`Invalid row index: ${rowIndex}`);
         }
     }
 
-
+// // 대기 환자 테이블의 행 번호 업데이트
+//     function updateRowNumbers() {
+//         for (let i = 1; i < waitingPatientsTable.rows.length; i++) {
+//             const cell = waitingPatientsTable.rows[i].cells[0]; // 첫 번째 셀 (환자 번호)
+//             cell.textContent = String(i); // 행 번호 업데이트
+//         }
+//     }
 
 
     // 대기 중 테이블에 환자 추가
@@ -232,6 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             row.classList.add('selected');
         });
+
         updateWaitingPatientCount();
     }
 
@@ -297,16 +304,17 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${formattedCurrentTime || 'N/A'}</td> <!-- 포맷된 현재 시간 -->
         <td>${formattedReceptionTime || 'N/A'}</td> <!-- 포맷된 접수 시간 -->
     `;
-
+        // updateRowNumbers()
         updateTreatmentPatientCount();
     }
 
 
 
     function updateWaitingPatientCount() {
-        const count = waitingPatientsTable.rows.length;
+        const count = waitingPatientsTable.rows.length ;
         const header = document.querySelector("#waitingPatientsTable th[colspan='6']");
         header.textContent = `진료 대기 환자: ${count}명`;
+
     }
 
     function updateTreatmentPatientCount() {
@@ -366,18 +374,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
     const patientNameElement = document.getElementById("patientName");
     const confirmCancelBtn = document.getElementById("confirmCancelBtn");
-    const closeModalBtn = document.querySelector('#cancelModal .btn-secondary'); // '아니오' 버튼
-
-    // 접수 취소 버튼
+    const closeModalBtn = document.querySelector('#cancelModal .btn-secondary'); // '아니요' 버튼
     const cancelReceptionButton = document.getElementById("cancelReceptionButton");
 
-    // 대기 환자 수 업데이트 함수
+    // 환자 수 업데이트 함수
     function updateWaitingPatientCount() {
-        const count = waitingPatientsTable.rows.length ;
+        const count = waitingPatientsTable.rows.length;
         const header = document.querySelector("#waitingPatientsTable th[colspan='6']");
+        header.textContent = `진료 대기 환자: ${Math.max(count, 0)}명`;
+    }
 
-        const displayCount = Math.max(count, 0);
-        header.textContent = `진료 대기 환자: ${displayCount}명`;
+    // 행 번호 업데이트 함수
+    function updateRowIndexes() {
+        const rows = waitingPatientsTable.getElementsByTagName("tr");
+        for (let i = 0; i < rows.length; i++) {
+            if (i > 0) { // 첫 번째 행은 헤더이므로 건너뜁니다.
+                const cell = rows[i].cells[0]; // 첫 번째 열(번호 열)을 가져옵니다.
+                cell.textContent = i; // 번호를 현재 행 번호로 업데이트합니다.
+            }
+        }
     }
 
     // 대기 환자 테이블의 행 클릭 시 해당 행 선택
@@ -387,22 +402,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 선택된 행 저장
         selectedRow = targetRow;
-
-        // 선택한 환자의 이름을 콘솔로 출력 (디버깅 용도)
         console.log("Selected patient:", selectedRow.cells[2].textContent);
     });
 
     // 접수 취소 버튼 클릭 시 모달 표시
     cancelReceptionButton.addEventListener("click", function () {
         if (selectedRow) {
-            // 선택한 환자의 이름을 모달에 표시
             const patientName = selectedRow.cells[2].textContent;
             patientNameElement.textContent = `환자 이름: ${patientName}`;
-
-            // 모달 표시
             cancelModal.show();
         } else {
-            alert("취소할 환자를 먼저 선택하세요."); // 선택된 행이 없을 경우 경고 메시지
+            alert("취소할 환자를 먼저 선택하세요.");
         }
     });
 
@@ -411,6 +421,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (selectedRow) {
             selectedRow.remove(); // 선택된 행 삭제
             updateWaitingPatientCount(); // 환자 수 업데이트
+            updateRowIndexes(); // 행 번호 업데이트
         }
 
         // 모달 닫기
