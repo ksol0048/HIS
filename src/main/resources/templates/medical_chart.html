@@ -544,7 +544,7 @@
 
                         </table>
                         <div class="d-flex">
-                        <button type="button" class="btn btn-success ms-auto" >저장</button>
+                            <button type="button" class="btn btn-success ms-auto">저장</button>
                         </div>
                         pi 최하단부
                     </div>
@@ -1101,9 +1101,9 @@
     // 치아 동적 배열 선언
     let toothList = []
     //선택된 pi 증상을 저장하기위한 변수
-    let symptomList= []
+    let symptomList = []
     // memo 데이터 저장을 위한 선언
-    let memoList=[];
+    let memoList = [];
     // 의사의 자주쓰는 멘트 저장을 위한 동적 배열 선언
     let frequentlyUsedPhrases = [];
     // 데이터가 저장될때 배열의 index값을 재 지정하기위한 변수.
@@ -1127,48 +1127,10 @@
     }
 
 
-
-
     // 데이터 배열을 세션에 등록.
-    function addsToSubList(subListIndex, newValue, listIndex, trueFalse) {
-
-            const data = {
-                subListIndex: subListIndex,
-                newValues: newValue, // newValue를 배열로 초기화
-                listIndex: listIndex,
-                addOrDelete: trueFalse
-            };
-console.log(data)
+     function masterToSubList(subListIndex, newValue, listIndex, trueFalse) {
         $.ajax({
-            url: '/his/adds-to-sublist',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(
-                // {
-                // subListIndex: subListIndex,
-                // newValues: newValue,
-                // listIndex: listIndex,
-                // addOrDelete: trueFalse
-
-            // }
-            data
-            ),
-            success: function (response) {
-                console.log("전송성공")
-                console.log("addsToSubList ->" + response);
-                fetchSessionItems(); // 변경된 세션 데이터를 가져와 화면에 갱신
-            },
-            error: function (xhr, status, error) {
-                console.log("fail")
-                console.error('Failed to add to sublist:', error);
-            }
-        });
-    }
-
-
-    function deletesToSubList(subListIndex, newValue, listIndex, trueFalse) {
-        $.ajax({
-            url: '/his/deletes-to-sublist',
+            url: '/his/addDelete-to-subList',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
@@ -1178,7 +1140,7 @@ console.log(data)
                 addOrDelete: trueFalse
             }),
             success: function (response) {
-                console.log("addsToSubList ->" + response);
+                console.log("masterToSubList ->" + response);
                 fetchSessionItems(); // 변경된 세션 데이터를 가져와 화면에 갱신
             },
             error: function (xhr, status, error) {
@@ -1226,14 +1188,14 @@ console.log(data)
     // 데이터 받아서 세션으로 전송하는 구문 시작
     // 치아 클릭 시 선택된 치아 value 값을 session에 저장.
     tooth.addEventListener("click", e => {
-        toothList=[]
+        toothList = []
         toothList.push(e.target.value)
         if (e.target.tagName === "BUTTON" && e.target.id === '') {
             if (e.target.classList.contains("opacity-50")) {
-                deletesToSubList(0, toothList,listIndex,false)
+                masterToSubList(0, toothList, listIndex, false)
                 e.target.classList.remove("opacity-50")
             } else {
-                addsToSubList(0, toothList,listIndex,true);
+                masterToSubList(0, toothList, listIndex, true);
                 e.target.classList.add("opacity-50")
             }
         } else {
@@ -1246,13 +1208,13 @@ console.log(data)
     //증상 데이터를 저장.
     symptom.addEventListener("click", e => {
         if (e.target.tagName === "INPUT") {
-            symptomList=[]
+            symptomList = []
             symptomList.push(e.target.value);
             if (e.target.checked) {
-                addsToSubList(1, symptomList,listIndex,true);
+                masterToSubList(1, symptomList, listIndex, true);
                 console.log(symptomList)
             } else {
-                deletesToSubList(1, symptomList,listIndex,false);
+                masterToSubList(1, symptomList, listIndex, false);
             }
         }
 
@@ -1260,10 +1222,10 @@ console.log(data)
     // 메모 데이터 저장
     saveMemo.addEventListener("click", e => {
         if (e.target.tagName === "BUTTON" && memo.tagName === "TEXTAREA") {
-            memoList=[]
+            memoList = []
             memoList.push(memo.value)
         }
-        addsToSubList(2, memoList,listIndex,true)
+        masterToSubList(2, memoList, listIndex, true)
         memo.value = ''
         console.log(memoList)
 
@@ -1277,12 +1239,12 @@ console.log(data)
                     toothList[i] = upToothValues[i].value;
                 }
                 if (upTooth.classList.contains("opacity-50")) {
-                    deletesToSubList(0, toothList,listIndex,false)
+                    masterToSubList(0, toothList, listIndex, false)
                     upTooth.classList.remove("opacity-50")
                     upToothValues.forEach(upToothValue =>
                         upToothValue.classList.remove("opacity-50"))
                 } else {
-                    addsToSubList(0, toothList,listIndex,true)
+                    masterToSubList(0, toothList, listIndex, true)
                     upTooth.classList.add("opacity-50")
                     upToothValues.forEach(upToothValue =>
                         upToothValue.classList.add("opacity-50"))
@@ -1296,14 +1258,14 @@ console.log(data)
                     toothList.push(downToothValues[i].value)
                 }
                 if (allTooth.classList.contains("opacity-50")) {
-                    deletesToSubList(0, toothList,listIndex,false)
+                    masterToSubList(0, toothList, listIndex, false)
                     allTooth.classList.remove("opacity-50")
                     upToothValues.forEach(upToothValue =>
                         upToothValue.classList.remove("opacity-50"))
                     downToothValues.forEach(downToothValue =>
                         downToothValue.classList.remove("opacity-50"))
                 } else {
-                    addsToSubList(0, toothList,listIndex,true)
+                    masterToSubList(0, toothList, listIndex, true)
                     allTooth.classList.add("opacity-50")
                     downToothValues.forEach(downToothValue =>
                         downToothValue.classList.add("opacity-50"))
@@ -1317,12 +1279,12 @@ console.log(data)
                     toothList[i] = downToothValues[i].value;
                 }
                 if (downTooth.classList.contains("opacity-50")) {
-                    deletesToSubList(0, toothList,listIndex,false)
+                    masterToSubList(0, toothList, listIndex, false)
                     downTooth.classList.remove("opacity-50")
                     downToothValues.forEach(downToothValue =>
                         downToothValue.classList.remove("opacity-50"))
                 } else {
-                    addsToSubList(0, toothList,listIndex,false)
+                    masterToSubList(0, toothList, listIndex, true)
                     downTooth.classList.add("opacity-50")
                     downToothValues.forEach(downToothValue =>
                         downToothValue.classList.add("opacity-50"))
@@ -1334,12 +1296,12 @@ console.log(data)
                     toothList[i] = yUpToothValues[i].value;
                 }
                 if (upToothY.classList.contains("opacity-50")) {
-                    deletesToSubList(0, toothList,listIndex,false)
+                    masterToSubList(0, toothList, listIndex, false)
                     upToothY.classList.remove("opacity-50")
                     yUpToothValues.forEach(yUpToothValue =>
                         yUpToothValue.classList.remove("opacity-50"))
                 } else {
-                    addsToSubList(0, toothList,listIndex,true)
+                    masterToSubList(0, toothList, listIndex, true)
                     upToothY.classList.add("opacity-50")
                     yUpToothValues.forEach(yUpToothValue =>
                         yUpToothValue.classList.add("opacity-50"))
@@ -1355,12 +1317,12 @@ console.log(data)
                     toothList[i] = yDownToothValues[i].value;
                 }
                 if (downToothY.classList.contains("opacity-50")) {
-                    deletesToSubList(0, toothList,listIndex,false)
+                    masterToSubList(0, toothList, listIndex, false)
                     downToothY.classList.remove("opacity-50")
                     yDownToothValues.forEach(yDownToothValue =>
                         yDownToothValue.classList.remove("opacity-50"))
                 } else {
-                    addsToSubList(0, toothList,listIndex,true)
+                    masterToSubList(0, toothList, listIndex, true)
                     downToothY.classList.add("opacity-50")
                     yDownToothValues.forEach(yDownToothValue =>
                         yDownToothValue.classList.add("opacity-50"))
@@ -1379,8 +1341,8 @@ console.log(data)
         row.addEventListener('click', function () {
             if (this.classList.contains("selected-row")) {
                 this.classList.remove("selected-row")
-                this.querySelectorAll("td").forEach(function (cell,index){
-                    if(index===1) {
+                this.querySelectorAll("td").forEach(function (cell, index) {
+                    if (index === 1) {
                         frequentlyUsedPhrases = frequentlyUsedPhrases.filter(item => item !== cell.textContent)
                     }
                 })
@@ -1388,8 +1350,8 @@ console.log(data)
             } else {
                 // 현재 클릭된 행에 클래스 추가
                 this.classList.add('selected-row');
-                this.querySelectorAll("td").forEach(function (cell,index){
-                    if(index===1) {
+                this.querySelectorAll("td").forEach(function (cell, index) {
+                    if (index === 1) {
                         frequentlyUsedPhrases.push(cell.textContent)
                     }
                 })
@@ -1398,11 +1360,11 @@ console.log(data)
         });
     });
 
-    modalInMemo.addEventListener("click", e =>{
-        memo.textContent=frequentlyUsedPhrases
+    modalInMemo.addEventListener("click", e => {
+        memo.textContent = frequentlyUsedPhrases
         const closeModal = document.querySelector("#piModal")
         let modalInstance = bootstrap.Modal.getInstance(closeModal)
-        if(!modalInstance){
+        if (!modalInstance) {
             console.log("11111")
             modalInstance = new bootstrap.modal(closeModal);
         }
