@@ -11,4 +11,9 @@ public interface PatientAdmissionService {
     List<PatientAdmission> getWaitingPatients();
 
 
+    // 진료 중 환자 목록을 반환
+    List<PatientAdmission> getWaitingPatientsForTreatment();
+
+    // 진료 완료 환자 목록을 반환
+    List<PatientAdmission> getCompletedPatients();
 }

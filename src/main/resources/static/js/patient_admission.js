@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
     const waitingPatientsTable = document.getElementById("waitingPatientsTable").getElementsByTagName("tbody")[0];
     const treatmentPatientsTable = document.getElementById("treatmentPatientsTable").getElementsByTagName("tbody")[0];
+    const completedPatientsTable = document.getElementById("completedPatientsTable").getElementsByTagName("tbody")[0];
     let waitingPatientCount = 0;
     let treatmentPatientCount = 0;
+    let completedPatientCount= 0;
 
     // 오늘 날짜 기본값 설정
     const today = new Date();

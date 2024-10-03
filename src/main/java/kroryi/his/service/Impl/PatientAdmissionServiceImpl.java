@@ -58,4 +58,16 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
     public List<PatientAdmission> getWaitingPatients() {
         return patientAdmissionRepository.findByTreatStatus("1");
     }
+
+    // 진료 중 환자 목록을 반환
+    @Override
+    public List<PatientAdmission> getWaitingPatientsForTreatment() {
+        return patientAdmissionRepository.findByTreatStatus("2"); // "2"는 진료 중 상태
+    }
+
+    // 진료 완료 환자 목록을 반환
+    @Override
+    public List<PatientAdmission> getCompletedPatients() {
+        return patientAdmissionRepository.findByTreatStatus("3"); // "3"은 진료 완료 상태
+    }
 }

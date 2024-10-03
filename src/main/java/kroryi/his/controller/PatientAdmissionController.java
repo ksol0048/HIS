@@ -57,8 +57,8 @@ public class PatientAdmissionController {
     // 진료 중 대기 환자 목록 반환
     @GetMapping("/treatment/waiting")
     public ResponseEntity<List<PatientAdmission>> getWaitingPatientsForTreatment() {
-        List<PatientAdmission> waitingPatients = patientAdmissionService.getWaitingPatients();
-        return ResponseEntity.ok(waitingPatients);
+        List<PatientAdmission> inTreatmentPatients  = patientAdmissionService.getWaitingPatients();
+        return ResponseEntity.ok(inTreatmentPatients );
     }
 
 //    진료완료
@@ -79,8 +79,8 @@ public class PatientAdmissionController {
 
     @GetMapping("/completeTreatment/waiting")
     public ResponseEntity<List<PatientAdmission>> getWaitingPatientsForCompleted() {
-        List<PatientAdmission> waitingPatients = patientAdmissionService.getWaitingPatients();
-        return ResponseEntity.ok(waitingPatients);
+        List<PatientAdmission> completedPatients = patientAdmissionService.getCompletedPatients();
+        return ResponseEntity.ok(completedPatients);
     }
 
 }
