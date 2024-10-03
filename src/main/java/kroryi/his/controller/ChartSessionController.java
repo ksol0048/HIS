@@ -131,7 +131,6 @@ public class ChartSessionController {
             }
             log.info("piList.size() ----->{}", piList.size());
         }
-        log.info("12312312313{}", listIndexList);
 
         switch (subListIndex) {
             case 0:
