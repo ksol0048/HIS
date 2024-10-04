@@ -16,7 +16,7 @@ public interface MaterialRegisterService {
 
     List<MaterialRegister> searchByMaterialName(String materialName);
 
-    List<MaterialRegister> searchByCompanyNameAndMaterialName(String companyName, String materialName);
+    List<MaterialRegister> searchByCompanyNameAndMaterialName(String companyName , String materialName);
 
     void updateMaterial(MaterialDTO materialDTO);
 
