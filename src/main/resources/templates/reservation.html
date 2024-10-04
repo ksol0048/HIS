@@ -69,16 +69,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="reservation-status">예약 상태</label>
+                    <label class="reservation-status">예약 종류</label>
                     <div class="row">
                         <div><input type="radio" id="patient-reservation" name="reservation-status"> 환자예약</div>
                         <div><input type="radio" id="other-reservation" name="reservation-status"> 그외예약</div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="patient-status">환자정보</label>
-                    <div class="row">
                         <div><input type="radio" id="registered-patient" name="patient-status"> 등록환자</div>
                         <div><input type="radio" id="unregistered-patient" name="patient-status"> 미등록환자</div>
                     </div>
@@ -116,26 +110,38 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="seat-number">치석</label>
-                    <input type="text" id="seat-number" name="seat-number" placeholder="1-9">
-                </div>
+<!--                <div class="form-group">-->
+<!--                    <label for="seat-number">치석</label>-->
+<!--                    <input type="text" id="seat-number" name="seat-number" placeholder="1-9">-->
+<!--                </div>-->
 
                 <div class="form-group">
-                    <label for="notes">노트</label>
-                    <textarea id="notes" name="notes"></textarea>
+                    <label for="check-type">노트</label>
+                    <select id="check-type" name="check-type">
+                        <option value="check">check</option>
+                        <option value="1주 ck">1주 ck</option>
+                        <option value="2달뒤 check">2달뒤 check</option>
+                        <option value="3개월 정기검진">3개월 정기검진</option>
+                        <option value="6개월 정기검진">6개월 정기검진</option>
+                        <option value="ext">ext</option>
+                        <option value="dr">dr</option>
+                    </select>
                 </div>
+
 
                 <div class="form-group">
                     <label for="color-select">Color 선택</label>
                     <select id="color-select" name="color-select">
-                        <option value="없음">없음</option>
+                        <option></option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <input type="radio" id="C_A" name="reservation-status" value="C_A"> C/A
-                    <input type="radio" id="B_A" name="reservation-status" value="B_A"> B/A
+                    <label class="reservation">예약 미이행</label>
+                    <div class="row">
+                        <div><input type="radio" name="C/A">C/A</div>
+                        <div><input type="radio" name="B/A">B/A</div>
+                    </div>
                 </div>
 
                 <div class="btn-group">
