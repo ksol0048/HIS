@@ -55,20 +55,6 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
     @Override
     public List<MaterialTransactionDTO> getAllTransactions() {
         List<MaterialTransactionRegister> transactions = materialTransactionRepository.findAll();
-
-        // 각 Transaction의 데이터를 확인하는 로그 추가
-        transactions.forEach(transaction -> {
-            log.info("Transaction ID: {}", transaction.getTransactionId());
-            log.info("Material Name: {}",
-                    transaction.getMaterialRegister() != null
-                            ? transaction.getMaterialRegister().getMaterialName()
-                            : "null");
-            log.info("Company Name: {}",
-                    transaction.getMaterialRegister() != null && transaction.getMaterialRegister().getCompanyRegister() != null
-                            ? transaction.getMaterialRegister().getCompanyRegister().getCompanyName()
-                            : "null");
-        });
-
         return transactions.stream()
                 .map(MaterialTransactionDTO::new)  // DTO로 변환
                 .collect(Collectors.toList());
