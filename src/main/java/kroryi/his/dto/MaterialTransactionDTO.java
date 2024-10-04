@@ -2,15 +2,14 @@ package kroryi.his.dto;
 
 import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Builder
 @Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class MaterialTransactionDTO {
@@ -48,19 +47,28 @@ public class MaterialTransactionDTO {
     //담당자연락처
     private String managerNumber;
 
-    public MaterialTransactionDTO(MaterialTransactionRegister MaterialTransactionRegister) {
-        this.transactionId = MaterialTransactionRegister.getTransactionId();
-        this.transactionDate = MaterialTransactionRegister.getTransactionDate();
-        this.stockIn = MaterialTransactionRegister.getStockIn();
-        this.stockOut = MaterialTransactionRegister.getStockOut();
-        this.remainingStock = MaterialTransactionRegister.getRemainingStock();
-        this.belowSafetyStock = MaterialTransactionRegister.isBelowSafetyStock();
-        this.materialCode = MaterialTransactionRegister.getMaterialRegister().getMaterialCode();
-        this.materialName = MaterialTransactionRegister.getMaterialRegister().getMaterialName();
-        this.companyName = MaterialTransactionRegister.getMaterialRegister().getCompanyRegister().getCompanyName();
-        this.companyCode = MaterialTransactionRegister.getMaterialRegister().getCompanyRegister().getCompanyCode();
-        this.managerNumber = MaterialTransactionRegister.getMaterialRegister().getCompanyRegister().getManagerNumber();
+    public MaterialTransactionDTO(MaterialTransactionRegister materialTransactionRegister) {
+        this.transactionId = materialTransactionRegister.getTransactionId();
+        this.transactionDate = materialTransactionRegister.getTransactionDate();
+        this.stockIn = materialTransactionRegister.getStockIn();
+        this.stockOut = materialTransactionRegister.getStockOut();
+        this.remainingStock = materialTransactionRegister.getRemainingStock();
+        this.belowSafetyStock = materialTransactionRegister.isBelowSafetyStock();
 
+        // MaterialRegister가 null이 아닌 경우에만 데이터 설정
+        if (materialTransactionRegister.getMaterialRegister() != null) {
+            this.materialCode = materialTransactionRegister.getMaterialRegister().getMaterialCode();
+            this.materialName = materialTransactionRegister.getMaterialRegister().getMaterialName();
+
+            // CompanyRegister가 null이 아닌 경우에만 데이터 설정
+            if (materialTransactionRegister.getMaterialRegister().getCompanyRegister() != null) {
+                this.companyName = materialTransactionRegister.getMaterialRegister().getCompanyRegister().getCompanyName();
+                this.companyCode = materialTransactionRegister.getMaterialRegister().getCompanyRegister().getCompanyCode();
+                this.managerNumber = materialTransactionRegister.getMaterialRegister().getCompanyRegister().getManagerNumber();
+            }
+        }
     }
+
+
 
 }

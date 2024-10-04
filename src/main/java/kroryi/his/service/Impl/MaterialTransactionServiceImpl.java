@@ -1,8 +1,10 @@
 package kroryi.his.service.Impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import kroryi.his.domain.CompanyRegister;
 import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
+import kroryi.his.dto.MaterialDTO;
 import kroryi.his.dto.MaterialTransactionDTO;
 import kroryi.his.repository.CompanyRegisterRepository;
 import kroryi.his.repository.MaterialRegisterRepository;
@@ -28,65 +30,78 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
     private final ModelMapper modelMapper;
 
     @Override
-    public List<MaterialTransactionDTO> searchTransactions(String materialName, String materialCode) {
-        if (materialName != null || materialCode != null) {
-            return materialTransactionRepository.findByMaterialRegister_MaterialNameOrMaterialRegister_MaterialCode(materialName, materialCode)
-                    .stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } else {
-            return materialTransactionRepository.findAll()
-                    .stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        }
+    public MaterialTransactionRegister register(MaterialTransactionDTO materialTransactionDTO) {
+        // MaterialDTO를 MaterialRegister로 변환
+        MaterialRegister materialRegister = materialRepository.findByMaterialCode(materialTransactionDTO.getMaterialCode())
+                .orElseThrow(() -> new EntityNotFoundException("재료를 찾을 수 없습니다: " + materialTransactionDTO.getMaterialCode()));
+
+        MaterialTransactionRegister materialTransactionRegister = modelMapper.map(materialTransactionDTO, MaterialTransactionRegister.class);
+
+        // 입고량과 출고량 기본값 설정
+        materialTransactionRegister.setStockIn(materialTransactionDTO.getStockIn() != null ? materialTransactionDTO.getStockIn() : 0L);
+        materialTransactionRegister.setStockOut(materialTransactionDTO.getStockOut() != null ? materialTransactionDTO.getStockOut() : 0L);
+
+        // 나머지 필드 설정
+        materialTransactionRegister.setTransactionDate(materialTransactionDTO.getTransactionDate());
+
+        // MaterialRegister 객체를 Transaction 엔티티에 설정
+        materialTransactionRegister.setMaterialRegister(materialRegister);
+
+        // 재료 출납 정보 저장
+        return materialTransactionRepository.save(materialTransactionRegister);
     }
 
+    // 모든 출납 내역 조회
     @Override
-    public void addTransaction(MaterialTransactionDTO transactionDTO) {
-        MaterialTransactionRegister transaction = convertToEntity(transactionDTO);
-        materialTransactionRepository.save(transaction);
+    public List<MaterialTransactionDTO> getAllTransactions() {
+        List<MaterialTransactionRegister> transactions = materialTransactionRepository.findAll();
+
+        // 각 Transaction의 데이터를 확인하는 로그 추가
+        transactions.forEach(transaction -> {
+            log.info("Transaction ID: {}", transaction.getTransactionId());
+            log.info("Material Name: {}",
+                    transaction.getMaterialRegister() != null
+                            ? transaction.getMaterialRegister().getMaterialName()
+                            : "null");
+            log.info("Company Name: {}",
+                    transaction.getMaterialRegister() != null && transaction.getMaterialRegister().getCompanyRegister() != null
+                            ? transaction.getMaterialRegister().getCompanyRegister().getCompanyName()
+                            : "null");
+        });
+
+        return transactions.stream()
+                .map(MaterialTransactionDTO::new)  // DTO로 변환
+                .collect(Collectors.toList());
     }
 
+
+    // 재료명으로 출납 내역 검색
     @Override
-    public void updateTransaction(MaterialTransactionDTO transactionDTO) {
-        MaterialTransactionRegister transaction = materialTransactionRepository.findById(transactionDTO.getTransactionId())
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
+    public List<MaterialTransactionDTO> searchByMaterialName(String materialName) {
+        List<MaterialTransactionRegister> transactions = materialTransactionRepository.findByMaterialRegisterMaterialNameContaining(materialName);
 
-        transaction.setTransactionDate(transactionDTO.getTransactionDate());
-        transaction.setStockIn(transactionDTO.getStockIn());
-        transaction.setStockOut(transactionDTO.getStockOut());
-        transaction.setRemainingStock(transactionDTO.getRemainingStock());
-        transaction.setBelowSafetyStock(transactionDTO.isBelowSafetyStock());
-
-        materialTransactionRepository.save(transaction);
+        // 엔티티를 DTO로 변환
+        return transactions.stream()
+                .map(transaction -> new MaterialTransactionDTO(transaction))  // DTO로 변환
+                .collect(Collectors.toList());
     }
 
+
+    // 재료코드로 출납 내역 검색
     @Override
-    public void deleteTransaction(Long transactionId) {
-        MaterialTransactionRegister transaction = materialTransactionRepository.findById(transactionId)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
-        materialTransactionRepository.delete(transaction);
+    public List<MaterialTransactionDTO> searchByMaterialCode(String materialCode) {
+        List<MaterialTransactionRegister> transactions = materialTransactionRepository.findByMaterialRegisterMaterialCodeContaining(materialCode);
+
+        // 엔티티를 DTO로 변환
+        return transactions.stream()
+                .map(transaction -> new MaterialTransactionDTO(transaction))  // DTO로 변환
+                .collect(Collectors.toList());
     }
 
-    private MaterialTransactionDTO convertToDTO(MaterialTransactionRegister transaction) {
-        return new MaterialTransactionDTO(transaction);
-    }
 
-    private MaterialTransactionRegister convertToEntity(MaterialTransactionDTO transactionDTO) {
-        // Optional에서 값을 꺼내는 부분 수정
-        MaterialRegister materialRegister = materialRepository.findByMaterialCode(transactionDTO.getMaterialCode())
-                .orElseThrow(() -> new EntityNotFoundException("Material not found"));
 
-        return MaterialTransactionRegister.builder()
-                .transactionDate(transactionDTO.getTransactionDate())
-                .stockIn(transactionDTO.getStockIn())
-                .stockOut(transactionDTO.getStockOut())
-                .remainingStock(transactionDTO.getRemainingStock())
-                .belowSafetyStock(transactionDTO.isBelowSafetyStock())
-                .materialRegister(materialRegister)  // Optional 타입이 아닌 실제 객체를 전달
-                .build();
-    }
 
 
 }
+
+

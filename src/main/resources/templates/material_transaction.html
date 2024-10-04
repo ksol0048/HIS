@@ -75,8 +75,8 @@
               <input type="date" name="transactionDate" class="form-control" id="transactionDate">
             </div>
             <div class="col-md-2 mb-3">
-              <label for="twoCompanyCode" class="form-label">업체명</label>
-              <input type="text" name="CompanyCode" class="form-control" id="twoCompanyCode"
+              <label for="twoCompanyName" class="form-label">업체명</label>
+              <input type="text" name="CompanyName" class="form-control" id="twoCompanyName"
                      placeholder="업체명 입력">
             </div>
             <div class="col-md-2 mb-3">
@@ -101,40 +101,37 @@
             </div>
             <div class="col-md-12 d-flex justify-content-end mb-3">
               <button type="button" class="btn btn-success mt-4" id="materialCompanySelect">재료조회</button>
-              <button type="submit" class="btn btn-primary mt-4 ms-2" id="saveTransaction">저장
+              <!--재료 선택 모달창-->
+              <div class="modal fade" id="materialCompanyModal" tabindex="-1" aria-labelledby="materialCompanyModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="materialCompanyModalLabel">업체/재료 목록</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                          <th>업체명</th>
+                          <th>재료명</th>
+                          <th>재료코드</th>
+                        </tr>
+                        </thead>
+                        <tbody id="materialCompanyList">
+                        <!-- 업체/재료 목록 동적 추가 -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary mt-4 ms-2" id="addTransactionBtn">저장
               </button>
               <button type="reset" class="btn btn-secondary mt-4 ms-2" id="resetTransaction">취소
               </button>
               <button type="button" class="btn btn-danger mt-4 ms-2" id="deleteTransactionBtn">삭제</button>
             </div>
-
-            <!--재료사 선택 모달창-->
-            <div class="modal fade" id="materialCompanyModal" tabindex="-1" aria-labelledby="materialCompanyModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="materialCompanyModalLabel">업체/재료 목록</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <table class="table table-bordered">
-                      <thead>
-                      <tr>
-                        <th>업체명</th>
-                        <th>재료명</th>
-                        <th>재료코드</th>
-                      </tr>
-                      </thead>
-                      <tbody id="materialCompanyList">
-                      <!-- 업체/재료 목록 동적 추가 -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
           </div>
         </form>
       </div>
@@ -142,3 +139,4 @@
   </div>
   <script src="/js/material_transaction.js"></script>
 </html>
+

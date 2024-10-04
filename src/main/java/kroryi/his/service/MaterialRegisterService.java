@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface MaterialRegisterService {
     List<MaterialRegister> getAllMaterial();
+    List<MaterialDTO> getAllMaterialsWithCompany();
 
     MaterialRegister register(MaterialDTO materialDTO);
 

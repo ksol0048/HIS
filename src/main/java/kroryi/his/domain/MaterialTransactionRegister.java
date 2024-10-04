@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Builder
 @Getter
 @Setter
@@ -17,7 +16,7 @@ import java.time.LocalDate;
 public class MaterialTransactionRegister {
 
     //material 테이블과 join. 무한참조 방지
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnore
     @JoinColumn(name = "material_Code", nullable = false)
     private MaterialRegister materialRegister;
@@ -29,7 +28,7 @@ public class MaterialTransactionRegister {
     private Long transactionId;
 
     //입출일자
-    @Column(name = "transaction_Date")
+    @Column(name = "transaction_Date", nullable = false)
     private LocalDate transactionDate;
 
     //입고량

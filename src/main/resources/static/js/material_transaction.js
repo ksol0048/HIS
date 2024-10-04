@@ -1,211 +1,221 @@
-document.addEventListener('DOMContentLoaded', function () {
+// 재료 추가 또는 수정 버튼 클릭 이벤트 핸들러
+document.getElementById('addTransactionBtn').addEventListener('click', (event) => {
+    event.preventDefault();  // 기본 폼 제출 동작을 막음
+    event.stopPropagation();  // 이벤트 전파 방지
 
-    // -------------------- 재료 출납 관리 관련 기능 --------------------
+    const materialData = {
+        transactionDate: document.getElementById('transactionDate').value,
+        materialCode: document.getElementById('twoMaterialCode').value,  // materialCode 확인
+        companyName: document.getElementById('twoCompanyName').value,
+        materialName: document.getElementById('twoMaterialName').value,
+        stockIn: parseInt(document.getElementById('stockIn').value, 10),
+        stockOut: parseInt(document.getElementById('stockOut').value, 10)
+    };
+    // 서버로 데이터 전송
 
-    // 트랜잭션 저장 버튼 클릭 이벤트
-    document.getElementById('saveTransaction').addEventListener('click', (event) => {
-        event.preventDefault();  // 기본 폼 제출 방지
-
-        const transactionDate = document.getElementById('transactionDate').value;
-        let url, method;
-
-        // 트랜잭션 저장 또는 수정 여부에 따른 URL 및 메소드 설정
-        if (transactionDate) {
-            url = `/transaction_management/updateTransaction`;
-            method = "PUT";
-        } else {
-            url = `/transaction_management/addTransaction`;
-            method = "POST";
-        }
-
-        const transactionData = {
-            transactionDate: document.getElementById('transactionDate').value,
-            companyName: document.getElementById('twoCompanyName').value,
-            materialName: document.getElementById('twoMaterialName').value,
-            materialCode: document.getElementById('twoMaterialCode').value,
-            stockIn: parseInt(document.getElementById('stockIn').value, 10),
-            stockOut: parseInt(document.getElementById('stockOut').value, 10),
-            managerNumber: document.getElementById('managerNumber').value
-        };
-
-        // 서버에 데이터 전송
-        fetch(url, {
-            method: method,
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(transactionData)
+    fetch('/inventory_management/addTransaction', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(materialData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
         })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);  // 서버 메시지 알림
-                loadTransactionList();  // 트랜잭션 목록 다시 로딩
-            })
-            .catch(error => {
-                alert(`오류 발생: ${error.message}`);
-            });
-    });
+        .then(data => {
+            alert(data.message);  // 서버에서 받은 메시지를 alert에 출력
+            loadTransactionList();  // 목록 다시 로딩
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert(`서버와의 통신 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
+        });
 
-    // 트랜잭션 목록 불러오기
-    function loadTransactionList() {
-        fetch('/transaction_management/searchTransaction')
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('transactionList');
-                tbody.innerHTML = '';  // 기존 행 초기화
+});
 
-                if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7">현재 등록된 출납 내역이 없습니다.</td></tr>';
-                } else {
-                    data.forEach(transaction => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${transaction.transactionDate}</td>
-                            <td>${transaction.companyName}</td>
-                            <td>${transaction.materialName}</td>
-                            <td>${transaction.materialCode}</td>
-                            <td>${transaction.stockIn}</td>
-                            <td>${transaction.stockOut}</td>
-                            <td>${transaction.managerNumber}</td>
-                        `;
-                        row.addEventListener('dblclick', () => populateTransactionForm(transaction));
-                        tbody.appendChild(row);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("출납 내역을 불러오는 중 오류 발생:", error);
-            });
-    }
 
-    // 트랜잭션 삭제 버튼 클릭 이벤트
-    document.getElementById('deleteTransactionBtn').addEventListener('click', () => {
-        const transactionDate = document.getElementById('transactionDate').value;
+// 재료 출납 목록 로딩 함수
+function loadTransactionList() {
+    fetch('/inventory_management/searchTransaction')  // 전체 목록 조회
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('transactionList');
+            tbody.innerHTML = '';  // 기존 테이블 내용 초기화
 
-        if (confirm("이 출납 내역을 삭제하시겠습니까?")) {
-            fetch(`/transaction_management/deleteTransaction?transactionDate=${encodeURIComponent(transactionDate)}`, {
-                method: "DELETE"
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    resetTransactionForm();
-                    loadTransactionList();
-                })
-                .catch(error => {
-                    alert(`삭제 중 오류 발생: ${error.message}`);
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">현재 등록된 출납 정보가 없습니다.</td></tr>';
+            } else {
+                data.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${transaction.transactionDate || 'N/A'}</td>
+                        <td>${transaction.companyName || 'N/A'}</td>
+                        <td>${transaction.materialName || 'N/A'}</td>
+                        <td>${transaction.materialCode || 'N/A'}</td>
+                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 'N/A'}</td>
+                        <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+                        <td>${transaction.managerNumber || 'N/A'}</td>
+                    `;
+                    tbody.appendChild(row);
                 });
+            }
+        })
+        .catch(error => {
+            console.error("재료 출납 목록을 불러오는 중 오류 발생:", error);
+        });
+}
+
+// 재료 검색 함수
+function twoSearch() {
+    const materialName = document.getElementById('twoMaterialNameSearch').value.trim();
+    const materialCode = document.getElementById('twoMaterialCodeSearch').value.trim();
+
+    let url = `/inventory_management/searchTransaction?`;
+    const queryParams = [];
+
+    if (materialName) queryParams.push(`materialName=${encodeURIComponent(materialName)}`);
+    if (materialCode) queryParams.push(`materialCode=${encodeURIComponent(materialCode)}`);
+
+    if (queryParams.length > 0) {
+        url += queryParams.join('&');
+    }
+
+    // 서버에 fetch 요청
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`서버 응답 오류: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const tbody = document.getElementById('transactionList');
+            tbody.innerHTML = ''; // 기존 테이블 내용 초기화
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">현재 등록된 출납 내역이 없습니다.</td></tr>';
+            } else {
+                data.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${transaction.transactionDate || 'N/A'}</td>
+                        <td>${transaction.companyName || 'N/A'}</td>
+                        <td>${transaction.materialName || 'N/A'}</td>
+                        <td>${transaction.materialCode || 'N/A'}</td>
+                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 'N/A'}</td>
+                        <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+                        <td>${transaction.managerNumber || 'N/A'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        })
+        .catch(error => {
+            console.error("검색 중 오류 발생:", error);
+            alert(`검색 중 오류가 발생했습니다. 자세한 내용: ${error.message}`);
+        });
+}
+
+// 초기화 버튼 클릭 시 호출되는 함수
+function resetSearch() {
+    // 검색어 초기화
+    document.getElementById('twoMaterialNameSearch').value = '';
+    document.getElementById('twoMaterialCodeSearch').value = '';
+
+    // 전체 데이터를 불러오는 요청
+    fetch('/inventory_management/searchTransaction')  // 전체 데이터를 가져오는 API 엔드포인트
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('transactionList');
+            tbody.innerHTML = '';  // 기존 행 제거
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">현재 등록된 재료가 없습니다.</td></tr>';
+            } else {
+                data.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${material_transactions.transactionDate || 'N/A'}</td>
+                        <td>${material_transactions.companyName || 'N/A'}</td>
+                        <td>${material_transactions.materialName || 'N/A'}</td>
+                        <td>${material_transactions.materialCode || 'N/A'}</td>
+                        <td>${material_transactions.stockIn != null ? transaction.stockIn.toLocaleString() : 'N/A'}</td>
+                        <td>${material_transactions.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+                        <td>${material_transactions.managerNumber || 'N/A'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        })
+        .catch(error => {
+            console.error("재료 출납 목록을 불러오는 중 오류 발생:", error);
+        });
+}
+
+// 페이지 로드 시 재료 출납 목록을 불러오는 함수 호출
+loadTransactionList();  // 초기 데이터 로딩
+
+// 업체 목록을 더블클릭했을 때 선택된 업체 정보를 input 필드에 채우는 함수
+function selectMaterial(companyName, materialName, materialCode) {
+    // 선택한 업체 정보를 input 필드에 채우기
+    document.getElementById('twoCompanyName').value = companyName;
+    document.getElementById('twoMaterialName').value = materialName;
+    document.getElementById('twoMaterialCode').value = materialCode;
+
+    // 모달 닫기
+    const modal = bootstrap.Modal.getInstance(document.getElementById('materialCompanyModal'));
+    modal.hide();
+}
+
+// 서버에서 재료 목록을 불러오는 함수
+async function fetchMaterialCompanies() {
+    try {
+        const response = await fetch('/inventory_management/searchMaterials'); // 서버에서 업체 목록을 가져오는 API 호출
+        const materialCompanies = await response.json();
+
+        const materialCompanyList = document.getElementById('materialCompanyList');
+        materialCompanyList.innerHTML = ''; // 기존 목록 초기화
+
+        // 서버에서 받은 데이터가 배열인지 확인
+        if (Array.isArray(materialCompanies)) {
+            // 배열일 경우 데이터를 테이블에 추가
+            materialCompanies.forEach(material_transactions => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${material_transactions.companyName}</td>
+                    <td>${material_transactions.materialName}</td>
+                    <td>${material_transactions.materialCode}</td>
+                `;
+
+                // 행을 더블클릭했을 때 업체 선택 함수 호출
+                row.addEventListener('dblclick', function() {
+                    selectMaterial(
+                        material_transactions.companyName,
+                        material_transactions.materialName,
+                        material_transactions.materialCode
+                    );
+                });
+
+                materialCompanyList.appendChild(row);
+            });
+        } else {
+            console.error("서버에서 배열이 아닌 데이터가 반환되었습니다.");
         }
-    });
-
-    // 재료 조회 버튼 클릭 시 모달창을 띄우고 재료 목록을 조회하는 함수
-    document.getElementById('materialCompanySelect').addEventListener('click', function () {
-        console.log("재료 조회 버튼 클릭됨");
-        loadMaterialCompanyList();  // 모달 열기 전에 데이터 로드
-        const materialCompanyModal = new bootstrap.Modal(document.getElementById('materialCompanyModal'));
-        materialCompanyModal.show();  // 모달 열기
-    });
-
-    function loadMaterialCompanyList() {
-        console.log("재료/업체 목록 불러오기 시작");
-        // 서버에서 재료/업체 목록 불러오기
-        fetch('/material_register/getMaterialCompanyList')  // 서버 API 호출
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('materialCompanyList');
-                tbody.innerHTML = '';  // 기존 내용 초기화
-
-                if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3">등록된 업체나 재료가 없습니다.</td></tr>';
-                } else {
-                    data.forEach(material => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${material.companyName}</td>
-                            <td>${material.materialName}</td>
-                            <td>${material.materialCode}</td>
-                        `;
-                        row.addEventListener('click', function () {
-                            selectMaterial(material);
-                        });
-                        tbody.appendChild(row);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("업체/재료 목록을 불러오는 중 오류 발생:", error);
-            });
+    } catch (error) {
+        console.error("재료 목록을 불러오는 중 오류 발생:", error);
     }
-
-    // 선택한 업체/재료 정보를 입력 필드에 채우기
-    function selectMaterial(material) {
-        document.getElementById('twoCompanyCode').value = material.companyCode;
-        document.getElementById('twoMaterialName').value = material.materialName;
-        document.getElementById('twoMaterialCode').value = material.materialCode;
-
-        // 모달 닫기
-        const modal = bootstrap.Modal.getInstance(document.getElementById('materialCompanyModal'));
-        modal.hide();
-    }
+}
 
 
-    // 선택한 업체/재료 정보를 입력 필드에 채우기
-    function selectMaterial(material) {
-        document.getElementById('twoCompanyCode').value = material.companyCode;
-        document.getElementById('twoCompanyName').value = material.companyName;
-        document.getElementById('twoMaterialName').value = material.materialName;
-        document.getElementById('twoMaterialCode').value = material.materialCode;
+// 모달이 열릴 때마다 업체 목록을 불러오기
+document.getElementById('materialCompanyModal').addEventListener('show.bs.modal', fetchMaterialCompanies);
 
-        // 모달 닫기
-        const modal = bootstrap.Modal.getInstance(document.getElementById('materialCompanyModal'));
-        modal.hide();
-    }
-
-    // 재료 및 업체 검색 함수
-    function twoSearch() {
-        const materialName = document.getElementById('twoMaterialNameSearch').value;
-        const materialCode = document.getElementById('twoMaterialCodeSearch').value;
-
-        let url = `/transaction_management/searchTransaction?`;
-        if (materialName) url += `materialName=${encodeURIComponent(materialName)}&`;
-        if (materialCode) url += `materialCode=${encodeURIComponent(materialCode)}`;
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('transactionList');
-                tbody.innerHTML = '';  // 기존 행 초기화
-
-                if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7">등록된 출납 내역이 없습니다.</td></tr>';
-                } else {
-                    data.forEach(transaction => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${transaction.transactionDate}</td>
-                            <td>${transaction.companyName}</td>
-                            <td>${transaction.materialName}</td>
-                            <td>${transaction.materialCode}</td>
-                            <td>${transaction.stockIn}</td>
-                            <td>${transaction.stockOut}</td>
-                            <td>${transaction.managerNumber}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("검색 중 오류 발생:", error);
-            });
-    }
-
-    // 트랜잭션 폼 초기화 함수
-    function resetTransactionForm() {
-        document.getElementById('transactionDate').value = '';
-        document.getElementById('twoCompanyCode').value = '';
-        document.getElementById('twoMaterialName').value = '';
-        document.getElementById('twoMaterialCode').value = '';
-        document.getElementById('stockIn').value = '';
-        document.getElementById('stockOut').value = '';
-    }
+// 돋보기 버튼 클릭 시 모달을 띄우는 함수
+document.getElementById('materialCompanySelect').addEventListener('click', function() {
+    const materialCompanyModal = new bootstrap.Modal(document.getElementById('materialCompanyModal'));
+    materialCompanyModal.show(); // 모달을 띄우기
 });

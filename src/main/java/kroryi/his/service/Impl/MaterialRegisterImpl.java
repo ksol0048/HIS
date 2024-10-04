@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Log4j2
@@ -28,6 +29,14 @@ public class MaterialRegisterImpl implements MaterialRegisterService {
     @Override
     public List<MaterialRegister> getAllMaterial() {
         return materialRepository.findAll();
+    }
+
+    @Override
+    public List<MaterialDTO> getAllMaterialsWithCompany() {
+        List<MaterialRegister> materials = materialRepository.findAll();
+        return materials.stream()
+                .map(material -> new MaterialDTO(material)) // MaterialDTO로 변환
+                .collect(Collectors.toList());
     }
 
     @Override
