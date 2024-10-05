@@ -27,6 +27,7 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
             patientAdmission.setMainDoc(patientAdmissionDTO.getMainDoc());
             patientAdmission.setReceptionTime(patientAdmissionDTO.getReceptionTime());
             patientAdmission.setRvTime(patientAdmissionDTO.getRvTime());
+            patientAdmission.setViTime(patientAdmissionDTO.getViTime());
 
             // viTime을 현재 시간으로 설정
             if ("2".equals(patientAdmissionDTO.getTreatStatus())) { // 진료 중 상태일 때

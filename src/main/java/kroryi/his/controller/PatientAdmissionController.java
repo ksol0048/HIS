@@ -68,8 +68,12 @@ public class PatientAdmissionController {
 
 
     patientAdmissionDTO.setCompletionTime(LocalDateTime.now());
-    patientAdmissionDTO.setTreatStatus("3"); //
+    patientAdmissionDTO.setTreatStatus("3");
 
+    String viTime = String.valueOf(patientAdmissionDTO.getViTime());
+    if(viTime != null){
+        patientAdmissionDTO.setViTime(LocalDateTime.parse(viTime));
+    }
 
     patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
 
