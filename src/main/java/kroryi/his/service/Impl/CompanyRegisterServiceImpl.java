@@ -57,6 +57,24 @@ public class CompanyRegisterServiceImpl implements CompanyRegisterService {
         return companyRegisterRepository.save(companyRegister);
     }
 
+    // 업체 정보 수정 로직
+    @Override
+    public CompanyRegister update(CompanyDTO companyDTO) {
+        // 업체가 존재하는지 확인
+        CompanyRegister existingCompany = companyRegisterRepository.findById(companyDTO.getCompanyCode())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 업체 코드입니다: " + companyDTO.getCompanyCode()));
+
+        // 기존 업체 정보를 새로운 값으로 업데이트
+        existingCompany.setCompanyName(companyDTO.getCompanyName());
+        existingCompany.setBusinessNumber(companyDTO.getBusinessNumber());
+        existingCompany.setCompanyNumber(companyDTO.getCompanyNumber());
+        existingCompany.setManagerName(companyDTO.getManagerName());
+        existingCompany.setManagerNumber(companyDTO.getManagerNumber());
+        existingCompany.setCompanyMemo(companyDTO.getCompanyMemo());
+
+        return companyRegisterRepository.save(existingCompany);  // 업데이트된 업체 정보 저장
+    }
+
     // 업체 검색
     @Override
     public List<CompanyRegister> searchByName(String companyName) {

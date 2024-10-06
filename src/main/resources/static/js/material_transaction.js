@@ -1,3 +1,10 @@
+// 페이지가 완전히 로드된 후 실행
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("페이지 로드 완료 - 오늘 날짜 설정 실행");
+    setTodayDate();  // 오늘 날짜 설정
+    loadTransactionList();  // 초기 데이터 로딩
+});
+
 // 재료 추가 또는 수정 버튼 클릭 이벤트 핸들러
 document.getElementById('addTransactionBtn').addEventListener('click', (event) => {
     event.preventDefault();  // 기본 폼 제출 동작을 막음
@@ -37,8 +44,7 @@ document.getElementById('addTransactionBtn').addEventListener('click', (event) =
 
 });
 
-
-// 재료 출납 목록 로딩 함수
+// 재료 출납 목록 로딩 함수 (테이블 행 더블클릭 이벤트 추가)
 function loadTransactionList() {
     fetch('/inventory_management/searchTransaction')  // 전체 목록 조회
         .then(response => response.json())
@@ -60,6 +66,12 @@ function loadTransactionList() {
                         <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
                         <td>${transaction.managerNumber || 'N/A'}</td>
                     `;
+
+                    // 더블클릭 이벤트 추가: 행을 더블클릭하면 데이터를 폼에 채워줌
+                    row.addEventListener('dblclick', function () {
+                        populateTransactionForm(transaction);
+                    });
+
                     tbody.appendChild(row);
                 });
             }
@@ -68,6 +80,20 @@ function loadTransactionList() {
             console.error("재료 출납 목록을 불러오는 중 오류 발생:", error);
         });
 }
+
+// 더블클릭한 행의 데이터를 폼에 채워주는 함수
+function populateTransactionForm(transaction) {
+    document.getElementById('transactionDate').value = transaction.transactionDate || '';  // 입출일자
+    document.getElementById('twoCompanyName').value = transaction.companyName || '';      // 업체명
+    document.getElementById('twoMaterialName').value = transaction.materialName || '';    // 재료명
+    document.getElementById('twoMaterialCode').value = transaction.materialCode || '';    // 재료코드
+    document.getElementById('stockIn').value = transaction.stockIn || 0;                 // 입고량
+    document.getElementById('stockOut').value = transaction.stockOut || 0;               // 출고량
+}
+
+// 페이지 로드 시 재료 출납 목록을 불러오는 함수 호출
+loadTransactionList();  // 초기 데이터 로딩
+
 
 // 재료 검색 함수
 function twoSearch() {
@@ -210,11 +236,10 @@ async function fetchMaterialCompanies() {
     }
 }
 
-
 // 모달이 열릴 때마다 업체 목록을 불러오기
 document.getElementById('materialCompanyModal').addEventListener('show.bs.modal', fetchMaterialCompanies);
 
-// 돋보기 버튼 클릭 시 모달을 띄우는 함수
+// 재료조회 버튼 클릭 시 모달을 띄우는 함수
 document.getElementById('materialCompanySelect').addEventListener('click', function() {
     const materialCompanyModal = new bootstrap.Modal(document.getElementById('materialCompanyModal'));
     materialCompanyModal.show(); // 모달을 띄우기

@@ -20,4 +20,6 @@ public interface CompanyRegisterService {
 
     void deleteCompany(String companyCode);
 
+    CompanyRegister update(CompanyDTO companyDTO);
+
 }

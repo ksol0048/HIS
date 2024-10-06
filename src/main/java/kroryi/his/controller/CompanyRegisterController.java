@@ -26,12 +26,12 @@ import java.util.Map;
 public class CompanyRegisterController {
     private final CompanyRegisterService companyRegisterService;
 
-    // 업체 등록
-    @ApiOperation(value = "회사등록 POST", notes = "POST 방식으로 회사 등록")
+    // 업체 등록 (POST 요청)
+    @ApiOperation(value = "업체 등록", notes = "POST 방식으로 새로운 업체를 등록합니다.")
     @PostMapping(value = "/addCompany", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> register(@Valid @RequestBody CompanyDTO companyDTO,
-                                        BindingResult bindingResult) throws BindException {
-        log.info("CompanyDTO->{}", companyDTO);
+    public ResponseEntity<Map<String, Object>> registerCompany(@Valid @RequestBody CompanyDTO companyDTO,
+                                                               BindingResult bindingResult) throws BindException {
+        log.info("CompanyDTO -> {}", companyDTO);
 
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
@@ -40,21 +40,75 @@ public class CompanyRegisterController {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            // 회사 등록
-            CompanyRegister companyRegister = companyRegisterService.register(companyDTO);
-            log.info("CompanyRegister->{}", companyRegister);
+            if (companyRegisterService.isCompanyCodeDuplicate(companyDTO.getCompanyCode())) {
+                throw new IllegalArgumentException("이미 등록된 업체입니다.");
+            }
 
-            // 성공 응답
+            CompanyRegister companyRegister = companyRegisterService.register(companyDTO);
+            log.info("CompanyRegister -> {}", companyRegister);
+
             result.put("success", true);
+            result.put("message", "업체가 성공적으로 등록되었습니다.");
             result.put("companyRegister", companyRegister);
+            return ResponseEntity.ok(result);
+
         } catch (IllegalArgumentException e) {
-            // 중복된 경우 예외 처리 및 실패 응답
-            log.warn("회사 등록 실패: {}", e.getMessage());
+            log.warn("업체 등록 실패: {}", e.getMessage());
             result.put("success", false);
             result.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+        } catch (Exception e) {
+            log.error("업체 등록 중 오류 발생", e);
+            result.put("success", false);
+            result.put("message", "업체 등록 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
+    // 업체 수정 (PUT 요청)
+    @ApiOperation(value = "업체 수정", notes = "PUT 방식으로 기존 업체 정보를 수정합니다.")
+    @PutMapping(value = "/updateCompany", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> updateCompany(@Valid @RequestBody CompanyDTO companyDTO,
+                                                             BindingResult bindingResult) throws BindException {
+        log.info("CompanyDTO -> {}", companyDTO);
+
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
         }
 
-        return result;
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // 업체가 존재하는지 확인 후 수정
+            if (!companyRegisterService.isCompanyCodeDuplicate(companyDTO.getCompanyCode())) {
+                throw new IllegalArgumentException("존재하지 않는 업체 코드입니다.");
+            }
+
+            CompanyRegister companyRegister = companyRegisterService.update(companyDTO);
+            log.info("CompanyRegister -> {}", companyRegister);
+
+            result.put("success", true);
+            result.put("message", "업체가 성공적으로 수정되었습니다.");
+            result.put("companyRegister", companyRegister);
+            return ResponseEntity.ok(result);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("업체 수정 실패: {}", e.getMessage());
+            result.put("success", false);
+            result.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+        } catch (Exception e) {
+            log.error("업체 수정 중 오류 발생", e);
+            result.put("success", false);
+            result.put("message", "업체 수정 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+
+    @GetMapping("/checkCompanyCode")
+    public ResponseEntity<Boolean> checkCompanyCode(@RequestParam String companyCode) {
+        boolean exists = companyRegisterService.isCompanyCodeDuplicate(companyCode);
+        return ResponseEntity.ok(exists);
     }
 
     // 업체 검색

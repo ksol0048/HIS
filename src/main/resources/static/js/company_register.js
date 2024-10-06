@@ -44,13 +44,14 @@ function loadCompanyList() {
 loadCompanyList();
 
 
-// 업체 등록 버튼 클릭 시 데이터 전송
+// 업체 등록 또는 수정 버튼 클릭 시 데이터 전송
 document.getElementById('addCompanyBtn').addEventListener('click', (event) => {
     event.preventDefault();  // 기본 submit 동작 방지
     event.stopPropagation();
 
+    const companyCode = document.getElementById('fourCompanyCode').value;
     const companyData = {
-        companyCode: document.getElementById('fourCompanyCode').value,
+        companyCode: companyCode,
         companyName: document.getElementById('fourCompanyName').value,
         businessNumber: document.getElementById('businessNumber').value,
         companyNumber: document.getElementById('companyNumber').value,
@@ -59,39 +60,61 @@ document.getElementById('addCompanyBtn').addEventListener('click', (event) => {
         companyMemo: document.getElementById('companyMemo').value
     };
 
-    fetch('/inventory_management/addCompany', {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(companyData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data);  // 서버 응답 확인
+    // 먼저 업체 코드가 존재하는지 확인
+    fetch(`/inventory_management/checkCompanyCode?companyCode=${encodeURIComponent(companyCode)}`)
+        .then(response => response.json())
+        .then(exists => {
+            let url, method;
 
-            if (data.success) {
-                alert("업체가 저장되었습니다.");
-
-                // 폼 리셋
-                document.getElementById('companyForm').reset();
-
-                // 전체 데이터 다시 불러오기
-                loadCompanyList();
+            // 업체 코드가 존재하면 업데이트 API 호출, 존재하지 않으면 추가 API 호출
+            if (exists) {
+                url = '/inventory_management/updateCompany';
+                method = 'PUT';  // 수정일 경우 PUT 메서드 사용
             } else {
-                alert(data.message || "업체 등록에 실패했습니다.");  // 서버에서 전달된 메시지 출력
+                url = '/inventory_management/addCompany';
+                method = 'POST';  // 등록일 경우 POST 메서드 사용
             }
+
+            // 최종적으로 업체 등록 또는 수정 요청
+            fetch(url, {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(companyData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);  // 서버 응답 확인
+
+                    if (data.success) {
+                        alert(data.message);  // 성공 메시지 출력
+
+                        // 폼 리셋
+                        document.getElementById('companyForm').reset();
+
+                        // 전체 데이터 다시 불러오기
+                        loadCompanyList();
+                    } else {
+                        alert(data.message || "업체 등록/수정에 실패했습니다.");  // 서버에서 전달된 메시지 출력
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert(`서버와의 통신 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
+                });
         })
         .catch(error => {
-            console.error("Error:", error);
-            alert(`서버와의 통신 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
+            console.error("업체 코드 확인 중 오류 발생:", error);
         });
 });
+
+
 
 
 // 업체 검색 함수
@@ -124,8 +147,19 @@ function fourSearch() {
         });
 }
 
+// 초기화 버튼 클릭 시 호출되는 함수
+function resetCompanySearch() {
+    // 검색 필드를 초기화
+    document.getElementById('fourCompanyNameSearch').value = '';
 
+    // 전체 데이터를 불러오는 요청 (검색어 없이)
+    loadCompanyList('');
+}
 
+// 초기화 버튼 클릭 이벤트 핸들러 추가
+document.getElementById('forSearchReset').addEventListener('click', function() {
+    resetCompanySearch();  // 검색 필드 초기화 및 전체 목록 로드
+});
 
 // 업체 삭제 버튼 클릭 시 데이터 전송
 document.getElementById('deleteCompanyBtn').addEventListener('click', function() {
