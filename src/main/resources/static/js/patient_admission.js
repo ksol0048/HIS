@@ -6,16 +6,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let treatmentPatientCount = 0;
     let completePatientCount = 0;
 
+
     // 오늘 날짜 기본값 설정
     const today = new Date();
     document.getElementById('currentDate').value = today.toISOString().substring(0, 10);
 
-    // 날짜 변경 이벤트
-    document.getElementById('currentDate').addEventListener("change", function () {
-        const selectedDate = new Date(this.value);
-        selectedDate.setHours(0, 0, 0, 0); // 선택한 날짜의 시간 부분을 00:00:00으로 설정
-        fetchAndDisplayPatients(selectedDate); // 날짜가 바뀌면 환자 목록 갱신
-    });
+
 
     // 접수 버튼 클릭 이벤트 추가
     const receptionBtn = document.querySelector(".ReceptionBtn");
@@ -350,22 +346,22 @@ document.addEventListener("DOMContentLoaded", function () {
 // 대기 중 테이블에서 환자 삭제
     function deletePatientFromWaitingTable(rowIndex) {
         if (waitingPatientsTable.rows.length > rowIndex && rowIndex >= 0) {
-            waitingPatientsTable.deleteRow(rowIndex);
-
-            updateWaitingPatientCount();
+            waitingPatientsTable.deleteRow(rowIndex); // 선택한 행 삭제
+            updateRowNumbers(); // 삭제 후 행 번호 업데이트
+            updateWaitingPatientCount(); // 대기 환자 수 업데이트
         } else {
-            console.error(`Invalid row index: ${rowIndex}`);
+            console.error(`Invalid row index: ${rowIndex}`); // 유효하지 않은 행 인덱스 오류 메시지
         }
     }
 
-// // 대기 환자 테이블의 행 번호 업데이트
-//     function updateRowNumbers() {
-//         for (let i = 1; i < waitingPatientsTable.rows.length; i++) {
-//             const cell = waitingPatientsTable.rows[i].cells[0]; // 첫 번째 셀 (환자 번호)
-//             cell.textContent = String(i); // 행 번호 업데이트
-//         }
-//     }
 
+// 행 번호 업데이트
+    function updateRowNumbers() {
+        const rows = waitingPatientsTable.rows;
+        for (let i = 0; i < rows.length; i++) {
+            rows[i].cells[0].innerText = i + 1; // 현재 행 번호로 첫 번째 셀 업데이트
+        }
+    }
 
     // 대기 중 테이블에 환자 추가
     function addPatientToWaitingTable(patient) {
@@ -493,10 +489,69 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // 진료 완료 환자를 완료 테이블에 추가하는 함수
-    function addPatientToCompleteTable(patient) {
-        console.log('Adding patient to complete treatment table:', patient);
 
+
+
+
+// 페이지 로드 시 현재 날짜에 대한 진료 완료 환자 목록을 불러오기
+    window.onload = function () {
+        const today = new Date();
+        const currentDate = today.toISOString().substring(0, 10);
+        document.getElementById('currentDate').value = currentDate; // 현재 날짜 설정
+        fetchAndDisplayPatients(currentDate); // 현재 날짜에 대한 환자 목록을 불러오기
+    };
+
+// 날짜 선택기가 변경될 때 해당 날짜의 환자 목록을 불러오기
+    document.getElementById('currentDate').addEventListener('change', function () {
+        const selectedDate = this.value; // 선택된 날짜
+        fetchAndDisplayPatients(selectedDate); // 선택된 날짜에 대한 환자 목록을 불러오기
+    });
+
+// 진료 완료 환자 목록을 불러와서 테이블 업데이트
+    function fetchCompletedPatients(selectedDate) {
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(9, 0, 0, 0); // 시작 시간
+
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999); // 종료 시간
+        console.log("완료된 환자를 가져오는 중:", startOfDay.toISOString(), "에서:", endOfDay.toISOString()); // 디버깅 로그
+
+        return fetch(`/api/patient-admission/completed?start=${startOfDay.toISOString()}&end=${endOfDay.toISOString()}`)
+
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('진료 완료 환자 목록을 불러오는 데 실패했습니다.');
+                }
+                return response.json();
+            });
+
+    }
+
+// 진료 완료 환자 목록을 표시하는 함수
+    function fetchAndDisplayPatients(selectedDate) {
+        fetchCompletedPatients(selectedDate)
+            .then(completedPatients => {
+                updateCompletedPatientsTable(completedPatients);
+            })
+            .catch(error => {
+                console.error("에러 발생:", error);
+                alert("환자 목록을 불러오는 중 오류가 발생했습니다: " + error.message);
+            });
+    }
+
+// 진료 완료 환자 목록을 업데이트하는 함수
+    function updateCompletedPatientsTable(completedPatients) {
+        const tableBody = document.getElementById('completedPatientsTableBody'); // 테이블 바디 ID
+        tableBody.innerHTML = ''; // 기존 내용을 비움
+        completePatientCount = 0; // 카운트 초기화
+
+        completedPatients.forEach(patient => {
+            addPatientToCompleteTable(patient);
+        });
+    }
+
+// 진료 완료 환자를 완료 테이블에 추가하는 함수
+    function addPatientToCompleteTable(patient) {
         const row = completePatientsTable.insertRow(); // 완료 테이블에 새 행 추가
         completePatientCount++; // 진료 완료 환자 수 증가
 
@@ -512,15 +567,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // 접수 시간 포맷팅 함수
         const formatReceptionTime = (dateTimeString) => {
             if (!dateTimeString || dateTimeString === 'N/A') return 'N/A'; // 유효하지 않은 값 처리
-            console.log('Input to formatReceptionTime:', dateTimeString);
-
             const date = new Date(dateTimeString); // ISO 형식을 Date 객체로 변환
-            if (isNaN(date.getTime())) { // getTime()으로 유효성 검사
-                console.error('Invalid dateTimeString:', dateTimeString);
-                return 'N/A'; // 유효하지 않은 경우 N/A 반환
-            }
-
-            // UTC 시간으로 포맷팅 (오전/오후 표시)
             return date.toLocaleTimeString('ko-KR', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -533,17 +580,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const formattedReceptionTime = formatReceptionTime(patient.receptionTime); // 접수 시간을 포맷팅
 
         row.innerHTML = `
-        <td>${completePatientCount}</td> <!-- 완료 환자 수 사용 -->
+        <td>${completePatientCount}</td>
         <td>${patient.chartNum || 'N/A'}</td>
         <td>${patient.paName || 'N/A'}</td>
         <td>${patient.selectedDoctor || 'N/A'}</td>
-        <td>${formattedReceptionTime || 'N/A'}</td> <!-- 포맷된 접수 시간 -->
+        <td>${formattedReceptionTime || 'N/A'}</td>
         <td>${formattedViTime || 'N/A'}</td> <!-- 포맷된 진료 완료 시간 -->
     `;
 
         // 완료 환자 수 업데이트
         updateCompletePatientCount();
     }
+
 
 
     function updateWaitingPatientCount() {
@@ -571,40 +619,40 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // DB에서 환자 목록을 가져오고 테이블에 표시하는 함수
-    function fetchAndDisplayPatients(selectedDate) {
-        fetch("/api/patient-admission/waiting")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('환자 목록을 가져오는 데 실패했습니다.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const currentPatients = Array.from(waitingPatientsTable.rows).map(row => ({
-                    chartNum: row.cells[1].textContent,
-                    rvTime: row.cells[4].textContent
-                }));
-
-                const filteredPatients = data.filter(patient => {
-                    const rvTime = new Date(patient.rvTime);
-                    return rvTime.toDateString() === selectedDate.toDateString();
-                });
-
-                filteredPatients.forEach(patient => {
-                    if (!currentPatients.some(current => current.chartNum === patient.chartNum && new Date(current.rvTime).toDateString() === new Date(patient.rvTime).toDateString())) {
-                        addPatientToWaitingTable(patient);
-                    }
-                });
-            })
-            .catch(error => {
-                console.error("에러 발생:", error);
-                alert("환자 목록을 가져오는 중 오류가 발생했습니다.");
-            });
-    }
-
-    // 초기화: 페이지 로드 시 환자 목록을 가져옵니다.
-    fetchAndDisplayPatients(today);
+    // // DB에서 환자 목록을 가져오고 테이블에 표시하는 함수
+    // function fetchAndDisplayPatients(selectedDate) {
+    //     fetch("/api/patient-admission/waiting")
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error('환자 목록을 가져오는 데 실패했습니다.');
+    //             }
+    //             return response.json();
+    //         })
+    //         .then(data => {
+    //             const currentPatients = Array.from(waitingPatientsTable.rows).map(row => ({
+    //                 chartNum: row.cells[1].textContent,
+    //                 rvTime: row.cells[4].textContent
+    //             }));
+    //
+    //             const filteredPatients = data.filter(patient => {
+    //                 const rvTime = new Date(patient.rvTime);
+    //                 return rvTime.toDateString() === selectedDate.toDateString();
+    //             });
+    //
+    //             filteredPatients.forEach(patient => {
+    //                 if (!currentPatients.some(current => current.chartNum === patient.chartNum && new Date(current.rvTime).toDateString() === new Date(patient.rvTime).toDateString())) {
+    //                     addPatientToWaitingTable(patient);
+    //                 }
+    //             });
+    //         })
+    //         .catch(error => {
+    //             console.error("에러 발생:", error);
+    //             alert("환자 목록을 가져오는 중 오류가 발생했습니다.");
+    //         });
+    // }
+    //
+    // // 초기화: 페이지 로드 시 환자 목록을 가져옵니다.
+    // fetchAndDisplayPatients(today);
 
     // 매 5초마다 환자 목록 갱신
     setInterval(() => {

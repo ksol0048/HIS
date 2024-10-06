@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -71,4 +73,23 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
     public List<PatientAdmission> getCompletedPatients() {
         return patientAdmissionRepository.findByTreatStatus("3"); // "3"은 진료 완료 상태
     }
+
+
+
+
+    @Override
+    public List<PatientAdmission> getPatientsByStatus(String status) {
+        return patientAdmissionRepository.findByTreatStatus(status);
+    }
+
+    @Override
+    public List<PatientAdmissionDTO> getCompletedPatientsByDate(LocalDateTime startOfDay, LocalDateTime endOfDay) {
+        List<PatientAdmission> patients = patientAdmissionRepository.findByCompletionTimeBetween(startOfDay, endOfDay);
+        return patients.stream()
+                .map(PatientAdmissionDTO::new) // DTO 변환
+                .collect(Collectors.toList());
+    }
+
+
+
 }

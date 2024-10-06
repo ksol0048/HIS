@@ -2,6 +2,8 @@ package kroryi.his.service;
 
 import kroryi.his.domain.PatientAdmission;
 import kroryi.his.dto.PatientAdmissionDTO;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -16,4 +18,9 @@ public interface PatientAdmissionService {
 
     // 진료 완료 환자 목록을 반환
     List<PatientAdmission> getCompletedPatients();
+
+    List<PatientAdmission> getPatientsByStatus(String status);
+
+    List<PatientAdmissionDTO> getCompletedPatientsByDate(LocalDateTime startOfDay, LocalDateTime endOfDay);
+
 }
