@@ -21,7 +21,7 @@ public interface PatientAdmissionService {
 
     List<PatientAdmission> getPatientsByStatus(String status);
 
-    List<PatientAdmissionDTO> getCompletedPatientsByDate(LocalDateTime startOfDay, LocalDateTime endOfDay);
+
 
     List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate);
 }

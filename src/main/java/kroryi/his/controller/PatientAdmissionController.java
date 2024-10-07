@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -84,42 +85,50 @@ public class PatientAdmissionController {
     }
 
 
-    @GetMapping("/completed")
-    public ResponseEntity<List<PatientAdmissionDTO>> getCompletedPatients(@RequestParam String date) {
-        if (date == null || date.isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
-        }
-
-        try {
-            // String 형태의 날짜를 LocalDate로 변환
-            LocalDate localDate = LocalDate.parse(date);
-
-            // 시작과 종료 시간을 설정
-            LocalDateTime startOfDay = localDate.atStartOfDay(); // 선택한 날짜의 00:00:00
-            LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1); // 선택한 날짜의 23:59:59
-
-            // 해당 날짜에 완료된 환자 목록 조회
-            List<PatientAdmissionDTO> completedPatients = patientAdmissionService.getCompletedPatientsByDate(startOfDay, endOfDay);
-
-            // 완료된 환자 목록 출력
-            System.out.println("완료된 환자 목록: " + completedPatients); // 로그 출력
-
-            return ResponseEntity.ok(completedPatients);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
+//    @GetMapping("/completed")
+//    public ResponseEntity<List<PatientAdmissionDTO>> getCompletedPatients(@RequestParam String date) {
+//        if (date == null || date.isEmpty()) {
+//            return ResponseEntity.badRequest().body(null);
+//        }
+//
+//        try {
+//            // String 형태의 날짜를 LocalDate로 변환
+//            LocalDate localDate = LocalDate.parse(date);
+//
+//            // 시작과 종료 시간을 설정
+//            LocalDateTime startOfDay = localDate.atStartOfDay(); // 선택한 날짜의 00:00:00
+//            LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1); // 선택한 날짜의 23:59:59
+//
+//            // 해당 날짜에 완료된 환자 목록 조회
+//
+//
+//
+//        } catch (DateTimeParseException e) {
+//            return ResponseEntity.badRequest().body(null);
+//        }
+//    }
 
     @GetMapping("/date/{date}")
     public List<PatientAdmissionDTO> getAdmissionsByDate(@PathVariable String date) {
-        // 날짜 문자열을 LocalDate로 변환
-        LocalDate localDate = LocalDate.parse(date);
+        try {
+            // 날짜 문자열을 LocalDate로 변환
+            LocalDate localDate = LocalDate.parse(date);
+            LocalDateTime startDate = localDate.atStartOfDay(); // 시작 시간
+            LocalDateTime endDate = localDate.plusDays(1).atStartOfDay(); // 끝 시간
 
-        // 해당 날짜의 시작과 끝을 정의
-        LocalDateTime startDate = localDate.atStartOfDay(); // 해당 날짜의 시작 시간
-        LocalDateTime endDate = localDate.plusDays(1).atStartOfDay(); // 다음 날짜의 시작 시간
+            System.out.println("시작 날짜: " + startDate); // 시작 날짜 로그
+            System.out.println("종료 날짜: " + endDate); // 종료 날짜 로그
 
-        // 해당 날짜와 접수 시간을 기준으로 환자 접수 정보를 가져옴
-        return patientAdmissionService.getAdmissionsByReceptionTime(startDate, endDate);
+            // 해당 날짜의 환자 접수 정보를 가져옴
+            List<PatientAdmissionDTO> admissions = patientAdmissionService.getAdmissionsByReceptionTime(startDate, endDate);
+
+            System.out.println("가져온 환자 접수 정보: " + admissions); // 가져온 환자 접수 정보 로그
+
+            return admissions;
+        } catch (Exception e) {
+            e.printStackTrace(); // 예외 발생 시 스택 트레이스를 출력
+            return Collections.emptyList(); // 비어 있는 리스트 반환
+        }
     }
+
 }

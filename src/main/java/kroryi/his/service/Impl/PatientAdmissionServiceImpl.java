@@ -83,24 +83,31 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
         return patientAdmissionRepository.findByTreatStatus(status);
     }
 
-    @Override
-    public List<PatientAdmissionDTO> getCompletedPatientsByDate(LocalDateTime startOfDay, LocalDateTime endOfDay) {
-        List<PatientAdmission> patients = patientAdmissionRepository.findByCompletionTimeBetween(startOfDay, endOfDay);
-        return patients.stream()
-                .map(PatientAdmissionDTO::new) // DTO 변환
-                .collect(Collectors.toList());
-    }
+
 
     @Override
+    @Transactional(readOnly = true)
     public List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate) {
-        // 접수 시간 범위에 맞는 환자 접수 정보 가져오기
+        // 시작 시간과 종료 시간을 사용하여 데이터베이스에서 환자 접수 정보 조회
         List<PatientAdmission> admissions = patientAdmissionRepository.findByReceptionTimeBetween(startDate, endDate);
 
-        // 엔티티 리스트를 DTO 리스트로 변환
+        // PatientAdmission 엔티티를 PatientAdmissionDTO로 변환
         return admissions.stream()
-                .map(admission -> modelMapper.map(admission, PatientAdmissionDTO.class))
-                .collect(Collectors.toList());
+                .map(this::convertToDTO)
+                .toList();
     }
-
+    // PatientAdmission 엔티티를 PatientAdmissionDTO로 변환하는 메서드
+    private PatientAdmissionDTO convertToDTO(PatientAdmission admission) {
+        PatientAdmissionDTO dto = new PatientAdmissionDTO();
+        dto.setChartNum(admission.getChartNum());
+        dto.setPaName(admission.getPaName());
+        dto.setMainDoc(admission.getMainDoc());
+        dto.setReceptionTime(admission.getReceptionTime());
+        dto.setRvTime(admission.getRvTime());
+        dto.setTreatStatus(admission.getTreatStatus());
+        dto.setViTime(admission.getViTime());
+        dto.setCompletionTime(admission.getCompletionTime());
+        return dto;
+    }
 
 }
