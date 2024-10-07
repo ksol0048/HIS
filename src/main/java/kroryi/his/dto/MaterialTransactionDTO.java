@@ -65,10 +65,14 @@ public class MaterialTransactionDTO {
                 this.companyName = materialTransactionRegister.getMaterialRegister().getCompanyRegister().getCompanyName();
                 this.companyCode = materialTransactionRegister.getMaterialRegister().getCompanyRegister().getCompanyCode();
                 this.managerNumber = materialTransactionRegister.getMaterialRegister().getCompanyRegister().getManagerNumber();
+            } else {
+                this.companyName = "N/A";  // Company 정보가 없을 경우 기본값 설정
+                this.managerNumber = "N/A";  // Manager 정보가 없을 경우 기본값 설정
             }
+        } else {
+            this.materialCode = "N/A";  // Material 정보가 없을 경우 기본값 설정
+            this.materialName = "N/A";
         }
     }
-
-
 
 }

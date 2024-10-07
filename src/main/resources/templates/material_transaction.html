@@ -41,7 +41,6 @@
     <!-- 재료출납 목록 테이블 -->
     <div class="fixed-box">
       <table class="table table-bordered">
-        <thead>
         <tr>
           <th>입출일자</th>
           <th>업체명</th>
@@ -51,7 +50,6 @@
           <th>출고량</th>
           <th>담당자 연락처</th>
         </tr>
-        </thead>
         <tbody id="transactionList">
         <tr>
           <td colspan="10">현재 등록된 출납 내역이 없습니다.</td>
@@ -67,19 +65,19 @@
         <div class="row row-gap">
           <div class="col-md-2 mb-3">
             <label for="transactionDate" class="form-label">입출일자</label>
-            <input type="date" name="transactionDate" class="form-control" id="transactionDate">
+            <input type="date" name="transactionDate" class="form-control" id="transactionDate" readonly>
           </div>
           <div class="col-md-2 mb-3">
             <label for="twoCompanyName" class="form-label">업체명</label>
-            <input type="text" name="CompanyName" class="form-control" id="twoCompanyName" placeholder="업체명 입력">
+            <input type="text" name="CompanyName" class="form-control" id="twoCompanyName" placeholder="업체명 입력" readonly>
           </div>
           <div class="col-md-2 mb-3">
             <label for="twoMaterialName" class="form-label">재료명</label>
-            <input type="text" name="materialName" class="form-control" id="twoMaterialName" placeholder="재료명 입력">
+            <input type="text" name="materialName" class="form-control" id="twoMaterialName" placeholder="재료명 입력" readonly>
           </div>
           <div class="col-md-2 mb-3">
             <label for="twoMaterialCode" class="form-label">재료코드</label>
-            <input type="text" name="materialCode" class="form-control" id="twoMaterialCode" placeholder="재료코드 입력">
+            <input type="text" name="materialCode" class="form-control" id="twoMaterialCode" placeholder="재료코드 입력" readonly>
           </div>
           <div class="col-md-2 mb-3">
             <label for="stockIn" class="form-label">입고량</label>
@@ -89,6 +87,7 @@
             <label for="stockOut" class="form-label">출고량</label>
             <input type="number" class="form-control" name="stockOut" id="stockOut" placeholder="출고량 입력">
           </div>
+          <input type="hidden" id="transactionId" />
           <div class="col-md-12 d-flex justify-content-end mb-3">
             <button type="button" class="btn btn-success mt-4" id="materialCompanySelect">재료조회</button>
             <!-- 재료 선택 모달창 -->

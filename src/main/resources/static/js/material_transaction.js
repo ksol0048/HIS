@@ -1,31 +1,41 @@
 // 페이지가 완전히 로드된 후 실행
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("페이지 로드 완료 - 오늘 날짜 설정 실행");
     setTodayDate();  // 오늘 날짜 설정
     loadTransactionList();  // 초기 데이터 로딩
 });
 
-// 재료 추가 또는 수정 버튼 클릭 이벤트 핸들러
 document.getElementById('addTransactionBtn').addEventListener('click', (event) => {
-    event.preventDefault();  // 기본 폼 제출 동작을 막음
-    event.stopPropagation();  // 이벤트 전파 방지
+    event.preventDefault();
+    event.stopPropagation();
 
-    const materialData = {
+    const transactionIdElement = document.getElementById('transactionId');
+    const transactionId = transactionIdElement ? transactionIdElement.value : null;
+
+    let url, method;
+    if (transactionId) {
+        url = `/inventory_management/updateTransaction`;
+        method = "PUT";
+    } else {
+        url = `/inventory_management/addTransaction`;
+        method = "POST";
+    }
+
+    const transactionData = {
+        transactionId: transactionId,
         transactionDate: document.getElementById('transactionDate').value,
-        materialCode: document.getElementById('twoMaterialCode').value,  // materialCode 확인
+        materialCode: document.getElementById('twoMaterialCode').value,
         companyName: document.getElementById('twoCompanyName').value,
         materialName: document.getElementById('twoMaterialName').value,
         stockIn: parseInt(document.getElementById('stockIn').value, 10),
         stockOut: parseInt(document.getElementById('stockOut').value, 10)
     };
-    // 서버로 데이터 전송
 
-    fetch('/inventory_management/addTransaction', {
-        method: "POST",
+    fetch(url, {
+        method: method,
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(materialData)
+        body: JSON.stringify(transactionData)
     })
         .then(response => {
             if (!response.ok) {
@@ -34,19 +44,19 @@ document.getElementById('addTransactionBtn').addEventListener('click', (event) =
             return response.json();
         })
         .then(data => {
-            alert(data.message);  // 서버에서 받은 메시지를 alert에 출력
+            alert(data.message);
             loadTransactionList();  // 목록 다시 로딩
         })
         .catch(error => {
             console.error("Error:", error);
             alert(`서버와의 통신 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
         });
-
 });
+
 
 // 재료 출납 목록 로딩 함수 (테이블 행 더블클릭 이벤트 추가)
 function loadTransactionList() {
-    fetch('/inventory_management/searchTransaction')  // 전체 목록 조회
+    fetch('/inventory_management/findTransaction')  // 전체 목록 조회
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById('transactionList');
@@ -81,28 +91,50 @@ function loadTransactionList() {
         });
 }
 
-// 더블클릭한 행의 데이터를 폼에 채워주는 함수
+// 테이블 행 더블클릭 이벤트 추가 시 transactionId 설정 및 필드 읽기 전용 처리
 function populateTransactionForm(transaction) {
-    document.getElementById('transactionDate').value = transaction.transactionDate || '';  // 입출일자
-    document.getElementById('twoCompanyName').value = transaction.companyName || '';      // 업체명
-    document.getElementById('twoMaterialName').value = transaction.materialName || '';    // 재료명
-    document.getElementById('twoMaterialCode').value = transaction.materialCode || '';    // 재료코드
-    document.getElementById('stockIn').value = transaction.stockIn || 0;                 // 입고량
-    document.getElementById('stockOut').value = transaction.stockOut || 0;               // 출고량
+    document.getElementById('transactionId').value = transaction.transactionId || '';  // transactionId 설정
+    document.getElementById('transactionDate').value = transaction.transactionDate || '';
+    document.getElementById('twoCompanyName').value = transaction.companyName || '';
+    document.getElementById('twoMaterialName').value = transaction.materialName || '';
+    document.getElementById('twoMaterialCode').value = transaction.materialCode || '';
+    document.getElementById('stockIn').value = transaction.stockIn || 0;
+    document.getElementById('stockOut').value = transaction.stockOut || 0;
+
+    // 수정할 수 없도록 필드를 읽기 전용으로 설정
+    document.getElementById('transactionDate').readOnly = true;
+    document.getElementById('twoCompanyName').readOnly = true;
+    document.getElementById('twoMaterialName').readOnly = true;
+    document.getElementById('twoMaterialCode').readOnly = true;
 }
+
+// 재료 조회 후 취소 버튼 클릭 시 필드 읽기 전용 해제
+document.getElementById('resetTransaction').addEventListener('click', function() {
+    // transactionId를 초기화하고, 필드들을 다시 수정 가능하게 설정
+    document.getElementById('transactionId').value = '';
+    document.getElementById('transactionDate').readOnly = false;
+    document.getElementById('twoCompanyName').readOnly = false;
+    document.getElementById('twoMaterialName').readOnly = false;
+    document.getElementById('twoMaterialCode').readOnly = false;
+});
+
 
 // 페이지 로드 시 재료 출납 목록을 불러오는 함수 호출
 loadTransactionList();  // 초기 데이터 로딩
 
 
-// 재료 검색 함수
+// 검색 함수
 function twoSearch() {
     const materialName = document.getElementById('twoMaterialNameSearch').value.trim();
     const materialCode = document.getElementById('twoMaterialCodeSearch').value.trim();
+    const transactionStartDate = document.getElementById('transactionStartDate').value;
+    const transactionEndDate = document.getElementById('transactionEndDate').value;
 
-    let url = `/inventory_management/searchTransaction?`;
+    let url = `/inventory_management/findTransaction?`;
     const queryParams = [];
 
+    if (transactionStartDate) queryParams.push(`transactionStartDate=${encodeURIComponent(transactionStartDate)}`);
+    if (transactionEndDate) queryParams.push(`transactionEndDate=${encodeURIComponent(transactionEndDate)}`);
     if (materialName) queryParams.push(`materialName=${encodeURIComponent(materialName)}`);
     if (materialCode) queryParams.push(`materialCode=${encodeURIComponent(materialCode)}`);
 
@@ -243,4 +275,9 @@ document.getElementById('materialCompanyModal').addEventListener('show.bs.modal'
 document.getElementById('materialCompanySelect').addEventListener('click', function() {
     const materialCompanyModal = new bootstrap.Modal(document.getElementById('materialCompanyModal'));
     materialCompanyModal.show(); // 모달을 띄우기
+});
+
+// 취소 버튼 클릭 시 transactionId 초기화
+document.getElementById('resetTransaction').addEventListener('click', function() {
+    document.getElementById('transactionId').value = '';  // transactionId 초기화
 });

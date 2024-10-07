@@ -1,12 +1,11 @@
 package kroryi.his.service.Impl;
 
-import jakarta.persistence.EntityNotFoundException;
-import kroryi.his.domain.CompanyRegister;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
-import kroryi.his.dto.MaterialDTO;
 import kroryi.his.dto.MaterialTransactionDTO;
-import kroryi.his.repository.CompanyRegisterRepository;
 import kroryi.his.repository.MaterialRegisterRepository;
 import kroryi.his.repository.MaterialTransactionRepository;
 import kroryi.his.service.MaterialTransactionService;
@@ -15,6 +14,8 @@ import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,34 +25,69 @@ import java.util.stream.Collectors;
 @Service
 public class MaterialTransactionServiceImpl implements MaterialTransactionService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final MaterialRegisterRepository materialRepository;
-    private final CompanyRegisterRepository companyRepository;
+
     private final MaterialTransactionRepository materialTransactionRepository;
+
     private final ModelMapper modelMapper;
+
 
     @Override
     public MaterialTransactionRegister register(MaterialTransactionDTO materialTransactionDTO) {
-        // MaterialDTO를 MaterialRegister로 변환
-        MaterialRegister materialRegister = materialRepository.findByMaterialCode(materialTransactionDTO.getMaterialCode())
-                .orElseThrow(() -> new EntityNotFoundException("재료를 찾을 수 없습니다: " + materialTransactionDTO.getMaterialCode()));
+        Optional<MaterialRegister> materialRegisterOpt = materialRepository.findByMaterialCode(materialTransactionDTO.getMaterialCode());
 
-        MaterialTransactionRegister materialTransactionRegister = modelMapper.map(materialTransactionDTO, MaterialTransactionRegister.class);
+        if (materialRegisterOpt.isEmpty()) {
+            throw new IllegalArgumentException("해당 재료 코드를 찾을 수 없습니다: " + materialTransactionDTO.getMaterialCode());
+        }
 
-        // 입고량과 출고량 기본값 설정
-        materialTransactionRegister.setStockIn(materialTransactionDTO.getStockIn() != null ? materialTransactionDTO.getStockIn() : 0L);
-        materialTransactionRegister.setStockOut(materialTransactionDTO.getStockOut() != null ? materialTransactionDTO.getStockOut() : 0L);
+        // 중복 출납 데이터 존재 여부 확인
+        Optional<MaterialTransactionRegister> existingTransaction = materialTransactionRepository
+                .findByTransactionDateAndMaterialRegister(materialTransactionDTO.getTransactionDate(), materialRegisterOpt.get());
 
-        // 나머지 필드 설정
-        materialTransactionRegister.setTransactionDate(materialTransactionDTO.getTransactionDate());
+        if (existingTransaction.isPresent()) {
+            throw new IllegalArgumentException("해당 날짜에 이미 출납 기록이 존재합니다.");
+        }
 
-        // MaterialRegister 객체를 Transaction 엔티티에 설정
-        materialTransactionRegister.setMaterialRegister(materialRegister);
+        MaterialTransactionRegister transaction = new MaterialTransactionRegister();
+        transaction.setTransactionDate(materialTransactionDTO.getTransactionDate());
+        transaction.setMaterialRegister(materialRegisterOpt.get());
+        transaction.setStockIn(materialTransactionDTO.getStockIn());
+        transaction.setStockOut(materialTransactionDTO.getStockOut());
 
-        // 재료 출납 정보 저장
-        return materialTransactionRepository.save(materialTransactionRegister);
+        return materialTransactionRepository.save(transaction);
     }
 
-    // 모든 출납 내역 조회
+
+    @Override
+    public MaterialTransactionRegister update(MaterialTransactionDTO materialTransactionDTO) {
+        if (materialTransactionDTO.getTransactionId() == null) {
+            throw new IllegalArgumentException("출납 정보 ID가 누락되었습니다.");
+        }
+
+        Optional<MaterialTransactionRegister> transactionOpt = materialTransactionRepository.findById(materialTransactionDTO.getTransactionId());
+
+        if (transactionOpt.isEmpty()) {
+            throw new IllegalArgumentException("해당 출납 정보를 찾을 수 없습니다: " + materialTransactionDTO.getTransactionId());
+        }
+
+        MaterialTransactionRegister transaction = transactionOpt.get();
+        transaction.setTransactionDate(materialTransactionDTO.getTransactionDate());
+        transaction.setStockIn(materialTransactionDTO.getStockIn());
+        transaction.setStockOut(materialTransactionDTO.getStockOut());
+
+        // 추가적으로 materialCode나 다른 정보가 변경되었을 경우를 처리
+        Optional<MaterialRegister> materialRegisterOpt = materialRepository.findByMaterialCode(materialTransactionDTO.getMaterialCode());
+        if (materialRegisterOpt.isEmpty()) {
+            throw new IllegalArgumentException("해당 재료 코드를 찾을 수 없습니다: " + materialTransactionDTO.getMaterialCode());
+        }
+        transaction.setMaterialRegister(materialRegisterOpt.get());
+
+        return materialTransactionRepository.save(transaction);
+    }
+
     @Override
     public List<MaterialTransactionDTO> getAllTransactions() {
         List<MaterialTransactionRegister> transactions = materialTransactionRepository.findAll();
@@ -84,7 +120,18 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<MaterialTransactionDTO> searchTransactions(LocalDate transactionStartDate, LocalDate transactionEndDate, String materialName, String materialCode) {
+        // 기본 검색 조건에 따라 쿼리를 생성
+        Optional<List<MaterialTransactionRegister>> optionalTransactions = materialTransactionRepository.findByTransactionDateBetweenAndMaterialNameContainingOrMaterialCodeContaining(
+                transactionStartDate, transactionEndDate, materialName, materialCode);
 
+        // Optional에서 값을 꺼내 처리
+        return optionalTransactions.orElse(Collections.emptyList())
+                .stream()
+                .map(MaterialTransactionDTO::new)  // 결과를 DTO로 변환
+                .collect(Collectors.toList());
+    }
 
 
 
