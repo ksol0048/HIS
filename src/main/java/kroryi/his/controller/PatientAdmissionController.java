@@ -4,6 +4,7 @@ import kroryi.his.domain.PatientAdmission;
 import kroryi.his.dto.PatientAdmissionDTO;
 import kroryi.his.service.PatientAdmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -84,14 +85,17 @@ public class PatientAdmissionController {
 
 
     @GetMapping("/completed")
-    public ResponseEntity<List<PatientAdmissionDTO>> getCompletedPatients(@RequestParam(required = false) String date) {
+    public ResponseEntity<List<PatientAdmissionDTO>> getCompletedPatients(@RequestParam String date) {
         if (date == null || date.isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
 
         try {
-            // String 형태의 날짜를 LocalDateTime으로 변환
-            LocalDateTime startOfDay = LocalDate.parse(date).atStartOfDay(); // 선택한 날짜의 00:00:00
+            // String 형태의 날짜를 LocalDate로 변환
+            LocalDate localDate = LocalDate.parse(date);
+
+            // 시작과 종료 시간을 설정
+            LocalDateTime startOfDay = localDate.atStartOfDay(); // 선택한 날짜의 00:00:00
             LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1); // 선택한 날짜의 23:59:59
 
             // 해당 날짜에 완료된 환자 목록 조회
@@ -106,5 +110,16 @@ public class PatientAdmissionController {
         }
     }
 
+    @GetMapping("/date/{date}")
+    public List<PatientAdmissionDTO> getAdmissionsByDate(@PathVariable String date) {
+        // 날짜 문자열을 LocalDate로 변환
+        LocalDate localDate = LocalDate.parse(date);
 
+        // 해당 날짜의 시작과 끝을 정의
+        LocalDateTime startDate = localDate.atStartOfDay(); // 해당 날짜의 시작 시간
+        LocalDateTime endDate = localDate.plusDays(1).atStartOfDay(); // 다음 날짜의 시작 시간
+
+        // 해당 날짜와 접수 시간을 기준으로 환자 접수 정보를 가져옴
+        return patientAdmissionService.getAdmissionsByReceptionTime(startDate, endDate);
+    }
 }

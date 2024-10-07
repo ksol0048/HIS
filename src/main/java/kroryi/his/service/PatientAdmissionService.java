@@ -23,4 +23,5 @@ public interface PatientAdmissionService {
 
     List<PatientAdmissionDTO> getCompletedPatientsByDate(LocalDateTime startOfDay, LocalDateTime endOfDay);
 
+    List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate);
 }

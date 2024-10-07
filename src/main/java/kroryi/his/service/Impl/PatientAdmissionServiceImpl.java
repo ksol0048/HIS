@@ -4,6 +4,7 @@ import kroryi.his.domain.PatientAdmission;
 import kroryi.his.dto.PatientAdmissionDTO;
 import kroryi.his.repository.PatientAdmissionRepository;
 import kroryi.his.service.PatientAdmissionService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
     @Autowired
     private PatientAdmissionRepository patientAdmissionRepository;
 
+    private ModelMapper modelMapper;
 
     @Override
     public void savePatientAdmission(PatientAdmissionDTO patientAdmissionDTO) {
@@ -76,7 +78,6 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
 
 
 
-
     @Override
     public List<PatientAdmission> getPatientsByStatus(String status) {
         return patientAdmissionRepository.findByTreatStatus(status);
@@ -90,6 +91,16 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate) {
+        // 접수 시간 범위에 맞는 환자 접수 정보 가져오기
+        List<PatientAdmission> admissions = patientAdmissionRepository.findByReceptionTimeBetween(startDate, endDate);
+
+        // 엔티티 리스트를 DTO 리스트로 변환
+        return admissions.stream()
+                .map(admission -> modelMapper.map(admission, PatientAdmissionDTO.class))
+                .collect(Collectors.toList());
+    }
 
 
 }

@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('currentDate').value = today.toISOString().substring(0, 10);
 
 
-
     // 접수 버튼 클릭 이벤트 추가
     const receptionBtn = document.querySelector(".ReceptionBtn");
     receptionBtn.addEventListener("click", function () {
@@ -72,19 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const treatmentPatientInfo = document.getElementById("treatmentPatientInfo");
     const completeTreatmentButton = document.getElementById("completeTreatmentButton");
 
-    // // 접수 시간을 포맷하는 함수 정의
-    // const formatReceptionTime = (dateTimeString) => {
-    //     if (!dateTimeString) return 'N/A'; // 유효하지 않은 시간 문자열 처리
-    //     const date = new Date(dateTimeString);
-    //     const formatCurrentTime = (date) => {
-    //         let hours = date.getHours();
-    //         const minutes = date.getMinutes().toString().padStart(2, '0');
-    //         const amPm = hours >= 12 ? '오후' : '오전';
-    //         hours = hours % 12 || 12; // 12시간 형식으로 변환
-    //         return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`;
-    //     };
-    //     return isNaN(date.getTime()) ? 'N/A' : formatCurrentTime(date); // NaN 체크 추가
-    // };
 
 
 // 진료 시작 버튼 클릭 이벤트
@@ -489,71 +475,68 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-
-
-
-
-// 페이지 로드 시 현재 날짜에 대한 진료 완료 환자 목록을 불러오기
-    window.onload = function () {
-        const today = new Date();
-        const currentDate = today.toISOString().substring(0, 10);
-        document.getElementById('currentDate').value = currentDate; // 현재 날짜 설정
-        fetchAndDisplayPatients(currentDate); // 현재 날짜에 대한 환자 목록을 불러오기
-    };
-
-// 날짜 선택기가 변경될 때 해당 날짜의 환자 목록을 불러오기
-    document.getElementById('currentDate').addEventListener('change', function () {
-        const selectedDate = this.value; // 선택된 날짜
-        fetchAndDisplayPatients(selectedDate); // 선택된 날짜에 대한 환자 목록을 불러오기
-    });
-
-// 진료 완료 환자 목록을 불러와서 테이블 업데이트
-    function fetchCompletedPatients(selectedDate) {
-        const startOfDay = new Date(selectedDate);
-        startOfDay.setHours(9, 0, 0, 0); // 시작 시간
-
-        const endOfDay = new Date(selectedDate);
-        endOfDay.setHours(23, 59, 59, 999); // 종료 시간
-        console.log("완료된 환자를 가져오는 중:", startOfDay.toISOString(), "에서:", endOfDay.toISOString()); // 디버깅 로그
-
-        return fetch(`/api/patient-admission/completed?start=${startOfDay.toISOString()}&end=${endOfDay.toISOString()}`)
-
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('진료 완료 환자 목록을 불러오는 데 실패했습니다.');
-                }
-                return response.json();
-            });
-
-    }
-
-// 진료 완료 환자 목록을 표시하는 함수
-    function fetchAndDisplayPatients(selectedDate) {
-        fetchCompletedPatients(selectedDate)
-            .then(completedPatients => {
-                updateCompletedPatientsTable(completedPatients);
-            })
-            .catch(error => {
-                console.error("에러 발생:", error);
-                alert("환자 목록을 불러오는 중 오류가 발생했습니다: " + error.message);
-            });
-    }
-
-// 진료 완료 환자 목록을 업데이트하는 함수
-    function updateCompletedPatientsTable(completedPatients) {
-        const tableBody = document.getElementById('completedPatientsTableBody'); // 테이블 바디 ID
-        tableBody.innerHTML = ''; // 기존 내용을 비움
-        completePatientCount = 0; // 카운트 초기화
-
-        completedPatients.forEach(patient => {
-            addPatientToCompleteTable(patient);
-        });
-    }
+// // 페이지 로드 시 현재 날짜에 대한 진료 완료 환자 목록을 불러오기
+//     window.onload = function () {
+//         const today = new Date();
+//         const currentDate = today.toISOString().substring(0, 10);
+//         document.getElementById('currentDate').value = currentDate; // 현재 날짜 설정
+//         fetchAndDisplayPatients(currentDate); // 현재 날짜에 대한 환자 목록을 불러오기
+//     };
+//
+// // 날짜 선택기가 변경될 때 해당 날짜의 환자 목록을 불러오기
+//     document.getElementById('currentDate').addEventListener('change', function () {
+//         const selectedDate = this.value; // 선택된 날짜
+//         fetchAndDisplayPatients(selectedDate); // 선택된 날짜에 대한 환자 목록을 불러오기
+//     });
+//
+// // 진료 완료 환자 목록을 불러와서 테이블 업데이트
+//     function fetchCompletedPatients(selectedDate) {
+//         console.log("완료된 환자를 가져오는 중, 날짜:", selectedDate); // 디버깅 로그
+//
+//         // 서버가 기대하는 형식으로 날짜 전달 (yyyy-MM-dd)
+//         return fetch(`/api/patient-admission/completed?date=${selectedDate}`)
+//             .then(response => {
+//                 if (!response.ok) {
+//                     throw new Error('진료 완료 환자 목록을 불러오는 데 실패했습니다.');
+//                 }
+//                 return response.json();
+//             });
+//     }
+//
+// // 진료 완료 환자 목록을 표시하는 함수
+//     function fetchAndDisplayPatients(selectedDate) {
+//         fetchCompletedPatients(selectedDate)
+//             .then(completedPatients => {
+//                 updateCompletedPatientsTable(completedPatients);
+//             })
+//             .catch(error => {
+//                 console.error("에러 발생:", error);
+//                 alert("환자 목록을 불러오는 중 오류가 발생했습니다: " + error.message);
+//             });
+//     }
+//
+// // 진료 완료 환자 목록을 업데이트하는 함수
+//     function updateCompletedPatientsTable(completedPatients) {
+//         const tableBody = document.getElementById('completedPatientsTableBody'); // 테이블 바디 ID
+//         tableBody.innerHTML = ''; // 기존 내용을 비움
+//         completePatientCount = 0; // 카운트 초기화
+//
+//         completedPatients.forEach(patient => {
+//             addPatientToCompleteTable(patient);
+//         });
+//     }
 
 // 진료 완료 환자를 완료 테이블에 추가하는 함수
     function addPatientToCompleteTable(patient) {
+        const completePatientsTable = document.getElementById('completedPatientsTable'); // 테이블 ID를 통해 테이블 요소를 가져옴
+        if (!completePatientsTable) {
+            console.error("Completed Patients Table not found!");
+            return;
+        }
+
         const row = completePatientsTable.insertRow(); // 완료 테이블에 새 행 추가
         completePatientCount++; // 진료 완료 환자 수 증가
+        console.log("Patient's reception time:", patient.receptionTime);
 
         // 현재 시간 포맷팅 함수
         const formatCurrentTime = (date) => {
@@ -564,20 +547,29 @@ document.addEventListener("DOMContentLoaded", function () {
             return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`;
         };
 
-        // 접수 시간 포맷팅 함수
+        // 접수 시간 포맷팅 함수 (UTC+6으로 변환)
         const formatReceptionTime = (dateTimeString) => {
             if (!dateTimeString || dateTimeString === 'N/A') return 'N/A'; // 유효하지 않은 값 처리
             const date = new Date(dateTimeString); // ISO 형식을 Date 객체로 변환
-            return date.toLocaleTimeString('ko-KR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true, // 오전/오후 표기
-                timeZone: 'UTC', // UTC 시간대 유지
-            });
+            const utcOffset = 15 * 60; // UTC+6
+            const convertedDate = new Date(date.getTime() + utcOffset * 60 * 1000); // UTC+6으로 변환
+
+            let hours = convertedDate.getHours();
+            const minutes = convertedDate.getMinutes().toString().padStart(2, '0');
+            const amPm = hours >= 12 ? '오후' : '오전';
+            hours = hours % 12 || 12; // 12시간 형식으로 변환
+            return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`;
         };
 
-        const formattedViTime = formatCurrentTime(new Date()); // 진료 완료 시간을 현재 시간으로 포맷팅
-        const formattedReceptionTime = formatReceptionTime(patient.receptionTime); // 접수 시간을 포맷팅
+        // 진료 완료 시간 포맷팅 함수 (cpTime으로 변경)
+        const formatCpTime = (dateTimeString) => {
+            if (!dateTimeString || dateTimeString === 'N/A') return 'N/A'; // 유효하지 않은 값 처리
+            const date = new Date(dateTimeString); // ISO 형식을 Date 객체로 변환
+            return date.toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true }); // 진료 완료 시간 포맷팅
+        };
+
+        const formattedReceptionTime = formatReceptionTime(patient.receptionTime); // 접수 시간을 포맷
+        const formattedCpTime = formatCurrentTime(new Date());
 
         row.innerHTML = `
         <td>${completePatientCount}</td>
@@ -585,12 +577,13 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${patient.paName || 'N/A'}</td>
         <td>${patient.selectedDoctor || 'N/A'}</td>
         <td>${formattedReceptionTime || 'N/A'}</td>
-        <td>${formattedViTime || 'N/A'}</td> <!-- 포맷된 진료 완료 시간 -->
+        <td>${formattedCpTime || 'N/A'}</td> <!-- 포맷된 진료 완료 시간 -->
     `;
 
         // 완료 환자 수 업데이트
         updateCompletePatientCount();
     }
+
 
 
 
@@ -619,46 +612,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // // DB에서 환자 목록을 가져오고 테이블에 표시하는 함수
-    // function fetchAndDisplayPatients(selectedDate) {
-    //     fetch("/api/patient-admission/waiting")
-    //         .then(response => {
-    //             if (!response.ok) {
-    //                 throw new Error('환자 목록을 가져오는 데 실패했습니다.');
-    //             }
-    //             return response.json();
-    //         })
-    //         .then(data => {
-    //             const currentPatients = Array.from(waitingPatientsTable.rows).map(row => ({
-    //                 chartNum: row.cells[1].textContent,
-    //                 rvTime: row.cells[4].textContent
-    //             }));
-    //
-    //             const filteredPatients = data.filter(patient => {
-    //                 const rvTime = new Date(patient.rvTime);
-    //                 return rvTime.toDateString() === selectedDate.toDateString();
-    //             });
-    //
-    //             filteredPatients.forEach(patient => {
-    //                 if (!currentPatients.some(current => current.chartNum === patient.chartNum && new Date(current.rvTime).toDateString() === new Date(patient.rvTime).toDateString())) {
-    //                     addPatientToWaitingTable(patient);
-    //                 }
-    //             });
-    //         })
-    //         .catch(error => {
-    //             console.error("에러 발생:", error);
-    //             alert("환자 목록을 가져오는 중 오류가 발생했습니다.");
-    //         });
-    // }
-    //
-    // // 초기화: 페이지 로드 시 환자 목록을 가져옵니다.
-    // fetchAndDisplayPatients(today);
+    // // 매 5초마다 환자 목록 갱신
+    // setInterval(() => {
+    //     const selectedDate = new Date(document.getElementById('currentDate').value);
+    //     fetchAndDisplayPatients(selectedDate); // 현재 선택된 날짜의 환자 목록 갱신
+    // }, 5000);
 
-    // 매 5초마다 환자 목록 갱신
-    setInterval(() => {
-        const selectedDate = new Date(document.getElementById('currentDate').value);
-        fetchAndDisplayPatients(selectedDate); // 현재 선택된 날짜의 환자 목록 갱신
-    }, 5000);
 });
 
 
@@ -727,6 +686,94 @@ document.addEventListener("DOMContentLoaded", function () {
     // '아니요' 버튼 클릭 시 모달 닫기
     closeModalBtn.addEventListener("click", function () {
         cancelModal.hide();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const dateInput = document.getElementById('currentDate');
+
+    // 날짜 선택 시 데이터 로드
+    dateInput.addEventListener('change', function() {
+        const selectedDate = dateInput.value;
+
+        // 선택한 날짜가 비어있지 않은지 확인
+        if (!selectedDate) {
+            alert("날짜를 선택해주세요.");
+            return;
+        }
+
+        // 서버에 날짜를 포함한 GET 요청을 보냅니다.
+        fetch(`/date/${selectedDate}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('네트워크 응답이 올바르지 않습니다.');
+                }
+                return response.json(); // JSON 형식으로 응답 변환
+            })
+            .then(data => {
+                // 각 테이블의 tbody를 선택
+                const waitingPatientsBody = document.getElementById('waitingPatientsBody');
+                const treatmentPatientsBody = document.getElementById('treatmentPatientsBody');
+                const completedPatientsBody = document.getElementById('completedPatientsBody');
+
+                // 기존 테이블 데이터를 비움
+                waitingPatientsBody.innerHTML = '';
+                treatmentPatientsBody.innerHTML = ''; // 진료중 테이블 초기화
+                completedPatientsBody.innerHTML = '';
+
+                let waitingCount = 0;
+                let treatmentCount = 0; // 진료중 환자 수
+                let completedCount = 0;
+
+                data.forEach(patient => {
+                    const row = document.createElement('tr');
+
+                    // 각 상태에 맞는 테이블에 데이터를 추가
+                    if (patient.status === 1) { // 대기중
+                        row.innerHTML = `
+                            <td>1</td>
+                            <td>${patient.chartNum}</td>
+                            <td>${patient.paName}</td>
+                            <td>${patient.mainDoc}</td>
+                            <td>${patient.rvTime}</td>
+                            <td>${patient.receptionTime}</td>
+                        `;
+                        waitingPatientsBody.appendChild(row);
+                        waitingCount++;
+                    } else if (patient.status === 2) { // 진료중
+                        row.innerHTML = `
+                            <td>2</td>
+                            <td>${patient.chartNum}</td>
+                            <td>${patient.paName}</td>
+                            <td>${patient.mainDoc}</td>
+                            <td>${patient.rvTime}</td>
+                            <td>${patient.treatmentStartTime}</td> <!-- 진료 시작 시간 -->
+                            <td>${patient.receptionTime}</td>
+                        `;
+                        treatmentPatientsBody.appendChild(row); // 진료중 테이블에 추가
+                        treatmentCount++;
+                    } else if (patient.status === 3) { // 진료 완료
+                        row.innerHTML = `
+                            <td>3</td>
+                            <td>${patient.chartNum}</td>
+                            <td>${patient.paName}</td>
+                            <td>${patient.mainDoc}</td>
+                            <td>${patient.receptionTime}</td>
+                            <td>${patient.treatmentEndTime}</td> <!-- 진료 완료 시간 -->
+                        `;
+                        completedPatientsBody.appendChild(row);
+                        completedCount++;
+                    }
+                });
+
+                // 테이블 헤더에 환자 수 업데이트
+                document.querySelector('#waitingPatientsTable thead th[colspan="6"]').textContent = `진료 대기 환자: ${waitingCount}명`;
+                document.querySelector('#treatmentPatientsTable thead th[colspan="7"]').textContent = `진료중 환자: ${treatmentCount}명`; // 진료중 헤더 업데이트
+                document.querySelector('#completedPatientsTable thead th[colspan="6"]').textContent = `진료 완료 환자: ${completedCount}명`;
+            })
+            .catch(error => {
+                console.error('에러 발생:', error);
+            });
     });
 });
 
