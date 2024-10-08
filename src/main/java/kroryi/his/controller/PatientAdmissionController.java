@@ -85,29 +85,6 @@ public class PatientAdmissionController {
     }
 
 
-//    @GetMapping("/completed")
-//    public ResponseEntity<List<PatientAdmissionDTO>> getCompletedPatients(@RequestParam String date) {
-//        if (date == null || date.isEmpty()) {
-//            return ResponseEntity.badRequest().body(null);
-//        }
-//
-//        try {
-//            // String 형태의 날짜를 LocalDate로 변환
-//            LocalDate localDate = LocalDate.parse(date);
-//
-//            // 시작과 종료 시간을 설정
-//            LocalDateTime startOfDay = localDate.atStartOfDay(); // 선택한 날짜의 00:00:00
-//            LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1); // 선택한 날짜의 23:59:59
-//
-//            // 해당 날짜에 완료된 환자 목록 조회
-//
-//
-//
-//        } catch (DateTimeParseException e) {
-//            return ResponseEntity.badRequest().body(null);
-//        }
-//    }
-
     @GetMapping("/date/{date}")
     public List<PatientAdmissionDTO> getAdmissionsByDate(@PathVariable String date) {
         try {
