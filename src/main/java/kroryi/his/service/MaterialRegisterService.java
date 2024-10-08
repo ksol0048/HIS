@@ -1,6 +1,7 @@
 package kroryi.his.service;
 
 import kroryi.his.domain.MaterialRegister;
+import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialDTO;
 
 import java.util.List;
@@ -22,4 +23,5 @@ public interface MaterialRegisterService {
     void updateMaterial(MaterialDTO materialDTO);
 
     boolean isNewMaterial(String materialCode);
+
 }

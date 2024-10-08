@@ -20,4 +20,6 @@ public interface MaterialTransactionService {
     List<MaterialTransactionDTO> searchByMaterialCode(String materialCode);
 
     List<MaterialTransactionDTO> searchTransactions(LocalDate transactionStartDate, LocalDate transactionEndDate, String materialName, String materialCode);
+
+    void deleteByTransactionId(Long transactionId);
 }

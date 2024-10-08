@@ -88,6 +88,11 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
         return materialTransactionRepository.save(transaction);
     }
 
+    // transactionId로 삭제
+    public void deleteByTransactionId(Long transactionId) {
+        materialTransactionRepository.deleteById(transactionId);
+    }
+
     @Override
     public List<MaterialTransactionDTO> getAllTransactions() {
         List<MaterialTransactionRegister> transactions = materialTransactionRepository.findAll();
@@ -123,7 +128,8 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
     @Override
     public List<MaterialTransactionDTO> searchTransactions(LocalDate transactionStartDate, LocalDate transactionEndDate, String materialName, String materialCode) {
         // 기본 검색 조건에 따라 쿼리를 생성
-        Optional<List<MaterialTransactionRegister>> optionalTransactions = materialTransactionRepository.findByTransactionDateBetweenAndMaterialNameContainingOrMaterialCodeContaining(
+        log.info("------------> {}, {}", materialCode, materialName);
+        Optional<List<MaterialTransactionRegister>> optionalTransactions = materialTransactionRepository.findSearch(
                 transactionStartDate, transactionEndDate, materialName, materialCode);
 
         // Optional에서 값을 꺼내 처리
@@ -132,8 +138,6 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
                 .map(MaterialTransactionDTO::new)  // 결과를 DTO로 변환
                 .collect(Collectors.toList());
     }
-
-
 
 }
 

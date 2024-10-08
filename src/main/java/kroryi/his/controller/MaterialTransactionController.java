@@ -94,7 +94,20 @@ public class MaterialTransactionController {
         }
     }
 
-    // 재료 출납 목록 조회
+    // 재료 출납 삭제 (DELETE 요청)
+    @DeleteMapping("/deleteTransaction/{transactionId}")
+    public ResponseEntity<?> deleteTransaction(@PathVariable Long transactionId) {
+        try {
+            materialTransactionService.deleteByTransactionId(transactionId);
+            log.info("Transaction Deleted for Transaction ID: {}", transactionId);
+            return ResponseEntity.ok(Map.of("success", true, "message", "재료가 삭제되었습니다."));
+        } catch (Exception e) {
+            log.error("재료 삭제 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    // 재료 조회
     @ApiOperation(value = "재료 조회", notes = "GET 방식으로 재료 조회를 합니다.")
     @GetMapping("/searchTransaction")
     public ResponseEntity<List<MaterialTransactionDTO>> searchTransaction(
@@ -135,6 +148,19 @@ public class MaterialTransactionController {
             return ResponseEntity.ok(transactions);
         } catch (Exception e) {
             log.error("재료 출납 검색 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
+    }
+
+    // 초기화 요청
+    @GetMapping("/reset")
+    public ResponseEntity<List<MaterialTransactionDTO>> resetTransactions() {
+        try {
+            // 모든 데이터를 반환
+            List<MaterialTransactionDTO> transactions = materialTransactionService.getAllTransactions();
+            return new ResponseEntity<>(transactions, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("전체 재료 출납 데이터 조회 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }

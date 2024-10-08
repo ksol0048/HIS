@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
 import kroryi.his.domain.CompanyRegister;
 import kroryi.his.domain.MaterialRegister;
+import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialDTO;
 import kroryi.his.service.CompanyRegisterService;
 import kroryi.his.service.MaterialRegisterService;
@@ -71,9 +72,6 @@ public class MaterialRegisterController {
             return ResponseEntity.ok(Map.of("success", true, "message", "재료가 수정되었습니다."));
         }
     }
-
-
-
 
     // 재료 검색 (GET 요청)
     @ApiOperation(value = "재료 검색", notes = "GET 방식으로 재료를 검색합니다.")
