@@ -34,11 +34,12 @@ function populateTransactionForm(transaction) {
 // 저장, 취소, 삭제 후 입력 필드 비우기
 function clearTransactionForm() {
     document.getElementById('transactionId').value = '';
+    setTodayDate();  // 오늘 날짜로 다시 설정
     document.getElementById('twoCompanyName').value = '';
     document.getElementById('twoMaterialName').value = '';
     document.getElementById('twoMaterialCode').value = '';
-    document.getElementById('stockIn').value = '';
-    document.getElementById('stockOut').value = '';
+    document.getElementById('stockIn').value = 0;
+    document.getElementById('stockOut').value = 0;
 
     // 필드를 다시 수정 가능하게 변경 (입출일자는 제외)
     setReadOnlyFields(true);  // 입출일자는 항상 읽기 전용으로 유지
@@ -65,12 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
     setReadOnlyFields(true);  // 필드 읽기 전용 설정
 });
 
-// 트랜잭션 목록 로딩
+// 트랜잭션 목록 로딩 함수 (목록 불러오기 및 이벤트 재설정 포함)
 function loadTransactionList() {
     fetch('/inventory_management/findTransaction')  // 전체 목록 조회
         .then(response => response.json())
         .then(data => {
-            // 데이터를 최신 날짜 순으로 정렬 (transactionDate 기준 내림차순)
+            // 데이터가 날짜 기준으로 내림차순(최근순)으로 정렬되도록 정렬
             data.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
 
             const tbody = document.getElementById('transactionList');
@@ -167,7 +168,7 @@ document.getElementById('resetTransaction').addEventListener('click', function()
     setReadOnlyFields(true);  // 취소 후 필드 읽기 전용
 });
 
-// 삭제 버튼 클릭 이벤트 핸들러
+// 삭제 버튼 클릭 시 동작
 document.getElementById('deleteTransactionBtn').addEventListener('click', function () {
     if (!selectedTransactionId) {
         alert('출납 기록을 선택하세요.');
@@ -181,10 +182,9 @@ document.getElementById('deleteTransactionBtn').addEventListener('click', functi
         .then(response => {
             if (response.ok) {
                 alert('출납 기록이 삭제되었습니다.');
-                resetSearch();  // 삭제 후 목록 초기화
-                clearTransactionForm();  // 삭제 후 필드 비우기
-                setTodayDate();  // 오늘 날짜로 다시 설정
                 selectedTransactionId = null;  // 삭제 후 transactionId 초기화
+                clearTransactionForm();  // 폼 초기화
+                loadTransactionList();  // 삭제 후 목록 새로고침
             } else {
                 alert('출납 기록 삭제에 실패했습니다.');
             }
@@ -262,6 +262,9 @@ function resetSearch() {
     fetch('/inventory_management/reset')  // 전체 데이터를 가져오는 API 엔드포인트
         .then(response => response.json())
         .then(data => {
+            // 데이터를 날짜 기준으로 내림차순 정렬 (최근 날짜가 먼저 나오도록)
+            data.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+
             const tbody = document.getElementById('transactionList');
             tbody.innerHTML = '';  // 기존 행 제거
 
@@ -279,6 +282,12 @@ function resetSearch() {
                         <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
                         <td>${transaction.managerNumber || 'N/A'}</td>
                     `;
+
+                    // 더블클릭 이벤트 추가: 행을 더블클릭하면 데이터를 폼에 채워줌
+                    row.addEventListener('dblclick', function () {
+                        populateTransactionForm(transaction);
+                    });
+
                     tbody.appendChild(row);
                 });
             }
