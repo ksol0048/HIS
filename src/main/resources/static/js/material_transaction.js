@@ -70,6 +70,9 @@ function loadTransactionList() {
     fetch('/inventory_management/findTransaction')  // 전체 목록 조회
         .then(response => response.json())
         .then(data => {
+            // 데이터를 최신 날짜 순으로 정렬 (transactionDate 기준 내림차순)
+            data.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+
             const tbody = document.getElementById('transactionList');
             tbody.innerHTML = '';  // 기존 테이블 내용 초기화
 
@@ -250,6 +253,10 @@ function resetSearch() {
     // 검색어 초기화
     document.getElementById('twoMaterialNameSearch').value = '';
     document.getElementById('twoMaterialCodeSearch').value = '';
+
+    // 입출고일자 초기화
+    document.getElementById('transactionStartDate').value = '';
+    document.getElementById('transactionEndDate').value = '';
 
     // 전체 데이터를 불러오는 요청
     fetch('/inventory_management/reset')  // 전체 데이터를 가져오는 API 엔드포인트
