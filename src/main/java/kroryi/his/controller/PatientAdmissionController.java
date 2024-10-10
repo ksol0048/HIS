@@ -75,32 +75,20 @@ public class PatientAdmissionController {
 
         // 진료 완료 시간 처리
         LocalDateTime completionTime = LocalDateTime.now();
-        patientAdmissionDTO.setCompletionTime(LocalDateTime.now());
+        patientAdmissionDTO.setCompletionTime(completionTime); // completionTime 설정
         patientAdmissionDTO.setTreatStatus("3");
 
-        // viTime 처리 (LocalDateTime으로 수신 시 별도 처리 필요 없음)
-        String viTime = String.valueOf(patientAdmissionDTO.getViTime()); // 클라이언트로부터 받은 viTime
-        if (viTime != null && !viTime.isEmpty()) {
-            try {
-                // 'HH:mm' 형식으로 viTime을 LocalTime으로 변환
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-                LocalTime parsedViTime = LocalTime.parse(viTime, formatter); // LocalTime 사용
-                patientAdmissionDTO.setViTime(LocalDateTime.from(parsedViTime));
-            } catch (DateTimeParseException e) {
-                System.err.println("viTime 형식이 잘못되었습니다: " + viTime);
-                return ResponseEntity.badRequest().body("viTime 형식이 잘못되었습니다.");
-            }
-        } else {
-            System.err.println("viTime이 null이거나 빈 값입니다.");
-            return ResponseEntity.badRequest().body("viTime은 필수입니다.");
+        // viTime 처리
+        LocalDateTime viTime = patientAdmissionDTO.getViTime(); // 클라이언트로부터 받은 viTime
+        if (viTime == null) {
+            System.err.println("viTime이 null입니다.");
+            return ResponseEntity.badRequest().body("{\"message\": \"viTime은 필수입니다.\"}");
         }
-
 
         // DTO 저장
         patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
-        return ResponseEntity.ok("환자가 진료 완료 상태로 등록되었습니다.");
+        return ResponseEntity.ok("{\"message\": \"환자가 진료 완료 상태로 등록되었습니다.\"}");
     }
-
 
 
 

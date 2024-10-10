@@ -178,16 +178,16 @@
         </div>
     </div>
 
-    <div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="completeModal" tabindex="-1" role="dialog" aria-labelledby="completeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="completeModalLabel">진료 완료</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>선택된 환자의 진료를 완료하시겠습니까?</p>
                     <p id="patientInfo"></p>
+                    <p>진료완료로 이동 하시겠습니까?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="confirmCompleteButton">예</button>
