@@ -12,7 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Log4j2
 @Service
-public class MaterialRegisterImpl implements MaterialRegisterService {
+public class MaterialRegisterServiceImpl implements MaterialRegisterService {
 
     private final MaterialRegisterRepository materialRepository;
     private final CompanyRegisterRepository companyRepository;
@@ -28,13 +28,17 @@ public class MaterialRegisterImpl implements MaterialRegisterService {
 
     @Override
     public List<MaterialRegister> getAllMaterial() {
-        return materialRepository.findAll();
+        return materialRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(MaterialRegister::getFirstRegisterDate).reversed())
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<MaterialDTO> getAllMaterialsWithCompany() {
         List<MaterialRegister> materials = materialRepository.findAll();
         return materials.stream()
+                .sorted(Comparator.comparing(MaterialRegister::getFirstRegisterDate).reversed())
                 .map(material -> new MaterialDTO(material)) // MaterialDTO로 변환
                 .collect(Collectors.toList());
     }
@@ -69,17 +73,26 @@ public class MaterialRegisterImpl implements MaterialRegisterService {
 
     // 업체명으로 검색
     public List<MaterialRegister> searchByCompanyName(String companyName) {
-        return materialRepository.findByCompanyRegisterCompanyNameContaining(companyName);
+        return materialRepository.findByCompanyRegisterCompanyNameContaining(companyName)
+                .stream()
+                .sorted(Comparator.comparing(MaterialRegister::getFirstRegisterDate).reversed())
+                .collect(Collectors.toList());
     }
 
     // 재료명으로 검색
     public List<MaterialRegister> searchByMaterialName(String materialName) {
-        return materialRepository.findByMaterialNameContaining(materialName);
+        return materialRepository.findByMaterialNameContaining(materialName)
+                .stream()
+                .sorted(Comparator.comparing(MaterialRegister::getFirstRegisterDate).reversed())
+                .collect(Collectors.toList());
     }
 
     // 업체명과 재료명으로 검색
     public List<MaterialRegister> searchByCompanyNameAndMaterialName(String companyName, String materialName) {
-        return materialRepository.findByCompanyRegisterCompanyNameContainingAndMaterialNameContaining(companyName, materialName);
+        return materialRepository.findByCompanyRegisterCompanyNameContainingAndMaterialNameContaining(companyName, materialName)
+                .stream()
+                .sorted(Comparator.comparing(MaterialRegister::getFirstRegisterDate).reversed())
+                .collect(Collectors.toList());
     }
 
     public boolean isNewMaterial(String materialCode) {

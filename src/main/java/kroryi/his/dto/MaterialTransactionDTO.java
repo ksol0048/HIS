@@ -3,6 +3,7 @@ package kroryi.his.dto;
 import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -38,6 +39,10 @@ public class MaterialTransactionDTO {
     //재료코드
     private String materialCode;
 
+    //최초등록일
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate firstRegisterDate;
+
     //업체코드
     private String companyCode;
 
@@ -54,7 +59,7 @@ public class MaterialTransactionDTO {
         this.stockOut = materialTransactionRegister.getStockOut();
         this.remainingStock = materialTransactionRegister.getRemainingStock();
         this.belowSafetyStock = materialTransactionRegister.isBelowSafetyStock();
-
+        this.firstRegisterDate = materialTransactionRegister.getMaterialRegister().getFirstRegisterDate();
         // MaterialRegister가 null이 아닌 경우에만 데이터 설정
         if (materialTransactionRegister.getMaterialRegister() != null) {
             this.materialCode = materialTransactionRegister.getMaterialRegister().getMaterialCode();

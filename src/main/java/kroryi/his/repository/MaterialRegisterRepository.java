@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MaterialRegisterRepository extends JpaRepository<MaterialRegister, String> {
-    @Query("SELECT m FROM MaterialRegister m JOIN FETCH m.companyRegister")
-    List<MaterialRegister> findByMaterialNameContainingIgnoreCase(String materialName);
 
     boolean existsByMaterialCode(String materialCode);
 

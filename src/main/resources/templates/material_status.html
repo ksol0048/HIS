@@ -1,76 +1,77 @@
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org">
-    <div class="card m-2 mb-1">
-        <div class="card-header text-center">
-            재료 현황 보기
-        </div>
-        <div class="card-body">
-            <!-- 검색 필드 -->
-            <div class="search-box">
-                <div class="row row-gap">
-                    <div class="col-md-2 mb-3">
-                        <label for="referenceDate" class="form-label">최초등록일자</label>
-                        <input type="date" class="form-control" name="referenceDate" id="referenceDate">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="oneCompanyName" class="form-label">업체명</label>
-                        <input type="text" class="form-control" name="companyName" id="oneCompanyName"
-                               placeholder="업체명 입력">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="materialCategory" class="form-label">재료명</label>
-                        <input type="text" class="form-control" name="materialCategory" id="materialCategory"
-                               placeholder="재료명 입력">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="belowSafetyStock" class="form-label">안전재고량 미달품목</label>
-                        <select class="form-select" id="belowSafetyStock" name="belowSafetyStock">
-                            <option value="">전체</option>
-                            <option value="yes">예</option>
-                            <option value="no">아니오</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label for="stockManagementItem" class="form-label">재고관리품목</label>
-                        <select class="form-select" name="stockManagementItem" id="stockManagementItem">
-                            <option value="">전체</option>
-                            <option value="yes">예</option>
-                            <option value="no">아니오</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3 align-bottom">
-                        <button type="button" class="btn btn-primary mt-4" onclick="oneSearch()">검색
-                        </button>
-                        <button type="reset" class="btn btn-secondary mt-4">초기화</button>
-                    </div>
+<div class="card m-2 mb-1">
+    <div class="card-header text-center">
+        재료 현황 보기
+    </div>
+    <div class="card-body">
+        <!-- 검색 필드 -->
+        <div class="search-box">
+            <div class="row row-gap">
+                <div class="col-md-2 mb-3">
+                    <label for="referenceDate" class="form-label">최초등록일자</label>
+                    <input type="date" class="form-control" name="referenceDate" id="referenceDate">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="oneCompanyName" class="form-label">업체명</label>
+                    <input type="text" class="form-control" name="companyName" id="oneCompanyName"
+                           placeholder="업체명 입력">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="materialCategory" class="form-label">재료명</label>
+                    <input type="text" class="form-control" name="materialCategory" id="materialCategory"
+                           placeholder="재료명 입력">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="belowSafetyStock" class="form-label">안전재고량 미달품목</label>
+                    <select class="form-select" id="belowSafetyStock" name="belowSafetyStock">
+                        <option value="">전체</option>
+                        <option value="yes">예</option>
+                        <option value="no">아니오</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="stockManagementItem" class="form-label">재고관리품목</label>
+                    <select class="form-select" name="stockManagementItem" id="stockManagementItem">
+                        <option value="">전체</option>
+                        <option value="yes">예</option>
+                        <option value="no">아니오</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3 align-bottom">
+                    <button type="button" class="btn btn-primary mt-4" onclick="oneSearch()">검색
+                    </button>
+                    <button type="reset" class="btn btn-secondary mt-4">초기화</button>
                 </div>
             </div>
+        </div>
 
-            <!-- 재료 목록 테이블 -->
-            <div class="fixed-box">
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>최초등록일자</th>
-                        <th>재료코드</th>
-                        <th>재료명</th>
-                        <th>단위</th>
-                        <th>현재고량</th>
-                        <th>잔량</th>
-                        <th>안전재고량</th>
-                        <th>안전재고량 미달여부</th>
-                        <th>재고관리여부</th>
-                        <th>업체명</th>
-                    </tr>
-                    </thead>
-                    <tbody id="materialStatusList">
-                    <!-- 재료 데이터가 여기에 추가됩니다 -->
-                    <tr>
-                        <td colspan="11">현재 등록된 재료가 없습니다.</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- 재료 목록 테이블 -->
+        <div class="fixed-box">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>최초등록일자</th>
+                    <th>재료코드</th>
+                    <th>재료명</th>
+                    <th>단위</th>
+                    <th>현재고량</th>
+                    <th>잔량</th>
+                    <th>안전재고량</th>
+                    <th>안전재고량 미달여부</th>
+                    <th>재고관리여부</th>
+                    <th>업체명</th>
+                </tr>
+                </thead>
+                <tbody id="materialStatusList">
+                <!-- 재료 데이터가 여기에 추가됩니다 -->
+                <tr>
+                    <td colspan="11">현재 등록된 재료가 없습니다.</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
+    <script src="/js/material_status.js"></script>
+</div>

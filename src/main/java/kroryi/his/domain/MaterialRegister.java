@@ -57,6 +57,14 @@ public class MaterialRegister {
     @Column(name = "first_Register_Date")
     private LocalDate firstRegisterDate;
 
+    @PrePersist
+    public void prePersist() {
+        if (this.firstRegisterDate == null) {
+            this.firstRegisterDate = LocalDate.now();
+        }
+    }
+
+
 
 
 }
