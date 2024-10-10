@@ -4,12 +4,15 @@ import kroryi.his.domain.PatientAdmission;
 import kroryi.his.dto.PatientAdmissionDTO;
 import kroryi.his.service.PatientAdmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
@@ -70,19 +73,36 @@ public class PatientAdmissionController {
     public ResponseEntity<String> completed(@RequestBody PatientAdmissionDTO patientAdmissionDTO) {
         System.out.println("진료 완료 요청 수신: " + patientAdmissionDTO);
 
-
+        // 진료 완료 시간 처리
+        LocalDateTime completionTime = LocalDateTime.now();
         patientAdmissionDTO.setCompletionTime(LocalDateTime.now());
         patientAdmissionDTO.setTreatStatus("3");
 
-        String viTime = String.valueOf(patientAdmissionDTO.getViTime());
-        if(viTime != null){
-            patientAdmissionDTO.setViTime(LocalDateTime.parse(viTime));
+        // viTime 처리 (LocalDateTime으로 수신 시 별도 처리 필요 없음)
+        String viTime = String.valueOf(patientAdmissionDTO.getViTime()); // 클라이언트로부터 받은 viTime
+        if (viTime != null && !viTime.isEmpty()) {
+            try {
+                // 'HH:mm' 형식으로 viTime을 LocalTime으로 변환
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+                LocalTime parsedViTime = LocalTime.parse(viTime, formatter); // LocalTime 사용
+                patientAdmissionDTO.setViTime(LocalDateTime.from(parsedViTime));
+            } catch (DateTimeParseException e) {
+                System.err.println("viTime 형식이 잘못되었습니다: " + viTime);
+                return ResponseEntity.badRequest().body("viTime 형식이 잘못되었습니다.");
+            }
+        } else {
+            System.err.println("viTime이 null이거나 빈 값입니다.");
+            return ResponseEntity.badRequest().body("viTime은 필수입니다.");
         }
 
-        patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
 
+        // DTO 저장
+        patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
         return ResponseEntity.ok("환자가 진료 완료 상태로 등록되었습니다.");
     }
+
+
+
 
 
     @GetMapping("/date/{date}")
