@@ -115,3 +115,64 @@ li {
 li button {
     margin-left: 10px;
 }
+
+.icon-button {
+    background: none;
+    border: none;
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.icon-button i {
+    font-size: 20px; /* Icon size */
+}
+
+.icon-button:hover {
+    transform: scale(1.1);
+}
+
+.card {
+    border-radius: 10px; /* 카드 모서리 둥글게 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 가벼운 그림자 */
+}
+
+td, th {
+    text-align: center;
+    padding: 8px;
+}
+/* 모달 다이얼로그의 최대 너비를 설정하여 화면 크기에 맞게 조절 */
+.modal-dialog {
+    max-width: 90%; /* 화면의 90% 너비까지 허용 */
+    margin: 1.75rem auto; /* 수직 중앙 배치 */
+}
+
+/* 모달 바디가 너무 길 경우 스크롤 추가 */
+.modal-body {
+    max-height: 70vh; /* 화면 높이의 70%를 최대 높이로 설정 */
+    overflow-y: auto; /* 수직 스크롤 가능 */
+}
+
+.table {
+    --bs-table-bg: var(--body-background-color) /* 기본 배경색을 투명으로 설정 */
+}
+
+/* 선택된 행의 배경색 */
+#patientTable tbody tr.selected {
+    background-color: #afefeb !important; /* 선택된 행의 배경색 */
+}
+
+
+
+
+.reservationTableListNumber {
+    display:none;
+}
+
+.index-number {
+    display:none;
+}
