@@ -1,234 +1,371 @@
 <!--진료예약-->
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout.html}">
+<html lang="en">
 
-<div layout:fragment="reservation">
-    <div class="row d-flex justify-content-center" style="padding: 0 200px 0 200px">
-        <!-- 왼쪽 구간 (캘린더) -->
-        <div class="col-4">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 
-            <!-- 캘린더 구간 -->
-            <div class="calendar">
-                <div class="calendar-header">
-                    <button onclick="prevMonth()">이전</button>
-                    <span id="monthYear"></span>
-                    <button onclick="nextMonth()">다음</button>
-                </div>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>일</th>
-                        <th>월</th>
-                        <th>화</th>
-                        <th>수</th>
-                        <th>목</th>
-                        <th>금</th>
-                        <th>토</th>
-                    </tr>
-                    </thead>
-                    <tbody id="calendar-body">
+    <link rel="stylesheet" href="./css.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/cerulean/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 
-                    </tbody>
-                </table>
+
+</head>
+
+<body>
+
+<!-- 상단 네비바 -->
+<nav class="navbar navbar-expand-lg bg-dark py-1" data-bs-theme="dark"></nav>
+<div class="container-fluid">
+    <a class="navbar-brand" href="home">HIS 병원업무관리시스템</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor02"
+            aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarColor02">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="admin_management" id="admin_management">
+                    <i class="bi bi-gear"></i>사용자관리
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+</nav>
+<div class="card m-2"></div>
+<div class="card-header">
+    <strong>MENU</strong>
+</div>
+<div class="card-body bg-light p-3"> <!-- 배경색을 밝게 수정 -->
+    <div class="col d-flex justify-content-center">
+        <!-- 첫 번째 박스 -->
+        <div class="row d-flex flex-fill">
+            <div id="patientInfo" class="col">
             </div>
-
-            <!-- 예약목록, 개인 예약 현황 구간 -->
-            <div class="d-flex" style="margin-top: 10px">
-                <button class="button_test_1" type="button">예약 목록</button>
-                <button class="button_test_2" type="submit">개인 예약 현황</button>
-            </div>
-
-            <!-- 해당 날짜 테이블 ? -->
-            <table id="reservationTable" class="table table-hover">
-                <thead>
-                <tr>
-                    <th style="width: 5%;"></th>
-                    <th style="width: 20%;">시간</th>
-                    <th style="width: 25%;">환자이름</th>
-                    <th style="width: 50%;">내용</th>
-                </tr>
-                </thead>
-                <tbody id="reservation-body">
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 중앙 구간 (예약 목록) -->
-        <div class="col-4" style="padding: 20px 50px 20px 50px !important;">
-            <div class="container">
-                <h2>예약</h2>
-                <div class="form-group">
-                    <label for="reservation-date">예약일자</label>
-                    <input type="date" id="reservation-date" name="reservation-date">
-                </div>
-
-                <div class="form-group">
-                    <label class="reservation-status">예약 종류</label>
-                    <div class="row">
-                        <div><input type="radio" id="patient-reservation" name="reservation-status"> 환자예약</div>
-                        <div><input type="radio" id="other-reservation" name="reservation-status"> 그외예약</div>
-                        <div><input type="radio" id="registered-patient" name="patient-status"> 등록환자</div>
-                        <div><input type="radio" id="unregistered-patient" name="patient-status"> 미등록환자</div>
+            <div class="col d-flex align-self-center">
+                <div class="row mb-2">
+                    <div class="input-group col">
+                        <input type="text" class="form-control" id="patient_name_keyword" placeholder="환자성명 입력">
+                        <button type="button" class="btn btn-secondary" id="resetBtn">
+                            <i class="bi bi-x-circle" style="padding: 0.5rem;"></i>
+                        </button>
                     </div>
-                </div>
+                    <div class="col">
 
-                <div class="form-group">
-                    <label for="department">환자이름</label>
-                    <input type="text" id="department" name="department" value="덴탈">
-                </div>
+                        <button type="button" class="btn btn-primary" id="addReplyBtn" style="margin-left: 0.5rem;">
+                            <i class="bi bi-search" style="padding: 0.5rem;"></i>
+                        </button>
 
-                <div class="form-group">
-                    <label for="sms-notification">SMS 발송</label>
-                    <input type="checkbox" id="sms-notification" name="sms-notification" checked>
-                </div>
-
-                <div class="form-group">
-                    <label for="chart-number">차트번호</label>
-                    <input type="text" id="chart-number" name="chart-number" placeholder="00000000">
-                </div>
-
-                <div class="form-group">
-                    <label for="doctor">진료의사</label>
-                    <select id="doctor" name="doctor">
-                        <option value="유의태">유의태</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="treatment-type">치료유형</label>
-                    <select id="treatment-type" name="treatment-type">
-                        <option value="일반">일반</option>
-                        <option value="수술">수술</option>
-                        <option value="리콜">리콜</option>
-                        <option value="신환">신환</option>
-                    </select>
-                </div>
-
-<!--                <div class="form-group">-->
-<!--                    <label for="seat-number">치석</label>-->
-<!--                    <input type="text" id="seat-number" name="seat-number" placeholder="1-9">-->
-<!--                </div>-->
-
-                <div class="form-group">
-                    <label for="check-type">노트</label>
-                    <select id="check-type" name="check-type">
-                        <option value="check">check</option>
-                        <option value="1주 ck">1주 ck</option>
-                        <option value="2달뒤 check">2달뒤 check</option>
-                        <option value="3개월 정기검진">3개월 정기검진</option>
-                        <option value="6개월 정기검진">6개월 정기검진</option>
-                        <option value="ext">ext</option>
-                        <option value="dr">dr</option>
-                    </select>
-                </div>
-
-
-                <div class="form-group">
-                    <label for="color-select">Color 선택</label>
-                    <select id="color-select" name="color-select">
-                        <option></option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="reservation">예약 미이행</label>
-                    <div class="row">
-                        <div><input type="radio" name="C/A">C/A</div>
-                        <div><input type="radio" name="B/A">B/A</div>
                     </div>
-                </div>
-
-                <div class="btn-group">
-                    <button type="button" style="margin-bottom: 10px">저장</button>
-                    <button type="button" style="margin-bottom: 10px">닫기</button>
                 </div>
             </div>
         </div>
 
-        <!-- 오른쪽 구간 -->
-        <div class="col-4">
-            <div class="container mt-5">
-                <table>
-                    <thead>
-                    <tr>
-                        <th style="width: 50%;">진료명</th>
-                        <th style="width: 22%;">구분</th>
-                        <th style="width: 14%;">수정</th>
-                        <th style="width: 14%;">삭제</th>
-                    </tr>
-                    </thead>
-                </table>
-                <h5>이곳을 클릭하여 새로운 용어를 추가하세요.</h5>
-                <ul>
-                    <li>
-                        <div>check</div>
-                        <div>
-
-                            <button class="btn btn-outline-primary">✔</button>
-                            <button class="btn btn-outline-danger">✖</button>
-                        </div>
-                    </li>
-                    <li>
-                        <div>1주 ck</div>
-                        <div>
-
-                            <button class="btn btn-outline-primary">✔</button>
-                            <button class="btn btn-outline-danger">✖</button>
-                        </div>
-                    </li>
-                    <li>
-                        <div>2달뒤 check</div>
-                        <div>
-
-                            <button class="btn btn-outline-primary">✔</button>
-                            <button class="btn btn-outline-danger">✖</button>
-                        </div>
-                    </li>
-                    <li>
-                        <div>3개월 정기검진</div>
-                        <div>
-
-                            <button class="btn btn-outline-primary">✔</button>
-                            <button class="btn btn-outline-danger">✖</button>
-                        </div>
-                    </li>
-                    <li>
-                        <div>6개월 정기검진</div>
-                        <div>
-
-                            <button class="btn btn-outline-primary">✔</button>
-                            <button class="btn btn-outline-danger">✖</button>
-                        </div>
-                    </li>
-                    <li>
-                        <div>ext</div>
-                        <div>
-
-                            <button class="btn btn-outline-primary">✔</button>
-                            <button class="btn btn-outline-danger">✖</button>
-                        </div>
-                    </li>
-                    <li>
-                        <div>dr</div>
-                        <div>
-
-                            <button class="btn btn-outline-primary">✔</button>
-                            <button class="btn btn-outline-danger">✖</button>
-                        </div>
-                    </li>
-                    <!-- 나머지 항목도 동일한 패턴으로 추가 -->
-                </ul>
+        <!-- 두 번째 박스 -->
+        <div class="row d-flex flex-fill">
+            <div class="d-flex justify-content-center">
+                <a class="btn btn-primary m-2" href="patient_register" style="width: 100px;">
+                    <i class="bi bi-person-plus"></i><br> 환자등록
+                </a>
+                <a class="btn btn-primary m-2" href="reservation" style="width: 100px;">
+                    <i class="bi bi-calendar-check"></i><br> 예약
+                </a>
+                <a class="btn btn-primary m-2" href="reception" style="width: 100px;">
+                    <i class="bi bi-folder"></i><br> 진료접수
+                </a>
+                <a class="btn btn-primary m-2" href="medical_chart" style="width: 100px;">
+                    <i class="bi bi-file-earmark-medical"></i><br> 진료차트
+                </a>
+                <a class="btn btn-primary m-2" href="inventory_management" style="width: 100px;">
+                    <i class="bi bi-box-seam"></i><br> 재고관리
+                </a>
+                <a class="btn btn-primary m-2" href="inventory_management" style="width: 100px;">
+                    <i class="bi bi-file-medical"></i><br> 보험청구
+                </a>
             </div>
         </div>
     </div>
 </div>
 
+</div>
+<div class="modal SearchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">환자 정보</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="patientTable" class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">이름</th>
+                        <th scope="col">나이</th>
+                        <th scope="col">성별</th>
+                        <th scope="col">차트번호</th>
+                        <th scope="col">생일</th>
+                        <th scope="col">휴대전화</th>
+                    </tr>
+                    </thead>
+                    <tbody id="patientTableBody">
+                    <!-- Rows will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary SearchBtn">확인</button>
+                <button type="button" class="btn btn-outline-dark closeBtn">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script layout:fragment="reservationscript" th:inline="javascript">
+<div class="row d-flex justify-content-center" style="padding: 0 200px 0 200px">
+    <!-- 왼쪽 구간 (캘린더) -->
+    <div class="col-4">
+
+        <!-- 캘린더 구간 -->
+        <div class="calendar">
+            <div class="calendar-header">
+                <button onclick="prevMonth()">이전</button>
+                <span id="monthYear"></span>
+                <button onclick="nextMonth()">다음</button>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>일</th>
+                    <th>월</th>
+                    <th>화</th>
+                    <th>수</th>
+                    <th>목</th>
+                    <th>금</th>
+                    <th>토</th>
+                </tr>
+                </thead>
+                <tbody id="calendar-body">
+
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 예약목록, 개인 예약 현황 구간 -->
+        <div class="d-flex" style="margin-top: 10px">
+            <button class="button_test_1" type="button">예약 목록</button>
+            <button class="button_test_2" type="submit">개인 예약 현황</button>
+        </div>
+
+        <!-- 해당 날짜 테이블 ? -->
+        <table id="reservationTable" class="table table-hover">
+            <thead>
+            <tr>
+                <th style="width: 5%;"></th>
+                <th style="width: 20%;">시간</th>
+                <th style="width: 25%;">환자이름</th>
+                <th style="width: 50%;">내용</th>
+            </tr>
+            </thead>
+            <tbody id="reservation-body">
+            </tbody>
+        </table>
+
+        <!-- 날짜 선택시 환자 데이터가 들어올 테이블 -->
+        <table id="reservationTableList" class="table table-hover">
+
+        </table>
+    </div>
+
+    <!-- 중앙 구간 (예약 목록) -->
+    <div class="col-4" style="padding: 20px 50px 20px 50px !important;">
+        <div class="container">
+            <h2>예약</h2>
+            <div class="form-group">
+                <label for="reservation-date">예약일자</label>
+                <input type="date" id="reservation-date" name="reservation-date">
+            </div>
+
+            <div class="form-group">
+                <div>
+                    <div class="col-md-3">
+                        <label class="reservation-status">예약 종류</label>
+                    </div>
+                    <div class="col-md-9 d-flex flex-wrap">
+                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
+                            <div><input type="radio" id="patient-reservation" name="reservation-status">환자예약</div>
+                        </div>
+                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
+                            <div><input type="radio" id="other-reservation" name="reservation-status">그외예약</div>
+                        </div>
+                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
+                            <div><input type="radio" id="registered-patient" name="patient-status"> 등록환자</div>
+                        </div>
+                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
+                            <div><input type="radio" id="unregistered-patient" name="patient-status"> 미등록환자</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="department">환자이름</label>
+                <input type="text" id="department" name="department" value="덴탈">
+            </div>
+
+            <div class="form-group">
+                <label for="sms-notification">SMS 발송</label>
+                <input type="checkbox" id="sms-notification" name="sms-notification">
+            </div>
+
+            <div class="form-group">
+                <label for="chart-number">차트번호</label>
+                <input type="text" id="chart-number" name="chart-number" placeholder="00000000">
+            </div>
+
+            <div class="form-group">
+                <label for="doctor">진료의사</label>
+                <select id="doctor" name="doctor">
+                    <option value="유의태">유의태</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="treatment-type">치료유형</label>
+                <select id="treatment-type" name="treatment-type">
+                    <option value="일반">일반</option>
+                    <option value="수술">수술</option>
+                    <option value="리콜">리콜</option>
+                    <option value="신환">신환</option>
+                </select>
+            </div>
+
+            <!--                <div class="form-group">-->
+            <!--                    <label for="seat-number">치석</label>-->
+            <!--                    <input type="text" id="seat-number" name="seat-number" placeholder="1-9">-->
+            <!--                </div>-->
+
+            <div class="form-group">
+                <label>노트</label>
+                <input type="text" id="patient-note">
+            </div>
+
+
+            <div class="form-group">
+                <label for="color-select">Color 선택</label>
+                <select id="color-select" name="color-select">
+                    <option></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="reservation">예약 미이행</label>
+                <div class="row">
+                    <div><input type="radio" id="reservation-status-ca" name="reservation-status-ca">C/A</div>
+                    <div><input type="radio" id="reservation-status-ba" name="reservation-status-ba">B/A</div>
+                </div>
+            </div>
+
+            <!-- 삭제 수정과 신규를 구별하기 위한 인덱스 번호-->
+            <div class="index-number" id="index-number">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" onclick="saveUpdate()" style="margin-bottom: 10px">저장</button>
+                <button type="button" style="margin-bottom: 10px">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 오른쪽 구간 -->
+    <div class="col-4">
+        <div class="container mt-5">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width: 50%;">진료명</th>
+                    <th style="width: 22%;">구분</th>
+                    <th style="width: 14%;">수정</th>
+                    <th style="width: 14%;">삭제</th>
+                </tr>
+                </thead>
+            </table>
+            <h5>이곳을 클릭하여 새로운 용어를 추가하세요.</h5>
+            <ul>
+                <li>
+                    <div>check</div>
+                    <div>
+
+                        <button class="btn btn-outline-primary">✔</button>
+                        <button class="btn btn-outline-danger">✖</button>
+                    </div>
+                </li>
+                <li>
+                    <div>1주 ck</div>
+                    <div>
+
+                        <button class="btn btn-outline-primary">✔</button>
+                        <button class="btn btn-outline-danger">✖</button>
+                    </div>
+                </li>
+                <li>
+                    <div>2달뒤 check</div>
+                    <div>
+
+                        <button class="btn btn-outline-primary">✔</button>
+                        <button class="btn btn-outline-danger">✖</button>
+                    </div>
+                </li>
+                <li>
+                    <div>3개월 정기검진</div>
+                    <div>
+
+                        <button class="btn btn-outline-primary">✔</button>
+                        <button class="btn btn-outline-danger">✖</button>
+                    </div>
+                </li>
+                <li>
+                    <div>6개월 정기검진</div>
+                    <div>
+
+                        <button class="btn btn-outline-primary">✔</button>
+                        <button class="btn btn-outline-danger">✖</button>
+                    </div>
+                </li>
+                <li>
+                    <div>ext</div>
+                    <div>
+
+                        <button class="btn btn-outline-primary">✔</button>
+                        <button class="btn btn-outline-danger">✖</button>
+                    </div>
+                </li>
+                <li>
+                    <div>dr</div>
+                    <div>
+
+                        <button class="btn btn-outline-primary">✔</button>
+                        <button class="btn btn-outline-danger">✖</button>
+                    </div>
+                </li>
+                <!-- 나머지 항목도 동일한 패턴으로 추가 -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
     const monthYear = document.getElementById('monthYear');
     const calendarBody = document.getElementById('calendar-body');
     let currentDate = new Date();
@@ -250,6 +387,7 @@
 
             for (let j = 0; j < 7; j++) {
                 const cell = document.createElement('td');
+                cell.classList.add('calendarDate');
                 if (i === 0 && j < firstDay) {
                     cell.innerHTML = '';
                 } else if (date > lastDate) {
@@ -263,7 +401,324 @@
 
             calendarBody.appendChild(row);
         }
+
+        // 은총 START
+
+
+        // 캘린더 날짜 선택시 오늘 날짜 정보 받아오기
+        document.querySelectorAll('.calendarDate').forEach(function (calendarDate) {
+            calendarDate.addEventListener('click', function () {
+                // 클릭된 날짜의 텍스트 가져오기
+                const day = this.textContent;
+
+                // 저장한 날짜 텍스트, 날짜 형식으로 재변환
+                const selectedDate = `${year}-${month + 1}-${day}`;
+
+                fetch('http://localhost:8080/home/api/main/selectedDatePatientList', {
+                    method: 'POST', // POST 요청
+                    headers: {
+                        'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
+                    },
+                    body: JSON.stringify({
+                        reservationDate: selectedDate
+                    }) // JSON 객체로 전송
+                })
+                    .then(response => {
+                        // 응답 상태가 성공적인 경우 JSON으로 변환
+                        if (!response.ok) {
+                            throw new Error('네트워크 응답이 실패했습니다.');
+                        }
+                        return response.json(); // JSON 데이터로 변환
+                    })
+                    .then(data => {
+                        // 환자 데이터가 들어갈 ID값 보관
+                        const tableBody = document.querySelector('#reservationTableList');
+
+                        // 테이블의 기존 데이터를 지우고 새 데이터를 추가
+                        // 해당 작업은 다른 날짜를 클릭했을때 기존 내용을 지워야 하기 때문임
+                        tableBody.innerHTML = ''; // 기존 내용 제거
+
+                        // 데이터 배열을 순회하여 테이블에 추가
+                        data.forEach(item => {
+                            const row = document.createElement('tr'); // 새로운 행 생성
+                            row.id = 'reservationTableListParent'; // ID 추가
+                            row.innerHTML = `
+    <td>${item.reservationDate}</td>
+    <td>${item.department}</td>
+    <td>${item.patientNote}</td>
+    <td class="reservationTableListNumber">${item.seq}</td>
+`; // 각 열에 데이터 삽입
+
+                            //
+                            row.onclick = function () {
+                                selectList(item.seq);
+                            };
+
+                            tableBody.appendChild(row); // tbody에 행 추가
+                        });
+                    })
+                    .catch(error => {
+                        // 에러 처리
+                        console.error('에러 발생:', error);
+                    });
+            });
+        });
+
+
+
     }
+
+    // 예약 목록에서 환자 정보를 눌렀을때 데이터 받아온 뒤 수정 가능한 화면 만들기
+
+    function selectList(indexNumber) {
+
+        // 보낼 데이터 객체로 변환
+        const data = {
+            seq: indexNumber
+        };
+
+        // 서버로 객체 전송
+        fetch('http://localhost:8080/home/api/main/selectedByReservation', {
+            method: 'POST', // POST 요청
+            headers: {
+                'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
+            },
+            body: JSON.stringify(data) // JSON 객체로 전송
+        })
+            .then(response => response.json()) // 응답을 JSON으로 변환
+            .then(responseData => {
+                console.log('서버 응답 데이터:', responseData); // 서버의 응답 데이터 출력
+
+                // 새로운 예약 정보를 새로 불러와야 하기 때문에 기존 값 전부 삭제
+
+                // 예약 날짜
+                const reservationDateElement = document.getElementById('reservation-date');
+                reservationDateElement.value = '';
+
+                // 예약 종류 - 환자 예약
+                const patientReservationElement = document.getElementById('patient-reservation');
+                patientReservationElement.checked = false;
+
+                // 예약 종류 - 그외 예약
+                const otherReservationElement = document.getElementById('other-reservation');
+                otherReservationElement.checked = false;
+
+                // 예약 종류 - 환자 예약
+                const registeredPatientElement = document.getElementById('registered-patient');
+                registeredPatientElement.checked = false;
+
+                // 예약 종류 - 환자 예약
+                const unregisteredPatientElement = document.getElementById('unregistered-patient');
+                unregisteredPatientElement.checked = false;
+
+                // 환자이름
+                const departmentElement = document.getElementById('department');
+                departmentElement.value = '';
+
+                // 예약 종류 - 환자 예약
+                const smsNotificationElement = document.getElementById('sms-notification');
+                smsNotificationElement.checked = false;
+
+                // 차트번호
+                const chartNumberElement = document.getElementById('chart-number');
+                chartNumberElement.value = '';
+
+                // 노트
+                const patientNoteElement = document.getElementById('patient-note');
+                patientNoteElement.value = '';
+
+                // 예약 미이행 - B/A
+                const reservationStatusCaElement = document.getElementById('reservation-status-ca');
+                reservationStatusCaElement.checked = false;
+
+                // 예약 미이행 - B/A
+                const reservationStatusBaElement = document.getElementById('reservation-status-ba');
+                reservationStatusBaElement.checked = false;
+
+                // 인덱스
+                const indexNumberElement = document.getElementById('index-number');
+                indexNumberElement.value = '';
+
+
+                // 받아온 데이터로 데이터 새로 등록
+
+                // 예약 날짜
+                if (reservationDateElement && responseData.length > 0) {
+                    reservationDateElement.value = responseData[0].reservationDate;
+                }
+
+                // 예약 종류 - 예약
+                if (patientReservationElement && otherReservationElement && responseData.length > 0) {
+                    if (responseData[0].reservationstatus == "patient") {
+                        patientReservationElement.checked = true;
+                    }
+                    else {
+                        otherReservationElement.checked = true;
+                    }
+                }
+
+                // 예약 종류 - 환자
+                if (registeredPatientElement && unregisteredPatientElement && responseData.length > 0) {
+                    if (responseData[0].patientStatus == "registered") {
+                        registeredPatientElement.checked = true;
+                    }
+                    else {
+                        unregisteredPatientElement.checked = true;
+                    }
+                }
+
+                // 환자 이름
+                if (departmentElement && responseData.length > 0) {
+                    departmentElement.value = responseData[0].department;
+                }
+
+                // SMS 발송
+                if (smsNotificationElement && responseData.length > 0) {
+                    if (responseData[0].smsNotification) {
+                        smsNotificationElement.checked = true;
+                    }
+                    else {
+                        smsNotificationElement.checked = false;
+                    }
+                }
+
+                // 차트 번호
+                if (chartNumberElement && responseData.length > 0) {
+                    chartNumberElement.value = responseData[0].chartNumber;
+                }
+
+                // 노트
+                if (patientNoteElement && responseData.length > 0) {
+                    patientNoteElement.value = responseData[0].patientNote;
+                }
+
+                // 예약 미이행
+                if (reservationStatusCaElement && reservationStatusBaElement && responseData.length > 0) {
+                    if (responseData[0].reservationStatusCheck == "ca") {
+                        reservationStatusCaElement.checked = true;
+                    }
+                    else {
+                        reservationStatusBaElement.checked = true;
+                    }
+                }
+
+                // 인덱스 번호
+                if (indexNumberElement && responseData.length > 0) {
+                    indexNumberElement.innerHTML = responseData[0].seq;
+                }
+
+            })
+            .catch(error => {
+                console.error('에러 발생:', error); // 에러 처리
+            });
+    }
+
+
+    // 저장 버튼 눌렀을 때 업데이트 혹은 저장이 이루어지게 하기
+    function saveUpdate() {
+
+        // 에약 일자
+        let reservationDate = document.getElementById('reservation-date').value;
+
+        // 에약 종류 - 예약 상태
+        let reservationstatus = "";
+        if (document.getElementById('patient-reservation').checked) {
+            reservationstatus = "patient";
+        }
+
+        else {
+            reservationstatus = "other";
+        }
+
+        // 에약 종류 - 예약 환자
+        let patientStatus = "";
+        if (document.getElementById('registered-patient').checked) {
+            patientStatus = "registered";
+        }
+
+        else {
+            patientStatus = "unregistered";
+        }
+
+        // 환자 이름
+        let department = document.getElementById('department').value;
+
+        // SMS 발송 허용 여부
+        let smsNotification = "";
+        if (document.getElementById('sms-notification').checked) {
+            smsNotification = "true";
+        }
+        else {
+            smsNotification = "false";
+        }
+
+        // 차트 번호
+        let chartNumber = document.getElementById('chart-number').value;
+
+        // 환자 노트
+        let patientNote = document.getElementById('patient-note').value;
+
+        // 예약 미이행
+        let reservationStatusCheck = "";
+        if (document.getElementById('reservation-status-ca').checked) {
+            reservationStatusCheck = "ca";
+        }
+        else {
+            reservationStatusCheck = "ba";
+        }
+
+        let indexNumber = document.getElementById('index-number').innerHTML.trim();
+
+        // 보낼 데이터 객체로 변환
+        const data = {
+            reservationDate: reservationDate,
+            reservationstatus: reservationstatus,
+            patientStatus: patientStatus,
+            department: department,
+            smsNotification: smsNotification,
+            chartNumber: chartNumber,
+            patientNote: patientNote,
+            reservationStatusCheck: reservationStatusCheck
+        };
+
+        //
+        //
+        // 여기서 값 없는거 찾아서 되돌리는 alert 만들어야 함
+        //
+        //
+
+
+        // 인덱스 번호가 있는 경우 수정
+        if (indexNumber) {
+            // 인덱스 번호가 있기 때문에 객체에 seq(인덱스 번호) 값 추가
+            data.seq = indexNumber;
+
+            // 서버에 데이터 값 보내주기
+            fetch('http://localhost:8080/home/main/insertReservationInformation', {
+                method: 'POST', // POST 요청
+                headers: {
+                    'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
+                },
+                body: JSON.stringify(data) // JSON 객체로 전송
+            })
+        }
+
+        // 인덱스 번호가 없는 경우 추가
+        else {
+            // 서버에 데이터 값 보내주기
+            fetch('http://localhost:8080/home/main/insertReservationInformation', {
+                method: 'POST', // POST 요청
+                headers: {
+                    'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
+                },
+                body: JSON.stringify(data) // JSON 객체로 전송
+            })
+        }
+
+        return;
+    }
+
+    // 은총 END
 
     function prevMonth() {
         currentDate.setMonth(currentDate.getMonth() - 1);
@@ -277,3 +732,5 @@
 
     renderCalendar();
 </script>
+
+</html>
