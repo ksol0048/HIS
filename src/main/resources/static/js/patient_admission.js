@@ -267,10 +267,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 환자 이름과 확인 메시지 설정
         console.log("모달 열기 직전 환자 이름:", paName);
-        const patientInfo = document.getElementById('patientInfo');
-        console.log("모달에서 표시할 patientInfo 요소:", patientInfo);
-        patientInfo.textContent = `환자: ${paName}`; // 환자 이름과 함께 메시지 표시
-        console.log("환자 정보가 설정되었습니다:", patientInfo.textContent);
+        const completeInfo = document.getElementById('completeInfo');
+        console.log("모달에서 표시할 patientInfo 요소:", completeInfo);
+        completeInfo.textContent = `환자: ${paName}`; // 환자 이름과 함께 메시지 표시
+        console.log("환자 정보가 설정되었습니다:", completeInfo.textContent);
 
         // 모달 보이기
         const completeModal = new bootstrap.Modal(document.getElementById('completeModal'));
@@ -278,8 +278,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const confirmCompleteButton = document.getElementById("confirmCompleteButton");
         confirmCompleteButton.onclick = function () {
-            // 현재 시간으로 completionTime 생성 (ISO 8601 형식)
-            const completionTime = new Date().toISOString(); // ISO 형식으로 변환
+            // 현재 시간으로 completionTime 생성 (UTC+9로 조정)
+            const now = new Date(); // 현재 시간 가져오기
+            const utcOffset = 9 * 60 * 60 * 1000; // 9시간을 밀리초로 변환
+            const completionTime = new Date(now.getTime() + utcOffset).toISOString(); // UTC+9로 변환하여 ISO 형식으로 변환
             console.log("진료 완료 시간:", completionTime);
 
             // DB에 저장할 데이터 준비
@@ -310,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         });
                     }
 
-                    // 진료 완료 후 환자 정보를 테이블에 추가
+                    // 진료 완료 후 환자 정보를 진료 완료 테이블에 추가
                     addPatientToCompleteTable({
                         chartNum: chartNum,
                         paName: paName,
@@ -326,18 +328,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     // 진료 중 세션에서 해당 환자 제거
                     const treatmentPatients = JSON.parse(sessionStorage.getItem('treatmentPatients')) || [];
                     const updatedTreatmentPatients = treatmentPatients.filter(patient => patient.chartNum !== chartNum);
+                    sessionStorage.setItem('treatmentPatients', JSON.stringify(updatedTreatmentPatients));
 
-                    // completionTime 추가하여 sessionStorage에 환자 정보 저장
-                    updatedTreatmentPatients.push({
+                    // 진료 완료 세션에 환자 추가
+                    const completedPatients = JSON.parse(sessionStorage.getItem('completedPatients')) || [];
+                    completedPatients.push({
                         chartNum,
                         paName,
                         selectedDoctor,
                         receptionTime: formattedReceptionTimeForDB,
-                        completionTime // 추가된 진료 완료 시간
+                        completionTime // 진료 완료 시간 추가 (UTC+9로 조정됨)
                     });
+                    sessionStorage.setItem('completedPatients', JSON.stringify(completedPatients));
 
-                    sessionStorage.setItem('treatmentPatients', JSON.stringify(updatedTreatmentPatients));
-
+                    // 대기 환자 수 업데이트
                     updateWaitingPatientCount();
                     alert("환자 진료가 완료되었습니다.");
                     completeModal.hide();
@@ -351,20 +355,16 @@ document.addEventListener("DOMContentLoaded", function () {
         // 모달이 닫힐 때 patientInfo 초기화
         const completeModalElement = document.getElementById('completeModal');
         completeModalElement.addEventListener('hidden.bs.modal', function () {
-            patientInfo.textContent = ''; // 모달이 닫힐 때 초기화
+            completeInfo.textContent = ''; // 모달이 닫힐 때 초기화
         });
     });
-
-
-
-
 
 
     const formatViTimeForDB = (timeString) => {
         if (!timeString) return null;
 
         // 예: '오후 03시 24분' 형식의 문자열
-        const timePattern = /^(오전|오후) (\d{1,2})시 (\d{1,2})분$/;
+        const timePattern = /^(오전|오후) (\d{1,2}):(\d{1,2})$/;
         const match = timeString.match(timePattern);
         if (!match) {
             console.error(`시간 형식이 잘못되었습니다: ${timeString}`);
@@ -393,7 +393,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!timeString) return null;
 
         // 예: '오후 04시 13분' 형식의 문자열
-        const timePattern = /^(오전|오후) (\d{1,2})시 (\d{1,2})분$/;
+        const timePattern = /^(오전|오후) (\d{1,2}):(\d{1,2})$/;
         const match = timeString.match(timePattern);
         if (!match) {
             console.error(`시간 형식이 잘못되었습니다: ${timeString}`);
@@ -532,7 +532,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const minutes = date.getMinutes().toString().padStart(2, '0');
         const amPm = hours >= 12 ? '오후' : '오전';
         hours = hours % 12 || 12; // 12시간 형식으로 변환
-        return `${amPm} ${hours.toString().padStart(2, '0')}시 ${minutes}분`;
+        return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`;
     };
 
 // 접수 시간을 포맷팅하는 함수
@@ -693,12 +693,12 @@ document.addEventListener("DOMContentLoaded", function () {
         completePatientCount++;
         console.log("Patient's reception time:", patient.receptionTime);
 
-        // 접수 시간 UTC+9로 변환
+        // 접수 시간 UTC+6으로 변환
         const formatReceptionTime = (dateTimeString) => {
             if (!dateTimeString || dateTimeString === 'N/A') return 'N/A';
             const date = new Date(dateTimeString);
-            // UTC+9 시간으로 조정
-            const utcOffset = 15 * 60 * 60 * 1000; // 9시간을 밀리초로 변환
+            // UTC+6 시간으로 조정
+            const utcOffset = 15 * 60 * 60 * 1000; // 6시간을 밀리초로 변환
             const convertedDate = new Date(date.getTime() + utcOffset);
 
             if (isNaN(convertedDate)) return 'N/A'; // 유효하지 않은 날짜 처리
@@ -710,8 +710,22 @@ document.addEventListener("DOMContentLoaded", function () {
             return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`;
         };
 
+        // 진료 완료 시간 UTC+15으로 변환
+        const formatCompleteTime = () => {
+            const now = new Date(); // 현재 시간 가져오기
+            // UTC+15 시간으로 조정
+            const utcOffset = 24 * 60 * 60 * 1000; // 15시간을 밀리초로 변환
+            const convertedDate = new Date(now.getTime() + utcOffset);
+
+            let hours = convertedDate.getHours();
+            const minutes = convertedDate.getMinutes().toString().padStart(2, '0');
+            const amPm = hours >= 12 ? '오후' : '오전';
+            hours = hours % 12 || 12;
+            return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`;
+        };
+
         const formattedReceptionTime = formatReceptionTime(patient.receptionTime);
-        const formattedCpTime = formatCurrentTime(new Date());
+        const formattedCpTime = formatCompleteTime();
 
         row.innerHTML = `
         <td>${completePatientCount}</td>
@@ -724,40 +738,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 완료 환자 수 업데이트
         updateCompletePatientCount();
-
-        // 서버에 완료된 진료 정보 전송 (예: API 호출)
-        const treatmentData = {
-            chartNum: patient.chartNum,
-            paName: patient.paName,
-            selectedDoctor: patient.selectedDoctor,
-            receptionTime: patient.receptionTime || new Date().toISOString(), // 기본값 설정
-            completeTime: new Date().toISOString() // 현재 시간으로 설정
-        };
-
     }
-    // 페이지 새로 고침 시 진료 중 환자 목록 복원
-    window.addEventListener('load', function() {
-        const treatmentPatients = JSON.parse(sessionStorage.getItem('treatmentPatients')) || [];
-        const treatmentPatientsTableBody = document.querySelector('#treatmentPatientsTable tbody'); // tbody 선택
 
-        treatmentPatients.forEach(patient => {
-            // 새 행 생성
-            const newRow = document.createElement('tr');
 
-            // 열 추가
-            newRow.innerHTML = `
-            <td>${treatmentPatientsTableBody.rows.length + 1}</td> <!-- completePatientCount -->
-            <td>${patient.chartNum || 'N/A'}</td>
-            <td>${patient.paName || 'N/A'}</td>
-            <td>${patient.selectedDoctor || 'N/A'}</td>
-            <td>${formatReceptionTimeForDB(patient.receptionTime) || 'N/A'}</td> <!-- receptionTime 변환 -->
-            <td>${patient.completionTime || 'N/A'}</td> <!-- completionTime 사용 -->
-        `;
 
-            // 테이블에 새 행 추가
-            treatmentPatientsTableBody.appendChild(newRow);
+    window.addEventListener('load', function () {
+        const completedPatients = JSON.parse(sessionStorage.getItem('completedPatients')) || [];
+
+        completedPatients.forEach(patient => {
+            const receptionTime = new Date(patient.receptionTime);
+            const adjustedReceptionTime = new Date(receptionTime);
+            // adjustedReceptionTime.setHours(adjustedReceptionTime.getHours() + 9);
+            const formattedReceptionTime = adjustedReceptionTime.toISOString();
+
+            // addPatientToCompleteTable 함수로 진료 완료 테이블에 환자 추가
+            addPatientToCompleteTable({
+                chartNum: patient.chartNum || 'N/A', // 차트 번호
+                paName: patient.paName || 'N/A', // 환자 이름
+                selectedDoctor: patient.selectedDoctor || 'N/A', // 담당 의사
+                receptionTime: formattedReceptionTime || 'N/A',
+                completionTime: patient.completionTime || 'N/A',// 진료 완료 시간
+                treatStatus: "3"
+            });
         });
     });
+
 
 
 
