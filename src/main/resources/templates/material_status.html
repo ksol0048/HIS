@@ -10,8 +10,8 @@
         <div class="search-box">
             <div class="row row-gap">
                 <div class="col-md-2 mb-3">
-                    <label for="referenceDate" class="form-label">최초등록일자</label>
-                    <input type="date" class="form-control" name="referenceDate" id="referenceDate">
+                    <label for="firstRegisterDate" class="form-label">최초등록일자</label>
+                    <input type="date" class="form-control" name="firstRegisterDate" id="firstRegisterDate">
                 </div>
                 <div class="col-md-2 mb-3">
                     <label for="oneCompanyName" class="form-label">업체명</label>
@@ -19,21 +19,21 @@
                            placeholder="업체명 입력">
                 </div>
                 <div class="col-md-2 mb-3">
-                    <label for="materialCategory" class="form-label">재료명</label>
-                    <input type="text" class="form-control" name="materialCategory" id="materialCategory"
+                    <label for="oneMaterialName" class="form-label">재료명</label>
+                    <input type="text" class="form-control" name="materialName" id="oneMaterialName"
                            placeholder="재료명 입력">
                 </div>
                 <div class="col-md-2 mb-3">
-                    <label for="belowSafetyStock" class="form-label">안전재고량 미달품목</label>
-                    <select class="form-select" id="belowSafetyStock" name="belowSafetyStock">
+                    <label for="oneBelowSafetyStock" class="form-label">최소보관수량 미달품목</label>
+                    <select class="form-select" id="oneBelowSafetyStock" name="belowSafetyStock">
                         <option value="">전체</option>
                         <option value="yes">예</option>
                         <option value="no">아니오</option>
                     </select>
                 </div>
                 <div class="col-md-2 mb-3">
-                    <label for="stockManagementItem" class="form-label">재고관리품목</label>
-                    <select class="form-select" name="stockManagementItem" id="stockManagementItem">
+                    <label for="oneStockManagementItem" class="form-label">재고관리품목</label>
+                    <select class="form-select" name="stockManagementItem" id="oneStockManagementItem">
                         <option value="">전체</option>
                         <option value="yes">예</option>
                         <option value="no">아니오</option>
@@ -57,9 +57,8 @@
                     <th>재료명</th>
                     <th>단위</th>
                     <th>현재고량</th>
-                    <th>잔량</th>
-                    <th>안전재고량</th>
-                    <th>안전재고량 미달여부</th>
+                    <th>최소보관수량</th>
+                    <th>최소보관수량 미달여부</th>
                     <th>재고관리여부</th>
                     <th>업체명</th>
                 </tr>
@@ -73,5 +72,6 @@
             </table>
         </div>
     </div>
-    <script src="/js/material_status.js"></script>
 </div>
+<script src="/js/material_status.js"></script>
+</html>

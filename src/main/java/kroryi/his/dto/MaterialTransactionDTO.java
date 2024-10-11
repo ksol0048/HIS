@@ -18,8 +18,11 @@ public class MaterialTransactionDTO {
     //입출아이디
     private Long transactionId;
 
-    //입출일자
-    private LocalDate transactionDate;
+    //입고일자
+    private LocalDate stockInDate;
+
+    //출고일자
+    private LocalDate stockOutDate;
 
     //입고량
     private Long stockIn;
@@ -27,11 +30,20 @@ public class MaterialTransactionDTO {
     //출고량
     private Long stockOut;
 
-    //잔량
+    //단위
+    private String materialUnit;
+
+    //현재고량
     private Long remainingStock;
+
+    //최소보관수량
+    private Long minQuantity;
 
     //안전재고량미달품목
     private boolean belowSafetyStock;
+
+    //재고관리품목 여부
+    private Boolean stockManagementItem;
 
     //재료명
     private String materialName;
@@ -54,16 +66,21 @@ public class MaterialTransactionDTO {
 
     public MaterialTransactionDTO(MaterialTransactionRegister materialTransactionRegister) {
         this.transactionId = materialTransactionRegister.getTransactionId();
-        this.transactionDate = materialTransactionRegister.getTransactionDate();
+        this.stockInDate = materialTransactionRegister.getStockInDate();
+        this.stockOutDate = materialTransactionRegister.getStockOutDate();
         this.stockIn = materialTransactionRegister.getStockIn();
         this.stockOut = materialTransactionRegister.getStockOut();
         this.remainingStock = materialTransactionRegister.getRemainingStock();
         this.belowSafetyStock = materialTransactionRegister.isBelowSafetyStock();
         this.firstRegisterDate = materialTransactionRegister.getMaterialRegister().getFirstRegisterDate();
+
         // MaterialRegister가 null이 아닌 경우에만 데이터 설정
         if (materialTransactionRegister.getMaterialRegister() != null) {
             this.materialCode = materialTransactionRegister.getMaterialRegister().getMaterialCode();
             this.materialName = materialTransactionRegister.getMaterialRegister().getMaterialName();
+            this.stockManagementItem = materialTransactionRegister.getMaterialRegister().isStockManagementItem();
+            this.materialUnit = materialTransactionRegister.getMaterialRegister().getMaterialUnit();
+            this.minQuantity = materialTransactionRegister.getMaterialRegister().getMinQuantity();
 
             // CompanyRegister가 null이 아닌 경우에만 데이터 설정
             if (materialTransactionRegister.getMaterialRegister().getCompanyRegister() != null) {
@@ -79,5 +96,4 @@ public class MaterialTransactionDTO {
             this.materialName = "N/A";
         }
     }
-
 }

@@ -45,14 +45,14 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
 
         // 중복 출납 데이터 존재 여부 확인
         Optional<MaterialTransactionRegister> existingTransaction = materialTransactionRepository
-                .findByTransactionDateAndMaterialRegister(materialTransactionDTO.getTransactionDate(), materialRegisterOpt.get());
+                .findBystockInDateAndMaterialRegister(materialTransactionDTO.getStockInDate(), materialRegisterOpt.get());
 
         if (existingTransaction.isPresent()) {
             throw new IllegalArgumentException("해당 날짜에 이미 출납 기록이 존재합니다.");
         }
 
         MaterialTransactionRegister transaction = new MaterialTransactionRegister();
-        transaction.setTransactionDate(materialTransactionDTO.getTransactionDate());
+        transaction.setStockInDate(materialTransactionDTO.getStockInDate());
         transaction.setMaterialRegister(materialRegisterOpt.get());
         transaction.setStockIn(materialTransactionDTO.getStockIn());
         transaction.setStockOut(materialTransactionDTO.getStockOut());
@@ -74,7 +74,7 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
         }
 
         MaterialTransactionRegister transaction = transactionOpt.get();
-        transaction.setTransactionDate(materialTransactionDTO.getTransactionDate());
+        transaction.setStockInDate(materialTransactionDTO.getStockInDate());
         transaction.setStockIn(materialTransactionDTO.getStockIn());
         transaction.setStockOut(materialTransactionDTO.getStockOut());
 

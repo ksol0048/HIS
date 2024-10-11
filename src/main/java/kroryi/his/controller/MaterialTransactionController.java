@@ -128,7 +128,7 @@ public class MaterialTransactionController {
     }
 
     // 재료 출납 목록 조회
-    @ApiOperation(value = "재료 출납 검색", notes = "입출일자, 재료명, 재료코드로 출납을 검색합니다.")
+    @ApiOperation(value = "재료 출납 검색", notes = "입고일자, 재료명, 재료코드로 출납을 검색합니다.")
     @GetMapping("/findTransaction")
     public ResponseEntity<List<MaterialTransactionDTO>> searchTransaction(
             @RequestParam(value = "transactionStartDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate transactionStartDate,

@@ -27,9 +27,13 @@ public class MaterialTransactionRegister {
     @Column(name = "transaction_Id")
     private Long transactionId;
 
-    //입출일자
-    @Column(name = "transaction_Date", nullable = false)
-    private LocalDate transactionDate;
+    //입고일자
+    @Column(name = "stock_in_date", nullable = false)
+    private LocalDate stockInDate;
+
+    //출고일자
+    @Column(name = "stock_out_date", nullable = false)
+    private LocalDate stockOutDate;
 
     //입고량
     @Column(name = "stock_In")

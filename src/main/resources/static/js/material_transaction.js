@@ -14,15 +14,14 @@ function populateTransactionForm(transaction) {
     clearTransactionForm();  // 새로운 선택 시 폼을 초기화
 
     document.getElementById('transactionId').value = transaction.transactionId || '';  // transactionId 설정
-    document.getElementById('transactionDate').value = transaction.transactionDate || '';
+    document.getElementById('stockInDate').value = transaction.stockInDate || '';
     document.getElementById('twoCompanyName').value = transaction.companyName || '';
     document.getElementById('twoMaterialName').value = transaction.materialName || '';
     document.getElementById('twoMaterialCode').value = transaction.materialCode || '';
     document.getElementById('stockIn').value = transaction.stockIn || 0;
-    document.getElementById('stockOut').value = transaction.stockOut || 0;
 
     // 필드 수정 불가능하게 설정
-    document.getElementById('transactionDate').readOnly = true;
+    document.getElementById('stockInDate').readOnly = true;
     document.getElementById('twoCompanyName').readOnly = true;
     document.getElementById('twoMaterialName').readOnly = true;
     document.getElementById('twoMaterialCode').readOnly = true;
@@ -39,15 +38,14 @@ function clearTransactionForm() {
     document.getElementById('twoMaterialName').value = '';
     document.getElementById('twoMaterialCode').value = '';
     document.getElementById('stockIn').value = 0;
-    document.getElementById('stockOut').value = 0;
 
-    // 필드를 다시 수정 가능하게 변경 (입출일자는 제외)
-    setReadOnlyFields(true);  // 입출일자는 항상 읽기 전용으로 유지
+    // 필드를 다시 수정 가능하게 변경 (입고일자는 제외)
+    setReadOnlyFields(true);  // 입고일자는 항상 읽기 전용으로 유지
 }
 
-// 필드를 읽기 전용으로 설정하는 함수 (입출일자는 항상 읽기 전용)
+// 필드를 읽기 전용으로 설정하는 함수 (입고일자는 항상 읽기 전용)
 function setReadOnlyFields(readOnly) {
-    document.getElementById('transactionDate').readOnly = true;  // 입출일자는 항상 읽기 전용
+    document.getElementById('stockInDate').readOnly = true;  // 입고일자는 항상 읽기 전용
     document.getElementById('twoCompanyName').readOnly = readOnly;
     document.getElementById('twoMaterialName').readOnly = readOnly;
     document.getElementById('twoMaterialCode').readOnly = readOnly;
@@ -56,7 +54,7 @@ function setReadOnlyFields(readOnly) {
 // 오늘 날짜를 설정하는 함수
 function setTodayDate() {
     const today = new Date().toISOString().split('T')[0];  // 오늘 날짜를 'YYYY-MM-DD' 형식으로 가져옴
-    document.getElementById('transactionDate').value = today;
+    document.getElementById('stockInDate').value = today;
 }
 
 // 페이지가 로드될 때, 그리고 저장/취소/삭제 후에 오늘 날짜로 설정
@@ -72,7 +70,7 @@ function loadTransactionList() {
         .then(response => response.json())
         .then(data => {
             // 데이터가 날짜 기준으로 내림차순(최근순)으로 정렬되도록 정렬
-            data.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+            data.sort((a, b) => new Date(b.stockInDate) - new Date(a.stockInDate));
 
             const tbody = document.getElementById('transactionList');
             tbody.innerHTML = '';  // 기존 테이블 내용 초기화
@@ -83,12 +81,11 @@ function loadTransactionList() {
                 data.forEach(transaction => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${transaction.transactionDate || 'N/A'}</td>
+                        <td>${transaction.stockInDate || 'N/A'}</td>
                         <td>${transaction.companyName || 'N/A'}</td>
                         <td>${transaction.materialName || 'N/A'}</td>
                         <td>${transaction.materialCode || 'N/A'}</td>
-                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 'N/A'}</td>
-                        <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 0}</td>
                         <td>${transaction.managerNumber || 'N/A'}</td>
                     `;
 
@@ -128,12 +125,11 @@ document.getElementById('addTransactionBtn').addEventListener('click', (event) =
 
     const transactionData = {
         transactionId: transactionId,
-        transactionDate: document.getElementById('transactionDate').value,
+        stockInDate: document.getElementById('stockInDate').value,
         materialCode: document.getElementById('twoMaterialCode').value,
         companyName: document.getElementById('twoCompanyName').value,
         materialName: document.getElementById('twoMaterialName').value,
-        stockIn: parseInt(document.getElementById('stockIn').value, 10),
-        stockOut: parseInt(document.getElementById('stockOut').value, 10)
+        stockIn: parseInt(document.getElementById('stockIn').value, 10)
     };
 
     fetch(url, {
@@ -242,14 +238,14 @@ function twoSearch() {
             const filteredData = data.filter(transaction => {
                 const matchesMaterialName = !materialName || transaction.materialName === materialName;
                 const matchesMaterialCode = !materialCode || transaction.materialCode === materialCode;
-                const matchesDateRange = (!transactionStartDate || new Date(transaction.transactionDate) >= new Date(transactionStartDate)) &&
-                    (!transactionEndDate || new Date(transaction.transactionDate) <= new Date(transactionEndDate));
+                const matchesDateRange = (!transactionStartDate || new Date(transaction.stockInDate) >= new Date(transactionStartDate)) &&
+                    (!transactionEndDate || new Date(transaction.stockInDate) <= new Date(transactionEndDate));
 
                 return matchesMaterialName && matchesMaterialCode && matchesDateRange;
             });
 
             // 데이터를 최근 날짜순으로 정렬
-            filteredData.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+            filteredData.sort((a, b) => new Date(b.stockInDate) - new Date(a.stockInDate));
 
             const tbody = document.getElementById('transactionList');
             tbody.innerHTML = ''; // 기존 테이블 내용 초기화
@@ -260,12 +256,11 @@ function twoSearch() {
                 filteredData.forEach(transaction => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${transaction.transactionDate || 'N/A'}</td>
+                        <td>${transaction.stockInDate || 'N/A'}</td>
                         <td>${transaction.companyName || 'N/A'}</td>
                         <td>${transaction.materialName || 'N/A'}</td>
                         <td>${transaction.materialCode || 'N/A'}</td>
-                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 'N/A'}</td>
-                        <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 0}</td>
                         <td>${transaction.managerNumber || 'N/A'}</td>
                     `;
                     tbody.appendChild(row);
@@ -293,7 +288,7 @@ function resetSearch() {
         .then(response => response.json())
         .then(data => {
             // 데이터를 날짜 기준으로 내림차순 정렬 (최근 날짜가 먼저 나오도록)
-            data.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+            data.sort((a, b) => new Date(b.stockInDate) - new Date(a.stockInDate));
 
             const tbody = document.getElementById('transactionList');
             tbody.innerHTML = '';  // 기존 행 제거
@@ -304,12 +299,11 @@ function resetSearch() {
                 data.forEach(transaction => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${transaction.transactionDate || 'N/A'}</td>
+                        <td>${transaction.stockInDate || 'N/A'}</td>
                         <td>${transaction.companyName || 'N/A'}</td>
                         <td>${transaction.materialName || 'N/A'}</td>
                         <td>${transaction.materialCode || 'N/A'}</td>
-                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 'N/A'}</td>
-                        <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+                        <td>${transaction.stockIn != null ? transaction.stockIn.toLocaleString() : 0}</td>
                         <td>${transaction.managerNumber || 'N/A'}</td>
                     `;
 
@@ -378,6 +372,28 @@ async function fetchMaterialCompanies() {
         console.error("재료 목록을 불러오는 중 오류 발생:", error);
     }
 }
+
+// 테이블에서 행을 더블 클릭했을 때 출고관리탭에 선택된 재료 정보를 표시
+document.getElementById('transactionList').addEventListener('dblclick', function (event) {
+    const targetRow = event.target.closest('tr');
+
+    if (targetRow) {
+        const companyName = targetRow.querySelector('td:nth-child(2)').textContent.trim();
+        const materialName = targetRow.querySelector('td:nth-child(3)').textContent.trim();
+        const materialCode = targetRow.querySelector('td:nth-child(4)').textContent.trim();
+
+        // 선택된 업체명, 재료명, 재료코드를 화면에 표시
+        document.getElementById('selectedCompanyName').textContent = companyName;
+        document.getElementById('selectedMaterialName').textContent = materialName;
+        document.getElementById('selectedMaterialCode').textContent = materialCode;
+
+        // 선택된 값을 입력 필드에도 반영
+        document.getElementById('twoCompanyName').value = companyName;
+        document.getElementById('twoMaterialName').value = materialName;
+        document.getElementById('twoMaterialCode').value = materialCode;
+    }
+});
+
 
 // 모달이 열릴 때마다 재료 목록을 불러오기
 document.getElementById('materialCompanyModal').addEventListener('show.bs.modal', fetchMaterialCompanies);

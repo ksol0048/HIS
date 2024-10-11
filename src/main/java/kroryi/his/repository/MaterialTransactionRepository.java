@@ -19,12 +19,12 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
     // 재료코드로 검색
     List<MaterialTransactionRegister> findByMaterialRegisterMaterialCodeContaining(String materialCode);
 
-    Optional<MaterialTransactionRegister> findByTransactionDateAndMaterialRegister(LocalDate transactionDate, MaterialRegister materialRegister);
+    Optional<MaterialTransactionRegister> findBystockInDateAndMaterialRegister(LocalDate stockInDate, MaterialRegister materialRegister);
 
     @Query("SELECT mt FROM MaterialTransactionRegister mt " +
             "JOIN mt.materialRegister mr " +
             "WHERE (mr.materialName LIKE %:materialName% OR mr.materialCode LIKE %:materialCode%) " +
-            "OR mt.transactionDate BETWEEN :startDate AND :endDate")
+            "OR mt.stockInDate BETWEEN :startDate AND :endDate")
     Optional<List<MaterialTransactionRegister>> findSearch(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,

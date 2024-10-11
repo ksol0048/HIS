@@ -4,126 +4,188 @@
   <link rel="stylesheet" href="/css/inventory_management.css">
 </head>
 <body>
-<div class="card m-2 mb-1">
-  <div class="card-header text-center">재료 출납 관리</div>
-  <div class="card-body">
+<div class="container-fluid">
+  <div class="row">
+    <!-- 기존 재료 출납 관리 영역 (2/3 크기) -->
+    <div class="col-lg-8">
+      <div class="card m-2 mb-1">
+        <div class="card-header text-center">재료 입고 관리</div>
+        <div class="card-body">
 
-    <!-- 상단 검색 영역 -->
-    <div class="search-box">
-      <div class="row row-cols-auto align-items-end">
-        <div class="row mb-3 align-items-center">
-          <label for="transactionDate" class="form-label">입출고일자</label>
-          <div class="col">
-            <input type="date" name="transactionStartDate" class="form-control" id="transactionStartDate">
+          <!-- 상단 검색 영역 -->
+          <div class="search-box">
+            <div class="row row-cols-auto align-items-end">
+              <div class="row mb-3 align-items-center">
+                <label for="stockInDate" class="form-label">입고일자</label>
+                <div class="col">
+                  <input type="date" name="transactionStartDate" class="form-control" id="transactionStartDate">
+                </div>
+                <div class="col-auto d-flex align-items-center justify-content-center">
+                  <span>~</span>
+                </div>
+                <div class="col">
+                  <input type="date" name="transactionEndDate" class="form-control" id="transactionEndDate">
+                </div>
+              </div>
+              <div class="col mb-3">
+                <label for="twoMaterialNameSearch" class="form-label">재료명</label>
+                <input type="text" name="materialName" class="form-control" id="twoMaterialNameSearch" placeholder="재료명 입력">
+              </div>
+              <div class="col mb-3">
+                <label for="twoMaterialCodeSearch" class="form-label">재료코드</label>
+                <input type="text" class="form-control" name="materialCode" id="twoMaterialCodeSearch" placeholder="재료코드 입력">
+              </div>
+              <div class="col mb-3">
+                <button type="button" class="btn btn-primary mt-4" onclick="twoSearch()">검색</button>
+                <button type="reset" class="btn btn-secondary mt-4" id="twoSearchReset" onclick="resetSearch()">초기화</button>
+              </div>
+            </div>
           </div>
-          <div class="col-auto d-flex align-items-center justify-content-center">
-            <span>~</span>
+
+          <!-- 재료출납 목록 테이블 -->
+          <div class="fixed-box">
+            <table class="table table-bordered">
+              <thead>
+              <tr>
+                <th>입고일자</th>
+                <th>업체명</th>
+                <th>재료명</th>
+                <th>재료코드</th>
+                <th>입고량</th>
+                <th>담당자 연락처</th>
+              </tr>
+              </thead>
+              <tbody id="transactionList">
+              <tr>
+                <td colspan="7">현재 등록된 입고 내역이 없습니다.</td>
+              </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="col">
-            <input type="date" name="transactionEndDate" class="form-control" id="transactionEndDate">
+
+          <!-- 하단 재료 출납 입력 섹션 -->
+          <div class="transaction-entry-box mt-3">
+            <h5>재료 출납 입력</h5>
+            <form onsubmit="addTransaction(); return false;">
+              <div class="row row-gap">
+                <div class="col-md-6 mb-3">
+                  <label for="stockInDate" class="form-label">입고일자</label>
+                  <input type="date" name="stockInDate" class="form-control" id="stockInDate" readonly>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="twoCompanyName" class="form-label">업체명</label>
+                  <input type="text" name="CompanyName" class="form-control" id="twoCompanyName" placeholder="업체명 입력" readonly>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="twoMaterialName" class="form-label">재료명</label>
+                  <input type="text" name="materialName" class="form-control" id="twoMaterialName" placeholder="재료명 입력" readonly>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="twoMaterialCode" class="form-label">재료코드</label>
+                  <input type="text" name="materialCode" class="form-control" id="twoMaterialCode" placeholder="재료코드 입력" readonly>
+                </div>
+                <div class="col-md-12 mb-3">
+                  <label for="stockIn" class="form-label">입고량</label>
+                  <input type="number" class="form-control" name="stockIn" id="stockIn" placeholder="입고량 입력">
+                </div>
+                <input type="hidden" id="transactionId" />
+                <div class="col-md-12 d-flex justify-content-end mb-3">
+                  <button type="button" class="btn btn-success mt-4" id="materialCompanySelect">재료조회</button>
+                  <!-- 재료 선택 모달창 -->
+                  <div class="modal fade" id="materialCompanyModal" tabindex="-1" aria-labelledby="materialCompanyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="materialCompanyModalLabel">업체/재료 목록</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                              <th>업체명</th>
+                              <th>재료명</th>
+                              <th>재료코드</th>
+                            </tr>
+                            </thead>
+                            <tbody id="materialCompanyList">
+                            <!-- 업체/재료 목록 동적 추가 -->
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-primary mt-4 ms-2" id="addTransactionBtn">저장</button>
+                  <button type="button" class="btn btn-secondary mt-4 ms-2" id="resetTransaction">취소</button>
+                  <button type="button" class="btn btn-danger mt-4 ms-2" id="deleteTransactionBtn">삭제</button>
+                </div>
+              </div>
+            </form>
           </div>
-        </div>
-        <div class="col mb-3">
-          <label for="twoMaterialNameSearch" class="form-label">재료명</label>
-          <input type="text" name="materialName" class="form-control" id="twoMaterialNameSearch" placeholder="재료명 입력">
-        </div>
-        <div class="col mb-3">
-          <label for="twoMaterialCodeSearch" class="form-label">재료코드</label>
-          <input type="text" class="form-control" name="materialCode" id="twoMaterialCodeSearch" placeholder="재료코드 입력">
-        </div>
-        <div class="col mb-3">
-          <button type="button" class="btn btn-primary mt-4" onclick="twoSearch()">검색</button>
-          <button type="reset" class="btn btn-secondary mt-4" id="twoSearchReset" onclick="resetSearch()">초기화</button>
         </div>
       </div>
     </div>
 
-    <!-- 재료출납 목록 테이블 -->
-    <div class="fixed-box">
-      <table class="table table-bordered">
-        <tr>
-          <th>입출일자</th>
-          <th>업체명</th>
-          <th>재료명</th>
-          <th>재료코드</th>
-          <th>입고량</th>
-          <th>출고량</th>
-          <th>담당자 연락처</th>
-        </tr>
-        <tbody id="transactionList">
-        <tr>
-          <td colspan="10">현재 등록된 출납 내역이 없습니다.</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <!-- 하단 재료 출납 입력 섹션 -->
-    <div class="transaction-entry-box mt-3">
-      <h5>재료 출납 입력</h5>
-      <form onsubmit="addTransaction(); return false;">
-        <div class="row row-gap">
-          <div class="col-md-2 mb-3">
-            <label for="transactionDate" class="form-label">입출일자</label>
-            <input type="date" name="transactionDate" class="form-control" id="transactionDate" readonly>
+
+    <!-- 새롭게 추가된 출고 관련 테이블 및 입력 섹션 (1/3 크기) -->
+    <div class="col-lg-4">
+      <div class="card m-2 mb-1">
+        <div class="card-header text-center">출고 관리</div>
+        <div class="card-body">
+
+          <!-- 선택된 재료 정보 표시 -->
+          <div class="selected-material-info mb-3">
+            <h5>선택된 재료 정보</h5>
+            <p>업체명: <span id="selectedCompanyName">-</span></p>
+            <p>재료명: <span id="selectedMaterialName">-</span></p>
+            <p>재료코드: <span id="selectedMaterialCode">-</span></p>
           </div>
-          <div class="col-md-2 mb-3">
-            <label for="twoCompanyName" class="form-label">업체명</label>
-            <input type="text" name="CompanyName" class="form-control" id="twoCompanyName" placeholder="업체명 입력" readonly>
+
+          <!-- 출고 내역 테이블 -->
+          <div class="fixed-box" style="height: 393px">
+            <table class="table table-bordered">
+              <thead>
+              <tr>
+                <th>출고일자</th>
+                <th>출고량</th>
+              </tr>
+              </thead>
+              <tbody id="outgoingTransactionList">
+              <tr>
+                <td colspan="2">현재 등록된 출고 내역이 없습니다.</td>
+              </tr>
+              </tbody>
+            </table>
           </div>
-          <div class="col-md-2 mb-3">
-            <label for="twoMaterialName" class="form-label">재료명</label>
-            <input type="text" name="materialName" class="form-control" id="twoMaterialName" placeholder="재료명 입력" readonly>
-          </div>
-          <div class="col-md-2 mb-3">
-            <label for="twoMaterialCode" class="form-label">재료코드</label>
-            <input type="text" name="materialCode" class="form-control" id="twoMaterialCode" placeholder="재료코드 입력" readonly>
-          </div>
-          <div class="col-md-2 mb-3">
-            <label for="stockIn" class="form-label">입고량</label>
-            <input type="number" class="form-control" name="stockIn" id="stockIn" placeholder="입고량 입력">
-          </div>
-          <div class="col-md-2 mb-3">
-            <label for="stockOut" class="form-label">출고량</label>
-            <input type="number" class="form-control" name="stockOut" id="stockOut" placeholder="출고량 입력">
-          </div>
-          <input type="hidden" id="transactionId" />
-          <div class="col-md-12 d-flex justify-content-end mb-3">
-            <button type="button" class="btn btn-success mt-4" id="materialCompanySelect">재료조회</button>
-            <!-- 재료 선택 모달창 -->
-            <div class="modal fade" id="materialCompanyModal" tabindex="-1" aria-labelledby="materialCompanyModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="materialCompanyModalLabel">업체/재료 목록</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <table class="table table-bordered">
-                      <thead>
-                      <tr>
-                        <th>업체명</th>
-                        <th>재료명</th>
-                        <th>재료코드</th>
-                      </tr>
-                      </thead>
-                      <tbody id="materialCompanyList">
-                      <!-- 업체/재료 목록 동적 추가 -->
-                      </tbody>
-                    </table>
-                  </div>
+
+          <!-- 출고 입력 섹션 -->
+          <div class="transaction-entry-box mt-3">
+            <h5>출고 입력</h5>
+            <form onsubmit="addOutgoingTransaction(); return false;">
+              <div class="row">
+                <div class="col-md-12 mb-3">
+                  <label for="stockOutDate" class="form-label">출고일자</label>
+                  <input type="date" name="stockOutDate" class="form-control" id="stockOutDate">
+                </div>
+                <div class="col-md-12 mb-3">
+                  <label for="stockOut" class="form-label">출고량</label>
+                  <input type="number" class="form-control" name="stockOut" id="stockOut" placeholder="출고량 입력">
+                </div>
+                <div class="col-md-12 d-flex justify-content-end">
+                  <button type="button" class="btn btn-primary mt-2" id="saveOutTransactionBtn">출고 저장</button>
                 </div>
               </div>
-            </div>
-            <button type="button" class="btn btn-primary mt-4 ms-2" id="addTransactionBtn">저장</button>
-            <button type="button" class="btn btn-secondary mt-4 ms-2" id="resetTransaction">취소</button>
-            <button type="button" class="btn btn-danger mt-4 ms-2" id="deleteTransactionBtn">삭제</button>
+            </form>
           </div>
+
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
+
 <script src="/js/material_transaction.js"></script>
 </body>
 </html>

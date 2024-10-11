@@ -32,16 +32,38 @@
     <script type="text/javascript">
         function loadContent(page) {
             $("#body").load(page, function(response, status, xhr) {
-                // console.log(response)
                 if (status === "error") {
                     $("#body").html("<p>페이지를 로드하는 데 실패했습니다: " + xhr.status + " " + xhr.statusText + "</p>");
+                } else {
+                    $("#body").html(response);
+
+                    // 재료출납관리 페이지인 경우 setTodayDate 호출
+                    if (page === '/material_transaction') {
+                        setTodayDate();  // 오늘 날짜 설정
+                    }
                 }
-                $("#body").html(response)
             });
         }
 
-        $(document).ready(function(){
+        // 페이지가 처음 로드되었을 때 재료현황 페이지 로드
+        $(document).ready(function() {
             loadContent('/material_status');
         });
+
+        // 오늘 날짜 설정 함수
+        function setTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = ('0' + (today.getMonth() + 1)).slice(-2);  // 월을 두 자리로 설정
+            const day = ('0' + today.getDate()).slice(-2);           // 일을 두 자리로 설정
+
+            const formattedDate = `${year}-${month}-${day}`;         // YYYY-MM-DD 형식으로 오늘 날짜를 만듦
+            const transactionDateField = document.getElementById('transactionDate');
+            if (transactionDateField) {
+                transactionDateField.value = formattedDate;  // 입출일자 필드에 오늘 날짜 설정
+            } else {
+                console.error('transactionDate 필드를 찾을 수 없습니다.');
+            }
+        }
     </script>
 </div>

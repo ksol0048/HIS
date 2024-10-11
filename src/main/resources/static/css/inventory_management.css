@@ -1,6 +1,6 @@
 /* 네모난 고정 영역을 유지하기 위한 스타일 */
 .fixed-box {
-    height: 250px; /* 중복 제거, 하나로 통일 */
+    height: 250px; /* 고정된 높이 */
     border: 1px solid #ccc;
     overflow-y: auto;
     box-sizing: border-box; /* 스크롤바 너비 포함하여 계산 */
@@ -8,13 +8,12 @@
 }
 
 .fixed-box table {
-
+    width: 100%;
     margin: 0;
     padding: 0;
-    width: 100%;
 }
 
-/* 테이블 헤더 중앙 정렬 */
+/* 테이블 헤더 중앙 정렬 및 고정 */
 table thead th {
     text-align: center;
     position: sticky; /* 스크롤 시 고정 */
@@ -28,25 +27,17 @@ table thead th {
 }
 
 /* 재료 목록과 재료 입력을 감싸는 컨테이너 */
-.inventory-container {
-    display: flex;
-    flex-direction: column;
-    margin-top: 30px;
-}
-
-.form-container {
-    margin-top: 20px;
-}
-
+.inventory-container,
+.form-container,
 .table-container {
-    margin-top: 20px; /* 중복 제거, 하나로 통일 */
-    margin-bottom: 20px;
+    margin-top: 20px; /* 중복 제거 */
 }
 
 .row-gap {
     margin-bottom: 15px;
 }
 
+/* 라디오 그룹의 스타일 */
 .radio-group {
     display: flex;
     align-items: center;
@@ -54,8 +45,8 @@ table thead th {
 }
 
 .form-control-single-line {
-    display: block;
     width: 100%;
+    display: block;
     resize: none;
 }
 
@@ -105,7 +96,7 @@ table thead th {
     font-size: 0.9rem;
 }
 
-/* 버튼이 하단 정렬될 수 있도록 */
+/* 검색 버튼 정렬 */
 .search-box .align-bottom {
     display: flex;
     justify-content: center;
@@ -129,6 +120,7 @@ table thead th {
     margin-bottom: 15px;
 }
 
+/* 텍스트 중앙 정렬 */
 .text-center {
     display: flex;
     align-items: center;
@@ -148,3 +140,4 @@ table thead th {
 .card-body {
     padding: 20px; /* 카드 내용에 여백 추가 */
 }
+
