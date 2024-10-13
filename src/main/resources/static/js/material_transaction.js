@@ -373,7 +373,7 @@ async function fetchMaterialCompanies() {
     }
 }
 
-// 테이블에서 행을 더블 클릭했을 때 출고관리탭에 선택된 재료 정보를 표시
+// 테이블에서 행을 더블 클릭했을 때 출고관리탭에 선택된 재료 정보를 표시하고 출고 내역을 로드
 document.getElementById('transactionList').addEventListener('dblclick', function (event) {
     const targetRow = event.target.closest('tr');
 
@@ -391,6 +391,9 @@ document.getElementById('transactionList').addEventListener('dblclick', function
         document.getElementById('twoCompanyName').value = companyName;
         document.getElementById('twoMaterialName').value = materialName;
         document.getElementById('twoMaterialCode').value = materialCode;
+
+        // 선택된 재료코드로 출고 내역을 로드
+        loadOutgoingTransactionList(materialCode);
     }
 });
 
@@ -407,3 +410,94 @@ document.getElementById('materialCompanySelect').addEventListener('click', funct
 
 // 초기화 버튼 클릭 이벤트 등록
 document.getElementById('twoSearchReset').addEventListener('click', resetSearch);
+
+
+// 출고 내역 저장 버튼 클릭 이벤트
+document.getElementById('saveOutTransactionBtn').addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const stockOutData = {
+        stockOutDate: document.getElementById('stockOutDate').value,
+        stockOut: parseInt(document.getElementById('stockOut').value, 10),
+        materialCode: document.getElementById('selectedMaterialCode').textContent
+    };
+
+    fetch('/inventory_management/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(stockOutData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message); // 서버에서 반환한 메시지 표시
+            loadOutgoingTransactionList(stockOutData.materialCode); // 출고 목록 다시 로딩
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert(`출고 저장 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
+        });
+});
+
+// // 재료코드를 통해 출고 내역을 조회하고 테이블에 표시하는 함수
+// function loadOutgoingTransactions(materialCode) {
+//     fetch(`/inventory_management/getByMaterialCode?materialCode=${materialCode}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             const tbody = document.getElementById('outgoingTransactionList');
+//             tbody.innerHTML = ''; // 기존 테이블 내용 초기화
+//
+//             if (data.length === 0) {
+//                 tbody.innerHTML = '<tr><td colspan="2">현재 등록된 출고 내역이 없습니다.</td></tr>';
+//             } else {
+//                 data.forEach(transaction => {
+//                     const row = document.createElement('tr');
+//                     row.innerHTML = `
+//                         <td>${transaction.stockOutDate || 'N/A'}</td>
+//                         <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+//                     `;
+//                     tbody.appendChild(row);
+//                 });
+//             }
+//         })
+//         .catch(error => {
+//             console.error('출고 내역을 불러오는 중 오류 발생:', error);
+//         });
+// }
+
+// 출고 내역 목록 로딩 함수 (재료코드를 기준으로)
+function loadOutgoingTransactionList(materialCode) {
+    fetch(`/inventory_management/getByMaterialCode?materialCode=${encodeURIComponent(materialCode)}`)
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('outgoingTransactionList');
+            tbody.innerHTML = '';  // 기존 테이블 내용 초기화
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2">현재 등록된 출고 내역이 없습니다.</td></tr>';
+            } else {
+                data.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${transaction.stockOutDate || 'N/A'}</td>
+                        <td>${transaction.stockOut != null ? transaction.stockOut.toLocaleString() : 'N/A'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        })
+        .catch(error => {
+            console.error("출고 내역을 불러오는 중 오류 발생:", error);
+        });
+}
+
+
+
+

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialDTO;
+import kroryi.his.dto.MaterialStockOutDTO;
 import kroryi.his.dto.MaterialTransactionDTO;
 import kroryi.his.service.MaterialRegisterService;
 import kroryi.his.service.MaterialTransactionService;
@@ -164,5 +165,6 @@ public class MaterialTransactionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
+
 
 }

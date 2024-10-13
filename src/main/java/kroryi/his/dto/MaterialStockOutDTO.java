@@ -24,5 +24,8 @@ public class MaterialStockOutDTO {
     // 출고량
     private Long stockOut;
 
+    private String materialCode;
+
+    private String materialName;
 
 }

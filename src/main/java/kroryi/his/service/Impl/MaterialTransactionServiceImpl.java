@@ -4,9 +4,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import kroryi.his.domain.MaterialRegister;
+import kroryi.his.domain.MaterialStockOut;
 import kroryi.his.domain.MaterialTransactionRegister;
+import kroryi.his.dto.MaterialStockOutDTO;
 import kroryi.his.dto.MaterialTransactionDTO;
 import kroryi.his.repository.MaterialRegisterRepository;
+import kroryi.his.repository.MaterialStockOutRepository;
 import kroryi.his.repository.MaterialTransactionRepository;
 import kroryi.his.service.MaterialTransactionService;
 import lombok.RequiredArgsConstructor;
@@ -138,7 +141,6 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
                 .map(MaterialTransactionDTO::new)  // 결과를 DTO로 변환
                 .collect(Collectors.toList());
     }
-
 
 
 }

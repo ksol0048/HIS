@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-//@ToString
+@ToString
 @Builder
 @Getter
 @Setter
@@ -69,8 +69,4 @@ public class MaterialRegister {
             this.firstRegisterDate = LocalDate.now();
         }
     }
-
-
-
-
 }
