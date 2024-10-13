@@ -9,16 +9,25 @@ import kroryi.his.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.modelmapper.ModelMapper;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ReservationImpl implements ReservationService {
+
+    private ModelMapper modelMapper = new ModelMapper();
+    // private final ModelMapper modelMapper;
+
+
     @Autowired
     private ReservationMapper reMapper;
 
     @Autowired
     private ReservationRepository reRepo;
+
+
 
     // 캘린더에서 날짜 선택시
     public List selectedDatePatientList(ReservationDTO dto) {
@@ -42,7 +51,8 @@ public class ReservationImpl implements ReservationService {
 
     // 예약에서 저장을 눌렀을 경우
     public void insertReservationInformation(ReservationDTO dto) {
-        Reservation rList = reMapper.toEntity(dto);
+        Reservation rList = modelMapper.map(dto, Reservation.class);
+        System.out.println(rList.getReservationDate());
         reRepo.save(rList);
     }
 

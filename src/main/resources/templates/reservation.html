@@ -688,6 +688,7 @@
         //
 
 
+        console.log("보낼꺼임" + JSON.stringify(data))
         // 인덱스 번호가 있는 경우 수정
         if (indexNumber) {
             // 인덱스 번호가 있기 때문에 객체에 seq(인덱스 번호) 값 추가
@@ -705,6 +706,7 @@
 
         // 인덱스 번호가 없는 경우 추가
         else {
+
             // 서버에 데이터 값 보내주기
             fetch('http://localhost:8080/home/main/insertReservationInformation', {
                 method: 'POST', // POST 요청
