@@ -25,13 +25,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // 환자 데이터 객체 생성
             const patientData = {
-                chartNum: selectedPatient.chartNum,
-                paName: selectedPatient.name,
+                chartNum: selectedPatient.chartNum, // 차트 번호
+                paName: selectedPatient.name, // 환자 이름
                 mainDoc: null,  // 의사는 null로 설정
-                rvTime: selectedPatient.rvTime,
+                rvTime: selectedPatient.rvTime, // 환자의 방문 시간
+                receptionTime: new Date().toISOString() // 현재 날짜 및 시간
             };
 
-            // API 호출하여 환자 접수
+            // 새로 등록하기
             fetch("/api/patient-admission/register", {
                 method: "POST",
                 headers: {
@@ -49,33 +50,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .then(data => {
                     console.log(data);
+                    alert("환자 접수가 완료되었습니다."); // 접수 완료 알림 추가
 
-                    // 환자가 이미 대기 중 테이블에 존재하는지 확인
-                    const existingRows = Array.from(waitingPatientsTable.rows);
-                    const alreadyExists = existingRows.some(row => {
-                        return row.cells[1].innerText === patientData.chartNum; // 차트 번호로 중복 검사
+                    // 대기 중 테이블에 추가
+                    addPatientToWaitingTable({
+                        chartNum: patientData.chartNum, // 차트 번호
+                        paName: patientData.paName, // 환자 이름
+                        treatStatus: "1", // 대기 상태
+                        receptionTime: patientData.receptionTime // 접수 시간
                     });
-
-                    // 테이블에 추가되지 않았고 세션에 환자 정보가 없다면 추가
-                    if (!alreadyExists) {
-                        // 대기 중 테이블에 추가
-                        addPatientToWaitingTable({
-                            ...patientData,
-                            receptionTime: new Date().toISOString(),
-                            treatStatus: "1" // 대기 상태
-                        });
-
-                        // 세션 스토리지에 환자 정보 저장
-                        let waitingPatients = JSON.parse(sessionStorage.getItem('waitingPatients')) || [];
-                        waitingPatients.push(patientData);
-                        sessionStorage.setItem('waitingPatients', JSON.stringify(waitingPatients));
-                    } else {
-                        alert("해당 환자는 이미 대기 중입니다.");
-                    }
                 })
                 .catch(error => {
                     console.error("에러 발생:", error);
-                    alert("환자 접수 중 오류가 발생했습니다. 다시 시도해 주세요.");
+                    alert(error.message);
                 });
         } else {
             console.log("세션에서 환자 정보가 없습니다.");
@@ -84,8 +71,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+
+
     const startTreatmentButton = document.getElementById("startTreatmentButton");
-    const treatmentModal = new bootstrap.Modal(document.getElementById('treatmentModal'));
     const treatmentPatientInfo = document.getElementById("treatmentPatientInfo");
     const completeTreatmentButton = document.getElementById("completeTreatmentButton");
 
@@ -135,6 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log('선택된 환자:', paName, '차트 번호:', chartNum)
 
         treatmentPatientInfo.textContent = `환자: ${paName}`
+        const treatmentModal = new bootstrap.Modal(document.getElementById('treatmentModal'));
         treatmentModal.show()
 
         const confirmTreatmentBtn = document.getElementById("confirmTreatmentBtn")
@@ -266,11 +255,9 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("변환된 receptionTime 값:", formattedReceptionTimeForDB); // 변환된 receptionTime 로그 출력
 
         // 환자 이름과 확인 메시지 설정
-        console.log("모달 열기 직전 환자 이름:", paName);
         const completeInfo = document.getElementById('completeInfo');
-        console.log("모달에서 표시할 patientInfo 요소:", completeInfo);
         completeInfo.textContent = `환자: ${paName}`; // 환자 이름과 함께 메시지 표시
-        console.log("환자 정보가 설정되었습니다:", completeInfo.textContent);
+
 
         // 모달 보이기
         const completeModal = new bootstrap.Modal(document.getElementById('completeModal'));

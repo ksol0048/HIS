@@ -4,11 +4,8 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout.html}">
-<link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/cerulean/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
+
+<!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">-->
 <link rel="stylesheet" href="/static/css/patient_admission.css">
 
 
@@ -22,7 +19,7 @@
         <!--  접수 버튼-->
         <button class="btn btn-info ReceptionBtn">접수</button>
 
-        <button id="startTreatmentButton">진료중</button>
+        <button id="startTreatmentButton" class="btn btn-secondary">진료중</button>
 
         <button id="completeTreatmentButton" class="btn btn-success">진료완료</button>
 
@@ -31,8 +28,8 @@
     </div>
     <div style="display: flex;">
         <!-- 진료대기테이블 -->
-        <table id="waitingPatientsTable" border="1" cellspacing="0" cellpadding="5" style="width: 650px">
-            <thead>
+        <table id="waitingPatientsTable" class="table table-hover">
+            <thead class="table-light">
             <tr>
                 <th colspan="6" bgcolor="#FFCCCC">진료 대기 환자: 0명</th>
             </tr>
@@ -46,16 +43,15 @@
 
             </tr>
             </thead>
-            <tbody id="waitingPatientsBody" class="scrollable-tbody">
+            <tbody id="waitingPatientsBody">
 
 
             </tbody>
         </table>
 
         <!-- 진료중테이블 -->
-        <table id="treatmentPatientsTable" border="1" cellspacing="0" cellpadding="5"
-               style="margin-left: 10px; width: 700px ">
-            <thead>
+        <table id="treatmentPatientsTable" class="table table-hover">
+            <thead class="table-light">
             <tr>
                 <th colspan="7" bgcolor="#CCFFCC">진료중환자 : 0명</th>
             </tr>
@@ -76,9 +72,8 @@
         </table>
 
         <!-- 진료완료테이블 -->
-        <table id="completedPatientsTable" border="1" cellspacing="0" cellpadding="5"
-               style="margin-left: 10px; width: 700px">
-            <thead>
+        <table id="completedPatientsTable" class="table table-hover">
+            <thead class="table-light">
             <tr>
                 <th colspan="6" bgcolor="#FF9999">진료 완료 환자:0명</th>
             </tr>

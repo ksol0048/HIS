@@ -1,55 +1,44 @@
-/* 커스텀 컨텍스트 메뉴 스타일 */
-.custom-context-menu {
-    position: absolute;
-    background-color: white;
-    border: 1px solid #ccc;
-    z-index: 1000;
-    width: 150px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+.table-container {
+    display: flex; /* Flexbox 사용 */
+    flex-direction: row; /* 가로 방향으로 정렬 */
+    justify-content: space-between; /* 테이블 사이 간격 조정 */
+    margin: 10px; /* 외부 여백 */
 }
-
-.custom-context-menu div {
-    padding: 10px;
-    cursor: pointer;
-}
-
-.custom-context-menu div:hover {
-    background-color: #f0f0f0;
-}
-
-/* 선택된 행 강조 스타일 */
-.selected-row {
-    background-color: #FFCCCC; /* 선택된 행의 배경색 */
-}
-
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-thead th {
-    position: sticky;
-    top: 0;
-    background-color: #FFCCCC; /* 헤더 배경색 */
-    z-index: 1; /* 헤더가 다른 내용 위에 오도록 설정 */
-    border: 1px solid #dee2e6; /* 헤더 테두리 색상 */
-}
-
-.scrollable-tbody {
-    display: block;
-    height: 300px; /* 높이 설정 */
-    overflow-y: auto; /* 상하 스크롤바 표시 */
-    width: 100%; /* 테이블 너비에 맞춤 */
-}
-
-tbody tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed; /* 열 너비 고정 */
+    border: 1px solid #000; /* 테두리 */
+    border-collapse: collapse; /* 테두리 겹침 방지 */
+    width: 800px; /* 테이블 너비 */
+    height: 800px; /* 테이블 높이 */
+    table-layout: fixed; /* 고정 너비 */
+    margin: 0 10px; /* 좌우 여백 */
 }
 
 th, td {
-    padding: 8px;
-    border: 1px solid #dee2e6; /* 테두리 색상 */
+    border: 1px solid #000; /* 셀 테두리 */
+    padding: 5px; /* 내부 여백 */
+    text-align: center; /* 중앙 정렬 */
 }
+
+thead th {
+    background-color: #f2f2f2; /* 헤더 배경 색상 */
+}
+
+tbody {
+    display: block; /* 블록 요소로 설정 */
+    height: 720px; /* tbody 높이 설정 (테이블 높이에서 헤더 높이 차감) */
+    overflow-y: auto; /* 세로 스크롤 */
+    overflow-x: hidden; /* 가로 스크롤 숨기기 */
+}
+
+thead {
+    display: table; /* 테이블 형식으로 표시 */
+    width: 100%; /* 너비 100% */
+    table-layout: fixed; /* 고정 너비 */
+}
+
+table tbody tr {
+    display: table; /* 테이블로 표시하여 셀 너비 유지 */
+    width: 100%; /* 너비 100% */
+}
+

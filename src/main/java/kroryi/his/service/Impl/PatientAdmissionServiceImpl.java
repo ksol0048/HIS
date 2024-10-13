@@ -4,7 +4,6 @@ import kroryi.his.domain.PatientAdmission;
 import kroryi.his.dto.PatientAdmissionDTO;
 import kroryi.his.repository.PatientAdmissionRepository;
 import kroryi.his.service.PatientAdmissionService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -65,6 +63,17 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
                 .map(this::convertToDTO)
                 .toList();
     }
+
+    @Override
+    public boolean existsByChartNum(Integer chartNum) {
+        return patientAdmissionRepository.existsByChartNum(chartNum);
+    }
+
+    @Override
+    public PatientAdmission findByChartNum(Integer chartNum) {
+        return patientAdmissionRepository.findByChartNum(chartNum);
+    }
+
 
     // PatientAdmission 엔티티를 PatientAdmissionDTO로 변환하는 메서드
     private PatientAdmissionDTO convertToDTO(PatientAdmission admission) {

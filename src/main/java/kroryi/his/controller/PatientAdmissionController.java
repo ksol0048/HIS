@@ -4,16 +4,12 @@ import kroryi.his.domain.PatientAdmission;
 import kroryi.his.dto.PatientAdmissionDTO;
 import kroryi.his.service.PatientAdmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -30,14 +26,26 @@ public class PatientAdmissionController {
         System.out.println("환자 등록 요청 수신: " + patientAdmissionDTO);
 
         // 현재 시간을 접수 시간으로 설정
-        patientAdmissionDTO.setReceptionTime(LocalDateTime.now());
+        LocalDateTime currentTime = LocalDateTime.now();
+        patientAdmissionDTO.setReceptionTime(currentTime);
         patientAdmissionDTO.setTreatStatus("1"); // 대기 상태는 1
 
-        // DB에 저장
-        patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
+        // 차트 번호로 기존 환자 존재 여부 체크
+        if (patientAdmissionService.existsByChartNum(patientAdmissionDTO.getChartNum())) {
+            // 기존 환자와 동일한 차트 번호를 가진 새로운 환자 등록
+            patientAdmissionService.savePatientAdmission(patientAdmissionDTO); // 새로운 환자 등록
 
+            return ResponseEntity.ok("{\"message\": \"기존 환자와 동일한 차트 번호로 새로운 환자가 대기 상태로 등록되었습니다.\"}");
+        }
+
+        // 환자가 없는 경우 새로 등록
+        patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
         return ResponseEntity.ok("{\"message\": \"환자가 대기 상태로 등록되었습니다.\"}");
     }
+
+
+
+
 
     // 대기 환자 목록 반환
     @GetMapping("/waiting")
