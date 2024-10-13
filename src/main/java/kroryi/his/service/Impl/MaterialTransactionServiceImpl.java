@@ -55,7 +55,7 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
         transaction.setStockInDate(materialTransactionDTO.getStockInDate());
         transaction.setMaterialRegister(materialRegisterOpt.get());
         transaction.setStockIn(materialTransactionDTO.getStockIn());
-        transaction.setStockOut(materialTransactionDTO.getStockOut());
+//        transaction.setStockOut(materialTransactionDTO.getStockOut());
 
         return materialTransactionRepository.save(transaction);
     }
@@ -76,7 +76,7 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
         MaterialTransactionRegister transaction = transactionOpt.get();
         transaction.setStockInDate(materialTransactionDTO.getStockInDate());
         transaction.setStockIn(materialTransactionDTO.getStockIn());
-        transaction.setStockOut(materialTransactionDTO.getStockOut());
+//        transaction.setStockOut(materialTransactionDTO.getStockOut());
 
         // 추가적으로 materialCode나 다른 정보가 변경되었을 경우를 처리
         Optional<MaterialRegister> materialRegisterOpt = materialRepository.findByMaterialCode(materialTransactionDTO.getMaterialCode());

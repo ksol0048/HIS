@@ -21,14 +21,8 @@ public class MaterialTransactionDTO {
     //입고일자
     private LocalDate stockInDate;
 
-    //출고일자
-    private LocalDate stockOutDate;
-
     //입고량
     private Long stockIn;
-
-    //출고량
-    private Long stockOut;
 
     //단위
     private String materialUnit;
@@ -67,12 +61,11 @@ public class MaterialTransactionDTO {
     public MaterialTransactionDTO(MaterialTransactionRegister materialTransactionRegister) {
         this.transactionId = materialTransactionRegister.getTransactionId();
         this.stockInDate = materialTransactionRegister.getStockInDate();
-        this.stockOutDate = materialTransactionRegister.getStockOutDate();
         this.stockIn = materialTransactionRegister.getStockIn();
-        this.stockOut = materialTransactionRegister.getStockOut();
         this.remainingStock = materialTransactionRegister.getRemainingStock();
         this.belowSafetyStock = materialTransactionRegister.isBelowSafetyStock();
         this.firstRegisterDate = materialTransactionRegister.getMaterialRegister().getFirstRegisterDate();
+
 
         // MaterialRegister가 null이 아닌 경우에만 데이터 설정
         if (materialTransactionRegister.getMaterialRegister() != null) {

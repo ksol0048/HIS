@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -21,6 +23,7 @@ public class MaterialTransactionRegister {
     @JoinColumn(name = "material_Code", nullable = false)
     private MaterialRegister materialRegister;
 
+
     //입출일자 아이디(PK)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,17 +34,9 @@ public class MaterialTransactionRegister {
     @Column(name = "stock_in_date", nullable = false)
     private LocalDate stockInDate;
 
-    //출고일자
-    @Column(name = "stock_out_date", nullable = false)
-    private LocalDate stockOutDate;
-
     //입고량
     @Column(name = "stock_In")
     private Long stockIn;
-
-    //출고량
-    @Column(name = "stock_Out")
-    private Long stockOut;
 
     //잔량
     @Column(name = "remaining_Stock")

@@ -28,6 +28,12 @@ public class MaterialRegister {
     @OneToMany(mappedBy = "materialRegister", cascade = CascadeType.ALL)
     private List<MaterialTransactionRegister> materialTransactionList = new ArrayList<>();
 
+
+    //StockOut과 조인
+    @OneToMany(mappedBy = "materialRegister", cascade = CascadeType.ALL)
+    private List<MaterialStockOut> materialStockOutList = new ArrayList<>();
+
+
     //재료명
     @Column(name = "material_Name", nullable = false,length = 30)
     private String materialName;

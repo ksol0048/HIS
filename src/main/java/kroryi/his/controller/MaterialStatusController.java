@@ -17,13 +17,6 @@ public class MaterialStatusController {
 
     private final MaterialStatusService materialStatusService;
 
-    // 검색 조건에 따라 데이터를 가져오는 엔드포인트
-    @PostMapping("/statusSearch")
-    public List<MaterialTransactionDTO> searchMaterials(@RequestBody MaterialTransactionDTO materialTransactionDTO) {
-        log.info("검색 조건: {}", materialTransactionDTO);
-        List<MaterialTransactionDTO> result = materialStatusService.searchMaterials(materialTransactionDTO);
-        log.info("검색 결과: {}", result);
-        return result;
-    }
+
 
 }
