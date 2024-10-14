@@ -129,22 +129,30 @@ public class MaterialTransactionController {
     }
 
     // 재료 출납 목록 조회
-    @ApiOperation(value = "재료 출납 검색", notes = "입고일자, 재료명, 재료코드로 출납을 검색합니다.")
+    @ApiOperation(value = "재료 출납 검색", notes = "입고일자, 재료명, 재료코드, 업체명 등으로 출납을 검색합니다.")
     @GetMapping("/findTransaction")
     public ResponseEntity<List<MaterialTransactionDTO>> searchTransaction(
             @RequestParam(value = "transactionStartDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate transactionStartDate,
             @RequestParam(value = "transactionEndDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate transactionEndDate,
             @RequestParam(value = "materialName", required = false) String materialName,
-            @RequestParam(value = "materialCode", required = false) String materialCode) {
+            @RequestParam(value = "materialCode", required = false) String materialCode,
+            @RequestParam(value = "companyName", required = false) String companyName,
+            @RequestParam(value = "belowSafetyStock", required = false) Boolean belowSafetyStock,
+            @RequestParam(value = "stockManagementItem", required = false) Boolean stockManagementItem) {
 
         try {
             // 모든 검색 필드를 비워둔 경우 전체 데이터를 반환
-            if (transactionStartDate == null && transactionEndDate == null && (materialName == null || materialName.isEmpty()) && (materialCode == null || materialCode.isEmpty())) {
+            if (transactionStartDate == null && transactionEndDate == null &&
+                    (materialName == null || materialName.isEmpty()) &&
+                    (materialCode == null || materialCode.isEmpty()) &&
+                    (companyName == null || companyName.isEmpty()) &&
+                    belowSafetyStock == null && stockManagementItem == null) {
                 return ResponseEntity.ok(materialTransactionService.getAllTransactions());
             }
 
             // 검색 필드가 있을 경우 필터링된 데이터를 반환
-            List<MaterialTransactionDTO> transactions = materialTransactionService.searchTransactions(transactionStartDate, transactionEndDate, materialName, materialCode);
+            List<MaterialTransactionDTO> transactions = materialTransactionService.searchTransactions(
+                    transactionStartDate, transactionEndDate, materialName, materialCode, companyName, belowSafetyStock, stockManagementItem);
 
             return ResponseEntity.ok(transactions);
         } catch (Exception e) {
@@ -152,6 +160,7 @@ public class MaterialTransactionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
         }
     }
+
 
     // 초기화 요청
     @GetMapping("/reset")

@@ -129,11 +129,17 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
     }
 
     @Override
-    public List<MaterialTransactionDTO> searchTransactions(LocalDate transactionStartDate, LocalDate transactionEndDate, String materialName, String materialCode) {
+    public List<MaterialTransactionDTO> searchTransactions(LocalDate transactionStartDate,
+                                                           LocalDate transactionEndDate,
+                                                           String materialName,
+                                                           String materialCode,
+                                                           String companyName,
+                                                           Boolean belowSafetyStock,
+                                                           Boolean stockManagementItem) {
         // 기본 검색 조건에 따라 쿼리를 생성
         log.info("------------> {}, {}", materialCode, materialName);
         Optional<List<MaterialTransactionRegister>> optionalTransactions = materialTransactionRepository.findSearch(
-                transactionStartDate, transactionEndDate, materialName, materialCode);
+                transactionStartDate, transactionEndDate, materialName, materialCode, companyName, belowSafetyStock, stockManagementItem);
 
         // Optional에서 값을 꺼내 처리
         return optionalTransactions.orElse(Collections.emptyList())

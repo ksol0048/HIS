@@ -79,6 +79,7 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
                     // 남은 재고량 계산 (입고량 - 출고량)
                     Long remainingStock = totalStockIn - totalStockOut;
 
+
                     // 트랜잭션에 남은 재고 설정
                     transaction.setRemainingStock(remainingStock);
 
@@ -92,13 +93,17 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
     }
 
     @Override
-    public List<MaterialTransactionDTO> searchMaterialStatus(LocalDate startDate, LocalDate endDate, String companyName, String materialName, String materialCode) {
-        log.info("서비스 레벨 검색 조건 - Start Date: {}, End Date: {}, Company Name: {}, Material Name: {}, Material Code: {}",
-                startDate, endDate, companyName, materialName, materialCode);
+    public List<MaterialTransactionDTO> searchMaterialStatus(LocalDate transactionStartDate,
+                                                             LocalDate transactionEndDate,
+                                                             String materialName,
+                                                             String materialCode,
+                                                             String companyName,
+                                                             Boolean belowSafetyStock,
+                                                             Boolean stockManagementItem) {
 
         // 검색 쿼리 실행
         Optional<List<MaterialTransactionRegister>> transactionsOpt = materialTransactionRepository.findSearch(
-                startDate, endDate, materialName, materialCode);
+                transactionStartDate, transactionEndDate, materialName, materialCode, companyName, belowSafetyStock, stockManagementItem);
 
         // 쿼리 결과가 없을 경우 로그 기록
         if (transactionsOpt.isEmpty()) {

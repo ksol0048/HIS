@@ -25,17 +25,23 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
     List<MaterialTransactionRegister> findByMaterialRegister(MaterialRegister materialRegister);
 
     @Query("SELECT mt FROM MaterialTransactionRegister mt " +
-            "JOIN mt.materialRegister mr " +
-            "WHERE (:materialName IS NULL OR mr.materialName LIKE %:materialName%) " +
-            "AND (:materialCode IS NULL OR mr.materialCode LIKE %:materialCode%) " +
-            "AND (:startDate IS NULL OR mt.stockInDate >= :startDate) " +
-            "AND (:endDate IS NULL OR mt.stockInDate <= :endDate)")
+            "LEFT JOIN mt.materialRegister mr " +
+            "LEFT JOIN mr.companyRegister cr " +  // 업체명 검색을 위해 추가
+            "WHERE (:materialName IS NULL OR :materialName = '' OR mr.materialName LIKE %:materialName%) " +
+            "AND (:materialCode IS NULL OR :materialCode = '' OR mr.materialCode LIKE %:materialCode%) " +
+            "AND (:transactionStartDate IS NULL OR mr.firstRegisterDate >= :transactionStartDate) " +
+            "AND (:transactionEndDate IS NULL OR mr.firstRegisterDate <= :transactionEndDate) " +
+            "AND (:companyName IS NULL OR :companyName = '' OR cr.companyName LIKE %:companyName%) " +  // 업체명 조건 수정
+            "AND (:belowSafetyStock IS NULL OR mt.belowSafetyStock = :belowSafetyStock) " +  // 최소 보관수량 미달 조건
+            "AND (:stockManagementItem IS NULL OR mr.stockManagementItem = :stockManagementItem)")  // 재고 관리 품목 조건 추가
     Optional<List<MaterialTransactionRegister>> findSearch(
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
+            @Param("transactionStartDate") LocalDate transactionStartDate,
+            @Param("transactionEndDate") LocalDate transactionEndDate,
             @Param("materialName") String materialName,
-            @Param("materialCode") String materialCode);
-
+            @Param("materialCode") String materialCode,
+            @Param("companyName") String companyName,
+            @Param("belowSafetyStock") Boolean belowSafetyStock,
+            @Param("stockManagementItem") Boolean stockManagementItem);
 
 
     // materialCode별 총 입고량 계산

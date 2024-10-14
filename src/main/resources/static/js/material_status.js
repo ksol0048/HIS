@@ -11,7 +11,6 @@ function loadMaterialStatus() {
             return response.json();
         })
         .then(data => {
-            console.log('데이터 불러오기 성공:', data);  // 불러온 데이터 콘솔에 출력
             updateMaterialStatusTable(data);  // 받은 데이터를 테이블에 업데이트
         })
         .catch(error => {
@@ -22,8 +21,8 @@ function loadMaterialStatus() {
 
 // 검색 버튼 클릭 시 실행되는 함수
 function oneSearch() {
-    // 검색 필드에서 값 가져오기
-    const firstRegisterDate = document.getElementById('firstRegisterDate').value;
+    const registerStartDate = document.getElementById('registerStartDate').value;
+    const registerEndDate = document.getElementById('registerEndDate').value;
     const companyName = document.getElementById('oneCompanyName').value.trim();
     const materialName = document.getElementById('oneMaterialName').value.trim();
     const belowSafetyStock = document.getElementById('oneBelowSafetyStock').value;
@@ -31,20 +30,16 @@ function oneSearch() {
 
     // 쿼리 파라미터 생성
     let queryParams = new URLSearchParams();
-    if (firstRegisterDate) queryParams.append('firstRegisterDate', firstRegisterDate);
+    if (registerStartDate) queryParams.append('startDate', registerStartDate);
+    if (registerEndDate) queryParams.append('endDate', registerEndDate);
     if (companyName) queryParams.append('companyName', companyName);
     if (materialName) queryParams.append('materialName', materialName);
-    if (belowSafetyStock) queryParams.append('belowSafetyStock', belowSafetyStock);
-    if (stockManagementItem) queryParams.append('stockManagementItem', stockManagementItem);
+    if (belowSafetyStock) queryParams.append('belowSafetyStock', belowSafetyStock === 'yes');
+    if (stockManagementItem) queryParams.append('stockManagementItem', stockManagementItem === 'yes');
 
     // 검색 조건을 서버로 요청
     fetch('/inventory_management/materialStatus/search?' + queryParams.toString())
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('서버 응답이 올바르지 않습니다.');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             updateMaterialStatusTable(data);  // 받은 데이터로 테이블 업데이트
         })
@@ -53,7 +48,8 @@ function oneSearch() {
         });
 }
 
-// 테이블 업데이트 함수
+
+// 검색 결과로 테이블 업데이트 함수
 function updateMaterialStatusTable(data) {
     const materialStatusList = document.getElementById('materialStatusList');
     materialStatusList.innerHTML = '';  // 기존 테이블 내용 초기화
@@ -83,9 +79,11 @@ function updateMaterialStatusTable(data) {
 
 // 초기화 버튼 클릭 시, 모든 필드를 초기화하고 전체 목록을 다시 로드
 document.querySelector('button[type="reset"]').addEventListener('click', function () {
-    document.getElementById('firstRegisterDate').value = '';
-    document.getElementById('oneCompanyName').value = '';
+    document.getElementById('registerStartDate').value = '';
+    document.getElementById('registerEndDate').value = '';
     document.getElementById('oneMaterialName').value = '';
+    document.getElementById('oneMaterialCode').value = '';
+    document.getElementById('oneCompanyName').value = '';
     document.getElementById('oneBelowSafetyStock').value = '';
     document.getElementById('oneStockManagementItem').value = '';
 

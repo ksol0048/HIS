@@ -9,4 +9,7 @@ public interface MaterialStockOutService {
 
     List<MaterialStockOutDTO> getOutgoingTransactionsByMaterialCode(String materialCode);
 
+    void deleteByTransactionId(Long transactionId);
+
+    void updateOutgoingTransaction(MaterialStockOutDTO stockOutDTO);
 }

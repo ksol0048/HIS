@@ -22,21 +22,32 @@ public class MaterialStockOutServiceImpl implements MaterialStockOutService {
     private final MaterialStockOutRepository materialStockOutRepository;
     private final MaterialRegisterRepository materialRegisterRepository;
 
+    // 신규 출고 데이터 저장
     @Override
     public void saveOutgoingTransaction(MaterialStockOutDTO stockOutDTO) {
-        // materialCode로 MaterialRegister 찾기
-        Optional<MaterialRegister> materialOpt = materialRegisterRepository.findByMaterialCode(stockOutDTO.getMaterialCode());
+        MaterialStockOut stockOut = new MaterialStockOut();
+        stockOut.setStockOutDate(stockOutDTO.getStockOutDate());
+        stockOut.setStockOut(stockOutDTO.getStockOut());
+        stockOut.setMaterialRegister(materialRegisterRepository.findByMaterialCode(stockOutDTO.getMaterialCode())
+                .orElseThrow(() -> new IllegalArgumentException("재료 코드를 찾을 수 없습니다.")));
 
-        if (materialOpt.isPresent()) {
-            MaterialStockOut stockOut = new MaterialStockOut();
-            stockOut.setMaterialRegister(materialOpt.get());  // MaterialRegister 설정
-            stockOut.setStockOutDate(stockOutDTO.getStockOutDate());  // 출고일자 설정
-            stockOut.setStockOut(stockOutDTO.getStockOut());  // 출고량 설정
+        materialStockOutRepository.save(stockOut);
+    }
 
-            materialStockOutRepository.save(stockOut);  // 저장
-        } else {
-            throw new IllegalArgumentException("해당 재료 코드를 찾을 수 없습니다: " + stockOutDTO.getMaterialCode());
+    // 기존 출고 데이터 수정
+    @Override
+    public void updateOutgoingTransaction(MaterialStockOutDTO stockOutDTO) {
+        if (stockOutDTO.getStockOutId() == null) {
+            throw new IllegalArgumentException("수정하려면 출고 ID가 필요합니다.");
         }
+
+        MaterialStockOut stockOut = materialStockOutRepository.findById(stockOutDTO.getStockOutId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 출고 데이터를 찾을 수 없습니다."));
+
+        stockOut.setStockOutDate(stockOutDTO.getStockOutDate());
+        stockOut.setStockOut(stockOutDTO.getStockOut());
+
+        materialStockOutRepository.save(stockOut);
     }
 
 
@@ -53,5 +64,17 @@ public class MaterialStockOutServiceImpl implements MaterialStockOutService {
                         stockOut.getMaterialRegister().getMaterialName()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteByTransactionId(Long stockOutId) {
+        Optional<MaterialStockOut> transaction = materialStockOutRepository.findById(stockOutId);
+
+        if (transaction.isPresent()) {
+            materialStockOutRepository.deleteById(stockOutId);  // 삭제 처리
+            log.info("StockOut ID {} 삭제 성공", stockOutId);
+        } else {
+            throw new IllegalArgumentException("해당 ID의 출납 기록이 존재하지 않습니다: " + stockOutId);
+        }
     }
 }

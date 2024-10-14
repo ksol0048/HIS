@@ -172,9 +172,12 @@
                 <div class="col-md-12 mb-3">
                   <label for="stockOut" class="form-label">출고량</label>
                   <input type="number" class="form-control" name="stockOut" id="stockOut" placeholder="출고량 입력">
+                  <input type="hidden" id="stockOutId" value="" />
                 </div>
                 <div class="col-md-12 d-flex justify-content-end">
-                  <button type="button" class="btn btn-primary mt-2" id="saveOutTransactionBtn">출고 저장</button>
+                  <button type="button" class="btn btn-primary mt-4 ms-2" id="saveOutTransactionBtn">출고 저장</button>
+                  <button type="button" class="btn btn-secondary mt-4 ms-2" id="resetStockTransaction">취소</button>
+                  <button type="button" class="btn btn-danger mt-4 ms-2" id="deleteStockTransactionBtn">삭제</button>
                 </div>
               </div>
             </form>
