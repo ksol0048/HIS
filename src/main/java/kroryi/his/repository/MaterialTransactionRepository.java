@@ -26,14 +26,14 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
 
     @Query("SELECT mt FROM MaterialTransactionRegister mt " +
             "LEFT JOIN mt.materialRegister mr " +
-            "LEFT JOIN mr.companyRegister cr " +  // 업체명 검색을 위해 추가
-            "WHERE (:materialName IS NULL OR :materialName = '' OR mr.materialName LIKE %:materialName%) " +
-            "AND (:materialCode IS NULL OR :materialCode = '' OR mr.materialCode LIKE %:materialCode%) " +
+            "LEFT JOIN mr.companyRegister cr " +
+            "WHERE (:materialName IS NULL OR :materialName = '' OR LOWER(mr.materialName) LIKE LOWER(CONCAT('%', :materialName, '%'))) " +
+            "AND (:materialCode IS NULL OR :materialCode = '' OR LOWER(mr.materialCode) LIKE LOWER(CONCAT('%', :materialCode, '%'))) " +
             "AND (:transactionStartDate IS NULL OR mr.firstRegisterDate >= :transactionStartDate) " +
             "AND (:transactionEndDate IS NULL OR mr.firstRegisterDate <= :transactionEndDate) " +
-            "AND (:companyName IS NULL OR :companyName = '' OR cr.companyName LIKE %:companyName%) " +  // 업체명 조건 수정
-            "AND (:belowSafetyStock IS NULL OR mt.belowSafetyStock = :belowSafetyStock) " +  // 최소 보관수량 미달 조건
-            "AND (:stockManagementItem IS NULL OR mr.stockManagementItem = :stockManagementItem)")  // 재고 관리 품목 조건 추가
+            "AND (:companyName IS NULL OR :companyName = '' OR LOWER(cr.companyName) LIKE LOWER(CONCAT('%', :companyName, '%'))) " +
+            "AND (:belowSafetyStock IS NULL OR mt.belowSafetyStock = :belowSafetyStock) " +
+            "AND (:stockManagementItem IS NULL OR mr.stockManagementItem = :stockManagementItem)")
     Optional<List<MaterialTransactionRegister>> findSearch(
             @Param("transactionStartDate") LocalDate transactionStartDate,
             @Param("transactionEndDate") LocalDate transactionEndDate,

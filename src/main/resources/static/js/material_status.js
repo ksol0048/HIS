@@ -23,8 +23,9 @@ function loadMaterialStatus() {
 function oneSearch() {
     const registerStartDate = document.getElementById('registerStartDate').value;
     const registerEndDate = document.getElementById('registerEndDate').value;
-    const companyName = document.getElementById('oneCompanyName').value.trim();
-    const materialName = document.getElementById('oneMaterialName').value.trim();
+    const companyName = document.getElementById('oneCompanyName').value;
+    const materialName = document.getElementById('oneMaterialName').value;
+    const materialCode = document.getElementById('oneMaterialCode').value;
     const belowSafetyStock = document.getElementById('oneBelowSafetyStock').value;
     const stockManagementItem = document.getElementById('oneStockManagementItem').value;
 
@@ -34,8 +35,19 @@ function oneSearch() {
     if (registerEndDate) queryParams.append('endDate', registerEndDate);
     if (companyName) queryParams.append('companyName', companyName);
     if (materialName) queryParams.append('materialName', materialName);
-    if (belowSafetyStock) queryParams.append('belowSafetyStock', belowSafetyStock === 'yes');
-    if (stockManagementItem) queryParams.append('stockManagementItem', stockManagementItem === 'yes');
+    if (materialCode) queryParams.append('materialCode', materialCode);
+
+    // belowSafetyStock 및 stockManagementItem 값 처리 ('yes' 또는 'no'가 선택된 경우만 true/false로 설정)
+    if (belowSafetyStock === 'yes') {
+        queryParams.append('belowSafetyStock', 'true');
+    } else if (belowSafetyStock === 'no') {
+        queryParams.append('belowSafetyStock', 'false');
+    }
+    if (stockManagementItem === 'yes') {
+        queryParams.append('stockManagementItem', true);
+    } else if (stockManagementItem === 'no') {
+        queryParams.append('stockManagementItem', false);
+    }
 
     // 검색 조건을 서버로 요청
     fetch('/inventory_management/materialStatus/search?' + queryParams.toString())
@@ -47,7 +59,6 @@ function oneSearch() {
             console.error('재료 현황 검색 중 오류 발생:', error);
         });
 }
-
 
 // 검색 결과로 테이블 업데이트 함수
 function updateMaterialStatusTable(data) {
