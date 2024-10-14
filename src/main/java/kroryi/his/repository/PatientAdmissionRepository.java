@@ -15,7 +15,7 @@ public interface PatientAdmissionRepository extends JpaRepository<PatientAdmissi
 
     List<PatientAdmission> findByReceptionTimeBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-    boolean existsByChartNum(Integer chartNum); // 차트 번호로 존재 여부 체크
-
-    PatientAdmission findByChartNum(Integer chartNum); // 차트 번호로 환자 정보 조회
+//    boolean existsByChartNum(Integer chartNum); // 차트 번호로 존재 여부 체크
+//
+//    PatientAdmission findByChartNum(Integer chartNum); // 차트 번호로 환자 정보 조회
 }

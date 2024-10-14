@@ -26,23 +26,14 @@ public class PatientAdmissionController {
         System.out.println("환자 등록 요청 수신: " + patientAdmissionDTO);
 
         // 현재 시간을 접수 시간으로 설정
-        LocalDateTime currentTime = LocalDateTime.now();
-        patientAdmissionDTO.setReceptionTime(currentTime);
+        patientAdmissionDTO.setReceptionTime(LocalDateTime.now());
         patientAdmissionDTO.setTreatStatus("1"); // 대기 상태는 1
 
-        // 차트 번호로 기존 환자 존재 여부 체크
-        if (patientAdmissionService.existsByChartNum(patientAdmissionDTO.getChartNum())) {
-            // 기존 환자와 동일한 차트 번호를 가진 새로운 환자 등록
-            patientAdmissionService.savePatientAdmission(patientAdmissionDTO); // 새로운 환자 등록
-
-            return ResponseEntity.ok("{\"message\": \"기존 환자와 동일한 차트 번호로 새로운 환자가 대기 상태로 등록되었습니다.\"}");
-        }
-
-        // 환자가 없는 경우 새로 등록
+        // DB에 저장
         patientAdmissionService.savePatientAdmission(patientAdmissionDTO);
+
         return ResponseEntity.ok("{\"message\": \"환자가 대기 상태로 등록되었습니다.\"}");
     }
-
 
 
 

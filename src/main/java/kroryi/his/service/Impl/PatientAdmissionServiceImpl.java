@@ -64,15 +64,15 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
                 .toList();
     }
 
-    @Override
-    public boolean existsByChartNum(Integer chartNum) {
-        return patientAdmissionRepository.existsByChartNum(chartNum);
-    }
-
-    @Override
-    public PatientAdmission findByChartNum(Integer chartNum) {
-        return patientAdmissionRepository.findByChartNum(chartNum);
-    }
+//    @Override
+//    public boolean existsByChartNum(Integer chartNum) {
+//        return patientAdmissionRepository.existsByChartNum(chartNum);
+//    }
+//
+//    @Override
+//    public PatientAdmission findByChartNum(Integer chartNum) {
+//        return patientAdmissionRepository.findByChartNum(chartNum);
+//    }
 
 
     // PatientAdmission 엔티티를 PatientAdmissionDTO로 변환하는 메서드

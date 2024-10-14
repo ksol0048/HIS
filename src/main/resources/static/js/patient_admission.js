@@ -453,6 +453,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const currentRowCount = waitingPatientsTable.rows.length; // 현재 행 수
 
         row.innerHTML = `
+
     <td>${currentRowCount}</td> <!-- 새로운 행 번호는 현재 테이블의 행 수 -->
     <td>${patient.chartNum || 'N/A'}</td>
     <td>${patient.paName || 'N/A'}</td>
@@ -511,6 +512,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // 대기 환자 수 업데이트
         updateWaitingPatientCount();
     });
+
+
 
 
     // 현재 시간을 포맷팅하는 함수
@@ -590,8 +593,8 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${patient.paName || 'N/A'}</td>
         <td>${patient.selectedDoctor || 'N/A'}</td>
         <td>${'N/A'}</td> 
-        <td>${treatmentStartTime || 'N/A'}</td> <!-- 포맷된 진료 시작 시간 -->
         <td>${formattedReceptionTime || 'N/A'}</td> <!-- 포맷된 접수 시간 -->
+        <td>${treatmentStartTime || 'N/A'}</td> <!-- 포맷된 진료 시작 시간 -->
     `;
 
         console.log('새로 추가된 행:', row); // 추가된 행 정보 확인
@@ -754,7 +757,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     function updateWaitingPatientCount() {
-        const count = waitingPatientsTable.rows.length;
+        const count = waitingPatientsTable.rows.length ;
         const header = document.querySelector("#waitingPatientsTable th[colspan='6']");
         header.textContent = `진료 대기 환자: ${count}명`;
 

@@ -31,11 +31,6 @@
                         <i class="bi bi-gear"></i>사용자관리
                     </a>
                 </li>
-                <li class="nav-item">
-                    <form action="/logout" method="post">
-                        <button type="submit" class="btn btn-primary submitBtn">Log Out</button>
-                    </form>
-                </li>
             </ul>
         </div>
     </div>
@@ -57,8 +52,8 @@
                         <div class="input-group col">
                             <input type="text" class="form-control" id="patient_name_keyword" placeholder="환자성명 입력">
                             <button type="button" class="btn btn-secondary" id="resetBtn">
-                                <i class="bi bi-x-circle" style="padding: 0.5rem;"></i>
-                            </button>
+                            <i class="bi bi-x-circle" style="padding: 0.5rem;"></i>
+                        </button>
                         </div>
                         <div class="col">
 
@@ -89,8 +84,8 @@
                     <a class="btn btn-primary m-2" href="inventory_management" style="width: 100px;">
                         <i class="bi bi-box-seam"></i><br> 재고관리
                     </a>
-                    <a class="btn btn-primary m-2" href="board/list" style="width: 100px;">
-                        <i class="bi bi-file-medical"></i><br> 공지사항
+                    <a class="btn btn-primary m-2" href="inventory_management" style="width: 100px;">
+                        <i class="bi bi-file-medical"></i><br> 보험청구
                     </a>
                 </div>
             </div>
@@ -145,11 +140,13 @@
 <div layout:fragment="inventory_management" style="width: 100%"></div>
 
 <script layout:fragment="patientscript" th:inline="javascript"></script>
+<script layout:fragment="axios" th:inline="javascript"></script>
 <script layout:fragment="reservationscript" th:inline="javascript"></script>
+
 <script layout:fragment="chartscript" th:inline="javascript"></script>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="/js/axios.js"></script>
 <script src="/js/layout.js"></script>
+<script src="/js/axios.js"></script>
 <div th:fragment="reception_js"></div>
 </html>
