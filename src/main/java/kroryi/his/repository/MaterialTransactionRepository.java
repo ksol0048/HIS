@@ -21,13 +21,26 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
 
     Optional<MaterialTransactionRegister> findBystockInDateAndMaterialRegister(LocalDate stockInDate, MaterialRegister materialRegister);
 
+    // MaterialRegister로 검색 (MaterialRegister 자체로 트랜잭션 조회)
+    List<MaterialTransactionRegister> findByMaterialRegister(MaterialRegister materialRegister);
+
     @Query("SELECT mt FROM MaterialTransactionRegister mt " +
             "JOIN mt.materialRegister mr " +
-            "WHERE (mr.materialName LIKE %:materialName% OR mr.materialCode LIKE %:materialCode%) " +
-            "OR mt.stockInDate BETWEEN :startDate AND :endDate")
+            "WHERE (:materialName IS NULL OR mr.materialName LIKE %:materialName%) " +
+            "AND (:materialCode IS NULL OR mr.materialCode LIKE %:materialCode%) " +
+            "AND (:startDate IS NULL OR mt.stockInDate >= :startDate) " +
+            "AND (:endDate IS NULL OR mt.stockInDate <= :endDate)")
     Optional<List<MaterialTransactionRegister>> findSearch(
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("materialName") String materialName,
             @Param("materialCode") String materialCode);
+
+
+
+    // materialCode별 총 입고량 계산
+    @Query("SELECT SUM(mtr.stockIn) FROM MaterialTransactionRegister mtr WHERE mtr.materialRegister.materialCode = :materialCode")
+    Long getTotalStockInByMaterialCode(@Param("materialCode") String materialCode);
+
+
 }

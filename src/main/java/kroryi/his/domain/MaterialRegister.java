@@ -69,4 +69,6 @@ public class MaterialRegister {
             this.firstRegisterDate = LocalDate.now();
         }
     }
+
+
 }
