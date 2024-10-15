@@ -1,17 +1,17 @@
 /* 전체 테이블 컨테이너 */
 .date-input {
-    width: 200px;
-    height: 60px;
+    width: 150px;
+    height: 45px;
     padding: 5px;
-    font-size: 25px;
+    font-size: 20px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 .button-container button {
-    width: 200px;
-    height: 60px;
-    font-size: 25px;
+    width: 150px;
+    height: 45px;
+    font-size: 20px;
     margin: 0 10px;
 }
 
@@ -26,6 +26,7 @@ thead {
     background-color: #f8f9fa; /* 헤더 배경색 */
     display: table;
     width: 100%;
+    table-layout: fixed;
 }
 
 
@@ -34,6 +35,7 @@ tbody {
     display: block;
     max-height: 600px; /* tbody의 최대 높이 설정 */
     overflow-y: auto; /* 스크롤바 추가 */
+    width: 100%;
 }
 
 /* 각 행 높이 설정 */
@@ -41,7 +43,9 @@ tbody tr {
     display: table; /* 테이블의 각 행을 다시 테이블 형태로 */
     table-layout: fixed; /* 고정된 테이블 레이아웃 */
     width: 100%; /* 테이블 너비에 맞게 설정 */
+
 }
+
 
 /* 테이블 셀 스타일 */
 td, th{
@@ -49,5 +53,16 @@ td, th{
     text-align: center !important;
     vertical-align: middle !important;
 
+    padding: 0;
 }
 
+.selected {
+    background-color: silver;
+}
+
+.clicked {
+    background-color: silver; /* 클릭한 행의 회색 배경색 */
+}
+.table-hover tbody tr:hover {
+    background-color: silver; /* 원하는 색상으로 변경 */
+}

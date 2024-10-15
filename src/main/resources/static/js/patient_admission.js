@@ -115,6 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const paName = selectedRow.cells[2].textContent
         const receptionTime = selectedRow.cells[5].textContent
 
+
         // 선택된 행의 의사 정보를 가져옴
         const selectedDoctor = selectedRow.querySelector('select').value
         console.log('선택된 의사:', selectedDoctor) // 의사 확인 로그 추가
@@ -144,7 +145,13 @@ document.addEventListener("DOMContentLoaded", function () {
             // 세션 스토리지에서 진료 시작 시간 가져오기
             const treatmentPatients = JSON.parse(sessionStorage.getItem('treatmentPatients')) || []
             const existingPatient = treatmentPatients.find(patient => patient.chartNum === chartNum)
-            const viTime = existingPatient ? existingPatient.viTime : null // viTime 수정
+            let viTime = existingPatient ? existingPatient.viTime : null // viTime 수정
+
+            if (!viTime) {
+                viTime = new Date(); // 현재 시간
+                viTime.setHours(viTime.getHours() + 9); // +9시간 추가
+                viTime = viTime.toISOString(); // ISO 형식으로 변환
+            }
 
             const patientData = {
                 chartNum: chartNum,
@@ -592,11 +599,11 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${patient.chartNum || 'N/A'}</td>
         <td>${patient.paName || 'N/A'}</td>
         <td>${patient.selectedDoctor || 'N/A'}</td>
-        <td>${'N/A'}</td> 
-        <td>${formattedReceptionTime || 'N/A'}</td> <!-- 포맷된 접수 시간 -->
+        <td>${formattedReceptionTime || 'N/A'}</td><!-- 포맷된 접수 시간 -->
         <td>${treatmentStartTime || 'N/A'}</td> <!-- 포맷된 진료 시작 시간 -->
     `;
-
+        console.log('환자의 receptionTime:', patient.receptionTime);
+        console.log('포맷된 receptionTime:', formattedReceptionTime);
         console.log('새로 추가된 행:', row); // 추가된 행 정보 확인
         updateTreatmentPatientCount(); // 환자 수 업데이트
 
@@ -630,38 +637,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 const formattedReceptionTime = adjustedReceptionTime.toISOString();
 
                 // treatmentStartTime을 세션에서 가져옴
-                let treatmentStartTime = patient.treatmentStartTime;
+                let viTime = patient.viTime;
+                console.log("가져온 viTime:", viTime);
+                console.log("viTime의 타입:", typeof viTime); // 확인용
 
-                // 진료 시작 시간이 없으면 현재 시간으로 설정하고 세션에 저장
-                if (!treatmentStartTime) {
-                    treatmentStartTime = new Date().toISOString(); // 현재 시간을 ISO 형식으로 저장
-                    patient.treatmentStartTime = treatmentStartTime; // 환자 객체에 저장
-
-                    // 세션 스토리지 업데이트
-                    sessionStorage.setItem('treatmentPatients', JSON.stringify(treatmentPatients));
-
-                    // 초기 진료 시작 시간 로그 출력
-                    console.log("처음 저장된 진료 시작 시간:", treatmentStartTime);
-                } else {
-                    // 이미 저장된 진료 시작 시간 로그 출력
-                    console.log("진료 시작 시간:", treatmentStartTime);
+                // viTime이 문자열인 경우, Date 객체로 변환
+                if (typeof viTime === 'string') {
+                    viTime = new Date(viTime);
+                    console.log("viTime (Date 객체):", viTime);
                 }
+
+                // viTime이 Date 객체인 경우에만 ISO 형식으로 변환
+                const viTimeIso = viTime instanceof Date ? viTime.toISOString() : 'N/A';
+                console.log("viTime (ISO 형식):", viTimeIso);
 
                 // 환자 정보를 테이블에 추가
                 addPatientToTreatmentTable({
                     chartNum: patient.chartNum || 'N/A',
                     paName: patient.paName || 'N/A',
                     selectedDoctor: patient.mainDoc || 'N/A',
-                    receptionTime: formattedReceptionTime, // 수정된 접수 시간
-                    treatmentStartTime: treatmentStartTime, // 저장된 진료 시작 시간 사용
+                    receptionTime: formattedReceptionTime,
+                    viTime: viTimeIso, // ISO 형식으로 변환된 viTime 사용
                     treatStatus: "2" // 진료 중 상태
                 });
             } else {
                 // 이미 테이블에 존재하는 환자일 경우, 진료 시작 시간을 세션에서 그대로 가져와서 업데이트
                 const existingRow = existingRows.find(row => row.cells[1].innerText === patient.chartNum);
                 if (existingRow) {
-                    const existingTreatmentStartTime = existingRow.cells[4].innerText; // 진료 시작 시간이 저장된 셀의 인덱스 확인
-                    existingRow.cells[4].innerText = existingTreatmentStartTime; // 세션에서 가져온 진료 시작 시간으로 업데이트
+                    console.log("기존 행:", existingRow);
+                    // 진료 시작 시간을 업데이트
+                    existingRow.cells[5].innerText = patient.viTime; // 세션에서 가져온 진료 시작 시간으로 업데이트
+                    console.log("업데이트된 viTime:", patient.viTime);
                 }
             }
         });
@@ -669,6 +675,12 @@ document.addEventListener("DOMContentLoaded", function () {
         // 진료 중 환자 수 업데이트
         updateTreatmentPatientCount();
     });
+
+
+
+
+
+
 
 
 // 진료 완료 환자를 완료 테이블에 추가하는 함수
@@ -765,7 +777,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateTreatmentPatientCount() {
         const count = treatmentPatientsTable.rows.length; // 현재 테이블의 행 개수
-        const header = document.querySelector("#treatmentPatientsTable th[colspan='7']");
+        const header = document.querySelector("#treatmentPatientsTable th[colspan='6']");
 
         if (header) {
             header.textContent = `진료 중 환자: ${count}명`; // 헤더 업데이트
@@ -821,8 +833,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const targetRow = event.target.closest("tr"); // 클릭한 셀의 행을 가져옴
         if (!targetRow) return;
 
+        if (selectedRow) {
+            selectedRow.classList.remove("clicked"); // 이전 행의 선택 클래스 제거
+        }
+
         // 선택된 행 저장
         selectedRow = targetRow;
+        selectedRow.classList.add("clicked");
+
         console.log("Selected patient:", selectedRow.cells[2].textContent);
     });
 
