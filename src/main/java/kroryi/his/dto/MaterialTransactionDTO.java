@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
+
 @Builder
 @Data
 @Getter
@@ -33,9 +34,6 @@ public class MaterialTransactionDTO {
     //최소보관수량
     private Long minQuantity;
 
-    //안전재고량미달품목
-    private boolean belowSafetyStock;
-
     //재고관리품목 여부
     private Boolean stockManagementItem;
 
@@ -58,13 +56,27 @@ public class MaterialTransactionDTO {
     //담당자연락처
     private String managerNumber;
 
+
+    // 안전 재고 여부
+    private boolean belowSafetyStock;
+
+
+    // 안전재고량 미달품목 여부 (실시간 계산 함수)
+    public boolean isBelowSafetyStock() {
+        return this.remainingStock != null && this.minQuantity != null && this.remainingStock < this.minQuantity;
+    }
+
+    // 빨간색 그리드를 위한 필드
+    private boolean isHighlighted;
+
+
     public MaterialTransactionDTO(MaterialTransactionRegister materialTransactionRegister) {
         this.transactionId = materialTransactionRegister.getTransactionId();
         this.stockInDate = materialTransactionRegister.getStockInDate();
         this.stockIn = materialTransactionRegister.getStockIn();
         this.remainingStock = materialTransactionRegister.getRemainingStock();
-        this.belowSafetyStock = materialTransactionRegister.isBelowSafetyStock();
         this.firstRegisterDate = materialTransactionRegister.getMaterialRegister().getFirstRegisterDate();
+        this.isHighlighted = false; // 초기값
 
 
         // MaterialRegister가 null이 아닌 경우에만 데이터 설정

@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface MaterialStatusService {
 
-    // 입고량 또는 출고량 등록 후 재고 현황 업데이트
-    void updateMaterialStatus(String materialCode);
 
     // 재료 현황 검색
     List<MaterialTransactionDTO> searchMaterialStatus(LocalDate transactionStartDate,
@@ -19,6 +17,5 @@ public interface MaterialStatusService {
                                                       Boolean belowSafetyStock,
                                                       Boolean stockManagementItem) ;
 
-    // 전체 데이터를 반환하는 메서드 추가
-    List<MaterialTransactionDTO> getAllMaterialTransactions();
+
 }

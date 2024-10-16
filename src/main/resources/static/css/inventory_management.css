@@ -141,3 +141,8 @@ table thead th {
     padding: 20px; /* 카드 내용에 여백 추가 */
 }
 
+/* 최소보관수량 미달품목 하이라이트 표시*/
+.highlight {
+    background-color: #f08080;
+    color: #FFFFFF !important;
+}

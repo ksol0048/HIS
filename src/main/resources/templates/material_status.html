@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" href="/css/inventory_management.css">
+</head>
 <div class="card m-2 mb-1">
     <div class="card-header text-center">
         재료 현황 보기
@@ -43,7 +46,7 @@
 
                 <!-- 최소보관수량 미달품목 검색 -->
                 <div class="col mb-3">
-                    <label for="oneBelowSafetyStock" class="form-label">최소보관수량 미달품목</label>
+                    <label for="oneBelowSafetyStock" class="form-label">최소보관수량 미달여부</label>
                     <select class="form-select" id="oneBelowSafetyStock" name="belowSafetyStock">
                         <option value="">전체</option>
                         <option value="yes">예</option>
@@ -53,7 +56,7 @@
 
                 <!-- 재고관리품목 검색 -->
                 <div class="col mb-3">
-                    <label for="oneStockManagementItem" class="form-label">재고관리품목</label>
+                    <label for="oneStockManagementItem" class="form-label">재고관리여부</label>
                     <select class="form-select" name="stockManagementItem" id="oneStockManagementItem">
                         <option value="">전체</option>
                         <option value="yes">예</option>

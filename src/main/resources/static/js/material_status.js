@@ -73,6 +73,13 @@ function updateMaterialStatusTable(data) {
     // 데이터를 테이블에 추가
     data.forEach(material => {
         const row = document.createElement('tr');
+
+        // 하이라이트 조건에 따라 클래스를 추가
+        if (material.highlighted) {
+            row.classList.add('highlight'); // CSS 클래스를 추가하여 하이라이트
+        }
+
+
         row.innerHTML = `
             <td>${material.firstRegisterDate || 'N/A'}</td>
             <td>${material.materialCode || 'N/A'}</td>
@@ -100,3 +107,5 @@ document.querySelector('button[type="reset"]').addEventListener('click', functio
 
     loadMaterialStatus();  // 초기화 후 전체 목록 다시 로드
 });
+
+

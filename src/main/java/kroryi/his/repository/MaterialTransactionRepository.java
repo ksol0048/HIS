@@ -4,8 +4,10 @@ import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -47,6 +49,12 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
     // materialCode별 총 입고량 계산
     @Query("SELECT SUM(mtr.stockIn) FROM MaterialTransactionRegister mtr WHERE mtr.materialRegister.materialCode = :materialCode")
     Long getTotalStockInByMaterialCode(@Param("materialCode") String materialCode);
+
+    // belowSafetyStock 실시간 데이터 반영
+    @Modifying
+    @Transactional
+    @Query("UPDATE MaterialTransactionRegister mtr SET mtr.belowSafetyStock = :belowSafetyStock WHERE mtr.transactionId = :transactionId")
+    void updateBelowSafetyStock(@Param("transactionId") Long transactionId, @Param("belowSafetyStock") Boolean belowSafetyStock);
 
 
 }

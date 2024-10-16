@@ -25,74 +25,6 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
     private final MaterialStockOutRepository materialStockOutRepository;
     private final MaterialRegisterRepository materialRegisterRepository;
 
-    // 입고량 또는 출고량 등록 후 재고 현황 업데이트
-    @Override
-    public void updateMaterialStatus(String materialCode) {
-        // 재료 코드로 해당 재료 정보를 가져옴
-        MaterialRegister material = materialRegisterRepository.findByMaterialCode(materialCode)
-                .orElseThrow(() -> new IllegalArgumentException("해당 재료를 찾을 수 없습니다: " + materialCode));
-
-        // 총 입고량 계산
-        Long totalStockIn = materialTransactionRepository.getTotalStockInByMaterialCode(materialCode);
-        // 총 출고량 계산
-        Long totalStockOut = materialStockOutRepository.getTotalStockOutByMaterialCode(materialCode);
-
-        // null 값 처리
-        totalStockIn = (totalStockIn != null) ? totalStockIn : 0L;
-        totalStockOut = (totalStockOut != null) ? totalStockOut : 0L;
-
-        // 현재고량 계산 (입고량 - 출고량)
-        Long remainingStock = totalStockIn - totalStockOut;
-
-        // 현재고량을 각 입고 및 출고 트랜잭션에 반영
-        List<MaterialTransactionRegister> transactions = materialTransactionRepository.findByMaterialRegister(material);
-        for (MaterialTransactionRegister transaction : transactions) {
-            transaction.setRemainingStock(remainingStock);
-
-            // 최소보관수량과 비교하여 isBelowSafetyStock 설정
-            transaction.setBelowSafetyStock(remainingStock < material.getMinQuantity());
-
-            materialTransactionRepository.save(transaction);
-        }
-
-        log.info("재료 코드 {}에 대한 현재고량이 각 트랜잭션에 업데이트되었습니다: 남은 재고 {}", materialCode, remainingStock);
-    }
-
-    // 전체 트랜잭션에 대해 계산하여 DTO 반환
-    @Override
-    public List<MaterialTransactionDTO> getAllMaterialTransactions() {
-        // 전체 트랜잭션 가져오기
-        List<MaterialTransactionRegister> transactions = materialTransactionRepository.findAll();
-
-        // 각 트랜잭션에 대해 남은 재고 계산
-        return transactions.stream()
-                .map(transaction -> {
-                    String materialCode = transaction.getMaterialRegister().getMaterialCode();
-                    Long totalStockIn = materialTransactionRepository.getTotalStockInByMaterialCode(materialCode);
-                    Long totalStockOut = materialStockOutRepository.getTotalStockOutByMaterialCode(materialCode);
-
-                    // null 값 처리
-                    totalStockIn = (totalStockIn != null) ? totalStockIn : 0L;
-                    totalStockOut = (totalStockOut != null) ? totalStockOut : 0L;
-
-                    // 남은 재고량 계산 (입고량 - 출고량)
-                    Long remainingStock = totalStockIn - totalStockOut;
-
-                    // 남은 재고가 음수인 경우 0으로 설정
-                    if (remainingStock < 0) remainingStock = 0L;
-
-                    // 트랜잭션에 남은 재고 설정
-                    transaction.setRemainingStock(remainingStock);
-
-                    // 최소보관수량과 비교하여 isBelowSafetyStock 설정
-                    transaction.setBelowSafetyStock(remainingStock < transaction.getMaterialRegister().getMinQuantity());
-
-                    // DTO로 변환 후 반환
-                    return new MaterialTransactionDTO(transaction);
-                })
-                .collect(Collectors.toList());
-    }
-
 
     @Override
     public List<MaterialTransactionDTO> searchMaterialStatus(LocalDate transactionStartDate,
@@ -107,7 +39,6 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
         Optional<List<MaterialTransactionRegister>> transactionsOpt = materialTransactionRepository.findSearch(
                 transactionStartDate, transactionEndDate, materialName, materialCode, companyName, belowSafetyStock, stockManagementItem);
 
-        // 쿼리 결과가 없을 경우 로그 기록
         if (transactionsOpt.isEmpty()) {
             log.warn("검색 결과가 없습니다.");
             return Collections.emptyList();
@@ -116,41 +47,38 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
         List<MaterialTransactionRegister> transactions = transactionsOpt.get();
         log.info("쿼리 결과 수: {}", transactions.size());
 
-        // DTO로 변환하여 반환
+        // materialCode를 기준으로 그룹화
         return transactions.stream()
-                .map(transaction -> {
-                    MaterialTransactionDTO dto = new MaterialTransactionDTO(transaction);
+                .collect(Collectors.groupingBy(transaction -> transaction.getMaterialRegister().getMaterialCode()))
+                .values().stream() // 그룹화된 결과를 스트림으로 변환
+                .map(groupedTransactions -> {
+                    MaterialTransactionRegister firstTransaction = groupedTransactions.get(0); // 그룹에서 첫 번째 트랜잭션 불러오기
+                    MaterialTransactionDTO dto = new MaterialTransactionDTO(firstTransaction);
 
-                    // 재료 코드에 대한 총 입고량 및 출고량 계산
-                    String materialCodeFromTransaction = transaction.getMaterialRegister().getMaterialCode();
+                    String materialCodeFromTransaction = firstTransaction.getMaterialRegister().getMaterialCode();
                     Long totalStockIn = materialTransactionRepository.getTotalStockInByMaterialCode(materialCodeFromTransaction);
                     Long totalStockOut = materialStockOutRepository.getTotalStockOutByMaterialCode(materialCodeFromTransaction);
 
-                    // null 값 처리
                     totalStockIn = (totalStockIn != null) ? totalStockIn : 0L;
                     totalStockOut = (totalStockOut != null) ? totalStockOut : 0L;
 
-                    // 현재고량(remainingStock) 계산
                     Long remainingStock = totalStockIn - totalStockOut;
 
-                    // 최소보관수량과 비교하여 isBelowSafetyStock 설정
-                    boolean isBelowSafetyStock = remainingStock < transaction.getMaterialRegister().getMinQuantity();
-
-                    // DTO에 계산된 값 반영
+                    boolean isBelowSafetyStock = remainingStock < firstTransaction.getMaterialRegister().getMinQuantity();
                     dto.setRemainingStock(remainingStock);
                     dto.setBelowSafetyStock(isBelowSafetyStock);
 
-                    // 로그 추가: 각 트랜잭션의 남은 재고 및 최소보관수량 상태 확인
-                    log.info("Material Code: {}, Total Stock In: {}, Total Stock Out: {}, Remaining Stock: {}, Below Safety Stock: {}",
-                            materialCodeFromTransaction, totalStockIn, totalStockOut, remainingStock, isBelowSafetyStock);
+                    // DB에 실시간으로 belowSafetyStock 값 업데이트
+                    materialTransactionRepository.updateBelowSafetyStock(firstTransaction.getTransactionId(), isBelowSafetyStock);
+
+                    // 하이라이트 설정
+                    dto.setHighlighted(isBelowSafetyStock && (dto.getStockManagementItem() != null && dto.getStockManagementItem()));
+
 
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
-
 }
-
-
 
 
