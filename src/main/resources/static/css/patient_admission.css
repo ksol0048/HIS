@@ -1,27 +1,46 @@
 /* 전체 테이블 컨테이너 */
 .date-input {
-    width: 150px;
-    height: 45px;
+    width: 130px;
+    height: 30px;
     padding: 5px;
-    font-size: 20px;
+    font-size: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
 .button-container button {
-    width: 150px;
-    height: 45px;
-    font-size: 20px;
+    width: 130px;
+    height: 30px;
+    font-size: 15px;
     margin: 0 10px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
 }
+
+
 
 .table-container {
     display: flex;
     gap: 10px; /* 테이블 간의 간격 */
     align-items: flex-start;
     margin-top: 20px;
+    font-size: small;
 }
 
+#waitingPatientsTable {
+    width: 600px;             /* 대기 환자 테이블의 높이 설정 */
+    margin-left: 10px;
+}
+#treatmentPatientsTable {
+    width: 650px;             /* 진료 중 환자 테이블의 높이 설정 */
+}
+
+#completedPatientsTable {
+    width: 630px;             /* 진료 완료 환자 테이블의 높이 설정 */
+}
 thead {
     background-color: #f8f9fa; /* 헤더 배경색 */
     display: table;
@@ -33,7 +52,7 @@ thead {
 /* tbody에 스크롤바 추가 */
 tbody {
     display: block;
-    max-height: 600px; /* tbody의 최대 높이 설정 */
+    max-height: 520px; /* tbody의 최대 높이 설정 */
     overflow-y: auto; /* 스크롤바 추가 */
     width: 100%;
 }
