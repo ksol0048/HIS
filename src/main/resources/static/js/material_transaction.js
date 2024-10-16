@@ -21,7 +21,6 @@ function populateTransactionForm(transaction) {
     document.getElementById('stockIn').value = transaction.stockIn || 0;
 
     // 필드 수정 불가능하게 설정
-    document.getElementById('stockInDate').readOnly = true;
     document.getElementById('twoCompanyName').readOnly = true;
     document.getElementById('twoMaterialName').readOnly = true;
     document.getElementById('twoMaterialCode').readOnly = true;
@@ -45,7 +44,6 @@ function clearTransactionForm() {
 
 // 필드를 읽기 전용으로 설정하는 함수 (입고일자는 항상 읽기 전용)
 function setReadOnlyFields(readOnly) {
-    document.getElementById('stockInDate').readOnly = true;  // 입고일자는 항상 읽기 전용
     document.getElementById('twoCompanyName').readOnly = readOnly;
     document.getElementById('twoMaterialName').readOnly = readOnly;
     document.getElementById('twoMaterialCode').readOnly = readOnly;
@@ -54,8 +52,9 @@ function setReadOnlyFields(readOnly) {
 // 오늘 날짜를 설정하는 함수
 function setTodayDate() {
     const today = new Date().toISOString().split('T')[0];  // 오늘 날짜를 'YYYY-MM-DD' 형식으로 가져옴
-    document.getElementById('stockInDate').value = today;   // 입고일자 필드에 오늘 날짜 설정
+    document.getElementById('stockInDate').value = today;  // 입고일자 필드에 오늘 날짜 설정
     document.getElementById('stockOutDate').value = today;  // 출고일자 필드에 오늘 날짜 설정 (필요한 경우)
+
 }
 
 
@@ -528,8 +527,16 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
         body: JSON.stringify(stockOutData)
     })
         .then(response => {
+            // 서버에서 재고 부족 예외를 처리한 경우 400 상태 코드 또는 사용자 정의 오류 반환
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (response.status === 400) {
+                    return response.json().then(data => {
+                        // 재고 부족 메시지를 클라이언트에 전달
+                        throw new Error(data.message || '재고 부족 오류 발생');
+                    });
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
             }
             return response.json();
         })
@@ -540,10 +547,12 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
             loadOutgoingTransactionList(materialCode);  // 목록 다시 로드
         })
         .catch(error => {
+            // 재고 부족 등 오류 발생 시 처리
             console.error("Error:", error);
-            alert(`출고 저장 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
+            alert(`상세 내용: ${error.message}`);
         });
 });
+
 
 // 삭제 버튼 클릭 시 동작하는 함수
 document.getElementById('deleteStockTransactionBtn').addEventListener('click', function () {

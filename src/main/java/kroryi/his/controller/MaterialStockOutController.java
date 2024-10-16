@@ -24,14 +24,15 @@ public class MaterialStockOutController {
 
     // 신규 출고 데이터 추가
     @PostMapping("/addStockTransaction")
-    public ResponseEntity<?> addStockTransaction(@RequestBody MaterialStockOutDTO stockOutDTO) {
+    public ResponseEntity<?> saveStockOut(@RequestBody MaterialStockOutDTO stockOutDTO) {
         try {
             materialStockOutService.saveOutgoingTransaction(stockOutDTO);
-            log.info("New stock transaction added: {}", stockOutDTO);
-            return ResponseEntity.ok(Map.of("success", true, "message", "출고 데이터가 추가되었습니다."));
+            return ResponseEntity.ok(Map.of("success", true, "message", "출고 내역이 저장되었습니다."));
+        } catch (IllegalArgumentException e) {
+            // 재고 부족으로 인한 예외 처리
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "message", e.getMessage()));
         } catch (Exception e) {
-            log.error("Error adding stock transaction", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "서버 오류가 발생했습니다."));
         }
     }
 

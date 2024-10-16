@@ -2,6 +2,7 @@ package kroryi.his.service.Impl;
 
 import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialStockOut;
+import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialStockOutDTO;
 import kroryi.his.repository.MaterialRegisterRepository;
 import kroryi.his.repository.MaterialStockOutRepository;
@@ -22,16 +23,44 @@ public class MaterialStockOutServiceImpl implements MaterialStockOutService {
     private final MaterialStockOutRepository materialStockOutRepository;
     private final MaterialRegisterRepository materialRegisterRepository;
 
-    // 신규 출고 데이터 저장
     @Override
     public void saveOutgoingTransaction(MaterialStockOutDTO stockOutDTO) {
+        // 재료 정보를 MaterialRegister에서 가져옴
+        MaterialRegister materialRegister = materialRegisterRepository.findByMaterialCode(stockOutDTO.getMaterialCode())
+                .orElseThrow(() -> new IllegalArgumentException("재료 코드를 찾을 수 없습니다."));
+
+        // 현재 재고량을 계산
+        Long remainingStock = calculateRemainingStock(materialRegister);
+
+        // 출고량이 현재 재고량보다 많은 경우 예외 처리
+        if (stockOutDTO.getStockOut() > remainingStock) {
+            throw new IllegalArgumentException("출고량이 현재 재고량보다 많습니다.");
+        }
+
+        // 출고 데이터를 저장
         MaterialStockOut stockOut = new MaterialStockOut();
         stockOut.setStockOutDate(stockOutDTO.getStockOutDate());
         stockOut.setStockOut(stockOutDTO.getStockOut());
-        stockOut.setMaterialRegister(materialRegisterRepository.findByMaterialCode(stockOutDTO.getMaterialCode())
-                .orElseThrow(() -> new IllegalArgumentException("재료 코드를 찾을 수 없습니다.")));
+        stockOut.setMaterialRegister(materialRegister);
 
         materialStockOutRepository.save(stockOut);
+    }
+
+    // 현재 재고량을 계산하는 메서드
+    private Long calculateRemainingStock(MaterialRegister materialRegister) {
+        List<MaterialTransactionRegister> transactions = materialRegister.getMaterialTransactionList();
+
+        // 총 입고량 계산
+        Long totalStockIn = transactions.stream()
+                .mapToLong(MaterialTransactionRegister::getStockIn)
+                .sum();
+
+        // 총 출고량 계산
+        Long totalStockOut = materialRegister.getMaterialStockOutList().stream()
+                .mapToLong(MaterialStockOut::getStockOut)
+                .sum();
+
+        return totalStockIn - totalStockOut;
     }
 
     // 기존 출고 데이터 수정
