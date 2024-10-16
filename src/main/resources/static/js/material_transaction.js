@@ -54,8 +54,10 @@ function setReadOnlyFields(readOnly) {
 // 오늘 날짜를 설정하는 함수
 function setTodayDate() {
     const today = new Date().toISOString().split('T')[0];  // 오늘 날짜를 'YYYY-MM-DD' 형식으로 가져옴
-    document.getElementById('stockOutDate').value = today;  // 출고일자 필드에 오늘 날짜 설정
+    document.getElementById('stockInDate').value = today;   // 입고일자 필드에 오늘 날짜 설정
+    document.getElementById('stockOutDate').value = today;  // 출고일자 필드에 오늘 날짜 설정 (필요한 경우)
 }
+
 
 // 페이지가 로드될 때, 그리고 저장/취소/삭제 후에 오늘 날짜로 설정
 document.addEventListener('DOMContentLoaded', function() {
