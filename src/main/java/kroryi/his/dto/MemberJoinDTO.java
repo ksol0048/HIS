@@ -1,6 +1,7 @@
 package kroryi.his.dto;
 
 import kroryi.his.domain.MemberRole;
+import kroryi.his.domain.MemberRoleSet;
 import lombok.Data;
 
 import java.util.Set;
@@ -14,10 +15,10 @@ public class MemberJoinDTO {
     private boolean retirement;
     private String social;
 
-    private Set<MemberRole> roles;
+    private Set<MemberRoleSet> roles;
 
     // 새로운 생성자 추가
-    public MemberJoinDTO(String mid, String name, String password, String email, boolean retirement, String social, Set<MemberRole> roles) {
+    public MemberJoinDTO(String mid, String name, String password, String email, boolean retirement, String social, Set<MemberRoleSet> roles) {
         this.mid = mid;
         this.name = name;
         this.password = password;

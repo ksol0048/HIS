@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("loadUserByUsername: " + username);
+        log.info("loadUserByUsername: {}" , username);
         Optional<Member> result = memberRepository.getWithRoles(username);
         if (result.isEmpty()) {
             throw new UsernameNotFoundException(username+"를 찾을수 없습니다.");
@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                         member.getSocial(),
                         member.getRoleSet()
                                 .stream().map(memberRole -> new SimpleGrantedAuthority(
-                                        "ROEL_" + memberRole.name()))
+                                        "ROEL_" + memberRole.getRoleSet()))
                                 .collect(Collectors.toList())
                 );
 

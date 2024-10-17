@@ -1,5 +1,6 @@
 package kroryi.his.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,11 +24,9 @@ public class Member extends BaseEntity{
     private boolean retirement;
     private String social;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "member_role_set", joinColumns = @JoinColumn(name = "member_mid"))
-    @Enumerated(EnumType.ORDINAL) // Store enum as string
-    @Builder.Default
-    private Set<MemberRole> roleSet = new HashSet<>();
+    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference  // 부모 엔티티에서 참조 관리
+    private Set<MemberRoleSet> roleSet = new HashSet<>();;
 
     public void changePassword(String newPassword) {
         this.password = newPassword;
@@ -45,9 +44,9 @@ public class Member extends BaseEntity{
         this.retirement = retirement;
     }
 
-    public void addRole(MemberRole role) {
-        this.roleSet.add(role);
-    }
+//    public void addRole(MemberRole role) {
+//        this.roleSet.add(role);
+//    }
 
     public void clearRoles() {
         this.roleSet.clear();
