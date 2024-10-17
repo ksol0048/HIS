@@ -150,7 +150,7 @@ table thead th {
 .highlight-info {
     display: flex;
     align-items: center;
-    justify-content: flex-end; /* 오른쪽 정렬 */
+    justify-content: flex-end;
 }
 
 .highlight-box {
