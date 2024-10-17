@@ -19,17 +19,11 @@ public class Reservation {
     @Column(name = "reservation_date")
     private String reservationDate;
 
-    @Column(name = "reservation_status")
-    private String reservationstatus;
-
-    @Column(name = "patient_status")
-    private String patientStatus;
-
     @Column(name = "department")
     private String department;
 
-    @Column(name = "sms_notification")
-    private boolean smsNotification;
+    @Column(name = "sns_notification")
+    private boolean snsNotification;
 
     @Column(name = "chart_number")
     private String chartNumber;
@@ -45,16 +39,14 @@ public class Reservation {
 
     }
 
-    public Reservation(long seq, String reservationDate, String reservationstatus, String patientStatus,
-                       String department, boolean smsNotification, String chartNumber, String patientNote,
+    public Reservation(long seq, String reservationDate,
+                       String department, boolean snsNotification, String chartNumber, String patientNote,
                        String reservationStatusCheck) {
         super();
         this.seq = seq;
         this.reservationDate = reservationDate;
-        this.reservationstatus = reservationstatus;
-        this.patientStatus = patientStatus;
         this.department = department;
-        this.smsNotification = smsNotification;
+        this.snsNotification = snsNotification;
         this.chartNumber = chartNumber;
         this.patientNote = patientNote;
         this.reservationStatusCheck = reservationStatusCheck;
@@ -76,22 +68,6 @@ public class Reservation {
         this.reservationDate = reservationDate;
     }
 
-    public String getReservationstatus() {
-        return reservationstatus;
-    }
-
-    public void setReservationstatus(String reservationstatus) {
-        this.reservationstatus = reservationstatus;
-    }
-
-    public String getPatientStatus() {
-        return patientStatus;
-    }
-
-    public void setPatientStatus(String patientStatus) {
-        this.patientStatus = patientStatus;
-    }
-
     public String getDepartment() {
         return department;
     }
@@ -101,11 +77,11 @@ public class Reservation {
     }
 
     public boolean isSmsNotification() {
-        return smsNotification;
+        return snsNotification;
     }
 
-    public void setSmsNotification(boolean smsNotification) {
-        this.smsNotification = smsNotification;
+    public void setSmsNotification(boolean snsNotification) {
+        this.snsNotification = snsNotification;
     }
 
     public String getChartNumber() {

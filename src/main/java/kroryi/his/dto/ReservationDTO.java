@@ -9,10 +9,8 @@ import lombok.Setter;
 public class ReservationDTO {
     private Long seq;
     private String reservationDate;
-    private String reservationstatus;
-    private String patientStatus;
     private String department;
-    private boolean smsNotification;
+    private boolean snsNotification;
     private String chartNumber;
     private String patientNote;
     private String reservationStatusCheck;
@@ -21,16 +19,14 @@ public class ReservationDTO {
         super();
     }
 
-    public ReservationDTO(Long seq, String reservationDate, String reservationstatus, String patientStatus,
-                          String department, boolean smsNotification, String chartNumber, String patientNote,
+    public ReservationDTO(Long seq, String reservationDate,
+                          String department, boolean snsNotification, String chartNumber, String patientNote,
                           String reservationStatusCheck) {
         super();
         this.seq = seq;
         this.reservationDate = reservationDate;
-        this.reservationstatus = reservationstatus;
-        this.patientStatus = patientStatus;
         this.department = department;
-        this.smsNotification = smsNotification;
+        this.snsNotification = snsNotification;
         this.chartNumber = chartNumber;
         this.patientNote = patientNote;
         this.reservationStatusCheck = reservationStatusCheck;
