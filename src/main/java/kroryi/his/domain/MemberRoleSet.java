@@ -14,7 +14,8 @@ public class MemberRoleSet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String roleSet;
+    @Enumerated(EnumType.STRING)  // MemberRole이 Enum일 경우
+    private MemberRole roleSet;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_mid")

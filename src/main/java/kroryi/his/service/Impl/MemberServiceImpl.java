@@ -35,17 +35,28 @@ public class MemberServiceImpl implements MemberService {
         boolean exist = memberRepository.existsById(mid);
         if (exist) throw new MidExistException();
 
-        Set<MemberRoleSet> roleSet = memberJoinDTO.getRoles();
+        // DTO의 roleSet 가져오기
+        Set<MemberRoleSet> roleSetDTO = memberJoinDTO.getRoles();
+        log.info("Received roleSetDTO: {}", roleSetDTO);
 
         Member member = modelMapper.map(memberJoinDTO, Member.class);
         member.changePassword(passwordEncoder.encode(memberJoinDTO.getPassword()));
 
-        MemberRoleSet memberRoleSet = modelMapper.map(roleSet, MemberRoleSet.class);
+        Set<MemberRoleSet> roleSetEntities = roleSetDTO.stream().map(roleDTO -> {
+            MemberRoleSet memberRoleSet = new MemberRoleSet();
+            memberRoleSet.setRoleSet(roleDTO.getRoleSet());  // role 필드 매핑
+            memberRoleSet.setMember(member);  // Member 엔티티와 연관 설정
+            return memberRoleSet;
+        }).collect(Collectors.toSet());
 
-        member.addRole(memberRoleSet);
-        log.info("============");
-        log.info(member);
-        log.info(member.getRoleSet());
+        // Member 객체에 roleSetEntities 추가
+        member.setRoleSet(roleSetEntities);
+
+        // Member와 연관된 roleSet 확인
+        log.info("Member after roleSet mapping: {}", member);
+        log.info("Roles: {}", member.getRoleSet());
+
+        // 저장
         memberRepository.save(member);
     }
 
