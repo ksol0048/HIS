@@ -4,6 +4,7 @@ import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialTransactionDTO;
 import kroryi.his.repository.MaterialRegisterRepository;
+import kroryi.his.repository.MaterialStatusRepository;
 import kroryi.his.repository.MaterialStockOutRepository;
 import kroryi.his.repository.MaterialTransactionRepository;
 import kroryi.his.service.MaterialStatusService;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @Log4j2
 @Service
 public class MaterialStatusServiceImpl implements MaterialStatusService {
-    private final MaterialTransactionRepository materialTransactionRepository;
+    private final MaterialStatusRepository materialStatusRepository;
     private final MaterialStockOutRepository materialStockOutRepository;
     private final MaterialRegisterRepository materialRegisterRepository;
 
@@ -36,7 +37,7 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
                                                              Boolean stockManagementItem) {
 
         // 검색 쿼리 실행
-        Optional<List<MaterialTransactionRegister>> transactionsOpt = materialTransactionRepository.findSearch(
+        Optional<List<MaterialTransactionRegister>> transactionsOpt = materialStatusRepository.findSearch(
                 transactionStartDate, transactionEndDate, materialName, materialCode, companyName, belowSafetyStock, stockManagementItem);
 
         if (transactionsOpt.isEmpty()) {
@@ -56,7 +57,7 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
                     MaterialTransactionDTO dto = new MaterialTransactionDTO(firstTransaction);
 
                     String materialCodeFromTransaction = firstTransaction.getMaterialRegister().getMaterialCode();
-                    Long totalStockIn = materialTransactionRepository.getTotalStockInByMaterialCode(materialCodeFromTransaction);
+                    Long totalStockIn = materialStatusRepository.getTotalStockInByMaterialCode(materialCodeFromTransaction);
                     Long totalStockOut = materialStockOutRepository.getTotalStockOutByMaterialCode(materialCodeFromTransaction);
 
                     totalStockIn = (totalStockIn != null) ? totalStockIn : 0L;
@@ -69,7 +70,7 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
                     dto.setBelowSafetyStock(isBelowSafetyStock);
 
                     // DB에 실시간으로 belowSafetyStock 값 업데이트
-                    materialTransactionRepository.updateBelowSafetyStock(firstTransaction.getTransactionId(), isBelowSafetyStock);
+                    materialStatusRepository.updateBelowSafetyStock(firstTransaction.getTransactionId(), isBelowSafetyStock);
 
                     // 하이라이트 설정
                     dto.setHighlighted(isBelowSafetyStock && (dto.getStockManagementItem() != null && dto.getStockManagementItem()));
