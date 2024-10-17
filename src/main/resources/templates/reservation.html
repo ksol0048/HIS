@@ -63,27 +63,33 @@
         .form-group {
             margin-bottom: 10px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-size: 14px;
         }
+
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 5px;
             font-size: 14px;
         }
+
         .form-group .row {
             display: flex;
             justify-content: space-between;
         }
+
         .form-group .row div {
             width: 48%;
         }
+
         .btn-group {
             display: flex;
             justify-content: space-between;
         }
+
         button {
             padding: 10px;
             font-size: 14px;
@@ -92,7 +98,7 @@
 
         .test_1 {
             display: flex;
-            width:100%;
+            width: 100%;
         }
 
         .button_test_1 {
@@ -113,6 +119,7 @@
             list-style-type: none;
             padding: 0;
         }
+
         li {
             display: flex;
             justify-content: space-between;
@@ -155,6 +162,7 @@
             text-align: center;
             padding: 8px;
         }
+
         /* 모달 다이얼로그의 최대 너비를 설정하여 화면 크기에 맞게 조절 */
         .modal-dialog {
             max-width: 90%; /* 화면의 90% 너비까지 허용 */
@@ -177,14 +185,12 @@
         }
 
 
-
-
         .reservationTableListNumber {
-            display:none;
+            display: none;
         }
 
         .index-number {
-            display:none;
+            display: none;
         }
     </style>
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/cerulean/bootstrap.min.css" rel="stylesheet">
@@ -194,7 +200,6 @@
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-
 
 
 </head>
@@ -374,28 +379,28 @@
                 <input type="date" id="reservation-date" name="reservation-date">
             </div>
 
-            <div class="form-group">
-                <div>
-                    <div class="col-md-3">
-                        <label class="reservation-status">예약 종류</label>
-                    </div>
-                    <div class="col-md-9 d-flex flex-wrap">
-                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
-                            <div><input type="radio" id="patient-reservation" name="reservation-status">환자예약</div>
-                        </div>
-                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
-                            <div><input type="radio" id="other-reservation" name="reservation-status">그외예약</div>
-                        </div>
-                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
-                            <div><input type="radio" id="registered-patient" name="patient-status"> 등록환자</div>
-                        </div>
-                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">
-                            <div><input type="radio" id="unregistered-patient" name="patient-status"> 미등록환자</div>
-                        </div>
-                    </div>
-                </div>
+            <!--            <div class="form-group">-->
+            <!--                <div>-->
+            <!--                    <div class="col-md-3">-->
+            <!--                        <label class="reservation-status">예약 종류</label>-->
+            <!--                    </div>-->
+            <!--                    <div class="col-md-9 d-flex flex-wrap">-->
+            <!--                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">-->
+            <!--                            <div><input type="radio" id="patient-reservation" name="reservation-status">환자예약</div>-->
+            <!--                        </div>-->
+            <!--                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">-->
+            <!--                            <div><input type="radio" id="other-reservation" name="reservation-status">그외예약</div>-->
+            <!--                        </div>-->
+            <!--                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">-->
+            <!--                            <div><input type="radio" id="registered-patient" name="patient-status"> 등록환자</div>-->
+            <!--                        </div>-->
+            <!--                        <div class="col-md-6 mb-2 d-flex align-items-center" style="height:50px;">-->
+            <!--                            <div><input type="radio" id="unregistered-patient" name="patient-status"> 미등록환자</div>-->
+            <!--                        </div>-->
+            <!--                    </div>-->
+            <!--                </div>-->
 
-            </div>
+            <!--            </div>-->
 
             <div class="form-group">
                 <label for="department">환자이름</label>
@@ -403,8 +408,8 @@
             </div>
 
             <div class="form-group">
-                <label for="sms-notification">SMS 발송</label>
-                <input type="checkbox" id="sms-notification" name="sms-notification">
+                <label for="sns-notification">SNS 발송</label>
+                <input type="checkbox" id="sns-notification" name="sns-notification">
             </div>
 
             <div class="form-group">
@@ -461,7 +466,7 @@
 
             <div class="btn-group">
                 <button type="button" onclick="saveUpdate()" style="margin-bottom: 10px">저장</button>
-                <button type="button" style="margin-bottom: 10px">닫기</button>
+                <button type="button" style="margin-bottom: 10px">삭제</button>
             </div>
         </div>
     </div>
@@ -582,8 +587,6 @@
         }
 
 
-
-
         // 캘린더 날짜 선택시 오늘 날짜 정보 받아오기
         document.querySelectorAll('.calendarDate').forEach(function (calendarDate) {
             calendarDate.addEventListener('click', function () {
@@ -592,8 +595,9 @@
 
                 // 저장한 날짜 텍스트, 날짜 형식으로 재변환
                 const selectedDate = `${year}-${month + 1}-${day}`;
-
+                console.log(selectedDate)
                 fetch('http://localhost:8080/api/main/selectedDatePatientList', {
+
                     method: 'POST', // POST 요청
                     headers: {
                         'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
@@ -610,6 +614,7 @@
                         return response.json(); // JSON 데이터로 변환
                     })
                     .then(data => {
+                        
                         // 환자 데이터가 들어갈 ID값 보관
                         const tableBody = document.querySelector('#reservationTableList');
 
@@ -644,7 +649,6 @@
         });
 
 
-
     }
 
     // 예약 목록에서 환자 정보를 눌렀을때 데이터 받아온 뒤 수정 가능한 화면 만들기
@@ -673,30 +677,14 @@
                 // 예약 날짜
                 const reservationDateElement = document.getElementById('reservation-date');
                 reservationDateElement.value = '';
-
-                // 예약 종류 - 환자 예약
-                const patientReservationElement = document.getElementById('patient-reservation');
-                patientReservationElement.checked = false;
-
-                // 예약 종류 - 그외 예약
-                const otherReservationElement = document.getElementById('other-reservation');
-                otherReservationElement.checked = false;
-
-                // 예약 종류 - 환자 예약
-                const registeredPatientElement = document.getElementById('registered-patient');
-                registeredPatientElement.checked = false;
-
-                // 예약 종류 - 환자 예약
-                const unregisteredPatientElement = document.getElementById('unregistered-patient');
-                unregisteredPatientElement.checked = false;
-
+                F
                 // 환자이름
                 const departmentElement = document.getElementById('department');
                 departmentElement.value = '';
 
                 // 예약 종류 - 환자 예약
-                const smsNotificationElement = document.getElementById('sms-notification');
-                smsNotificationElement.checked = false;
+                const snsNotificationElement = document.getElementById('sns-notification');
+                snsNotificationElement.checked = false;
 
                 // 차트번호
                 const chartNumberElement = document.getElementById('chart-number');
@@ -725,39 +713,17 @@
                 if (reservationDateElement && responseData.length > 0) {
                     reservationDateElement.value = responseData[0].reservationDate;
                 }
-
-                // 예약 종류 - 예약
-                if (patientReservationElement && otherReservationElement && responseData.length > 0) {
-                    if (responseData[0].reservationstatus == "patient") {
-                        patientReservationElement.checked = true;
-                    }
-                    else {
-                        otherReservationElement.checked = true;
-                    }
-                }
-
-                // 예약 종류 - 환자
-                if (registeredPatientElement && unregisteredPatientElement && responseData.length > 0) {
-                    if (responseData[0].patientStatus == "registered") {
-                        registeredPatientElement.checked = true;
-                    }
-                    else {
-                        unregisteredPatientElement.checked = true;
-                    }
-                }
-
                 // 환자 이름
                 if (departmentElement && responseData.length > 0) {
                     departmentElement.value = responseData[0].department;
                 }
 
                 // SMS 발송
-                if (smsNotificationElement && responseData.length > 0) {
-                    if (responseData[0].smsNotification) {
-                        smsNotificationElement.checked = true;
-                    }
-                    else {
-                        smsNotificationElement.checked = false;
+                if (snsNotificationElement && responseData.length > 0) {
+                    if (responseData[0].snsNotification) {
+                        snsNotificationElement.checked = true;
+                    } else {
+                        snsNotificationElement.checked = false;
                     }
                 }
 
@@ -775,8 +741,7 @@
                 if (reservationStatusCaElement && reservationStatusBaElement && responseData.length > 0) {
                     if (responseData[0].reservationStatusCheck == "ca") {
                         reservationStatusCaElement.checked = true;
-                    }
-                    else {
+                    } else {
                         reservationStatusBaElement.checked = true;
                     }
                 }
@@ -799,36 +764,35 @@
         // 에약 일자
         let reservationDate = document.getElementById('reservation-date').value;
 
-        // 에약 종류 - 예약 상태
-        let reservationstatus = "";
-        if (document.getElementById('patient-reservation').checked) {
-            reservationstatus = "patient";
-        }
-
-        else {
-            reservationstatus = "other";
-        }
-
-        // 에약 종류 - 예약 환자
-        let patientStatus = "";
-        if (document.getElementById('registered-patient').checked) {
-            patientStatus = "registered";
-        }
-
-        else {
-            patientStatus = "unregistered";
-        }
+        // // 에약 종류 - 예약 상태
+        // let reservationstatus = "";
+        // if (document.getElementById('patient-reservation').checked) {
+        //     reservationstatus = "patient";
+        // }
+        //
+        // else {
+        //     reservationstatus = "other";
+        // }
+        //
+        // // 에약 종류 - 예약 환자
+        // let patientStatus = "";
+        // if (document.getElementById('registered-patient').checked) {
+        //     patientStatus = "registered";
+        // }
+        //
+        // else {
+        //     patientStatus = "unregistered";
+        // }
 
         // 환자 이름
         let department = document.getElementById('department').value;
 
         // SMS 발송 허용 여부
-        let smsNotification = "";
-        if (document.getElementById('sms-notification').checked) {
-            smsNotification = "true";
-        }
-        else {
-            smsNotification = "false";
+        let snsNotification = "";
+        if (document.getElementById('sns-notification').checked) {
+            snsNotification = "true";
+        } else {
+            snsNotification = "false";
         }
 
         // 차트 번호
@@ -841,8 +805,7 @@
         let reservationStatusCheck = "";
         if (document.getElementById('reservation-status-ca').checked) {
             reservationStatusCheck = "ca";
-        }
-        else {
+        } else {
             reservationStatusCheck = "ba";
         }
 
@@ -851,10 +814,8 @@
         // 보낼 데이터 객체로 변환
         const data = {
             reservationDate: reservationDate,
-            reservationstatus: reservationstatus,
-            patientStatus: patientStatus,
             department: department,
-            smsNotification: smsNotification,
+            snsNotification: snsNotification,
             chartNumber: chartNumber,
             patientNote: patientNote,
             reservationStatusCheck: reservationStatusCheck
@@ -865,9 +826,6 @@
         // 여기서 값 없는거 찾아서 되돌리는 alert 만들어야 함
         //
         //
-
-
-        console.log("보낼꺼임" + JSON.stringify(data))
         // 인덱스 번호가 있는 경우 수정
         if (indexNumber) {
             // 인덱스 번호가 있기 때문에 객체에 seq(인덱스 번호) 값 추가
@@ -898,7 +856,6 @@
 
         return;
     }
-
 
 
     function prevMonth() {
