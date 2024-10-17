@@ -27,13 +27,13 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
     List<MaterialTransactionRegister> findByMaterialRegister(MaterialRegister materialRegister);
 
     @Query("SELECT mt FROM MaterialTransactionRegister mt " +
-            "LEFT JOIN mt.materialRegister mr " +
-            "LEFT JOIN mr.companyRegister cr " +
-            "WHERE (:materialName IS NULL OR :materialName = '' OR LOWER(mr.materialName) LIKE LOWER(CONCAT('%', :materialName, '%'))) " +
-            "AND (:materialCode IS NULL OR :materialCode = '' OR LOWER(mr.materialCode) LIKE LOWER(CONCAT('%', :materialCode, '%'))) " +
-            "AND (:transactionStartDate IS NULL OR mr.firstRegisterDate >= :transactionStartDate) " +
-            "AND (:transactionEndDate IS NULL OR mr.firstRegisterDate <= :transactionEndDate) " +
-            "AND (:companyName IS NULL OR :companyName = '' OR LOWER(cr.companyName) LIKE LOWER(CONCAT('%', :companyName, '%'))) " +
+            "JOIN mt.materialRegister mr " +
+            "JOIN mr.companyRegister cr " +
+            "WHERE (:materialName IS NULL OR LOWER(mr.materialName) LIKE LOWER(:materialName)) " +
+            "AND (:materialCode IS NULL OR LOWER(mr.materialCode) LIKE LOWER(:materialCode)) " +
+            "AND (:companyName IS NULL OR LOWER(cr.companyName) LIKE LOWER(:companyName)) " +
+            "AND (:transactionStartDate IS NULL OR mt.stockInDate >= :transactionStartDate) " +
+            "AND (:transactionEndDate IS NULL OR mt.stockInDate <= :transactionEndDate) " +
             "AND (:belowSafetyStock IS NULL OR mt.belowSafetyStock = :belowSafetyStock) " +
             "AND (:stockManagementItem IS NULL OR mr.stockManagementItem = :stockManagementItem)")
     Optional<List<MaterialTransactionRegister>> findSearch(

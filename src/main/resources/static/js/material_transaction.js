@@ -191,7 +191,6 @@ document.getElementById('deleteTransactionBtn').addEventListener('click', functi
         });
 });
 
-// 두 검색어 초기화 함수 및 검색 함수는 전역 스코프에 선언
 function twoSearch() {
     const materialName = document.getElementById('twoMaterialNameSearch').value.trim();
     const materialCode = document.getElementById('twoMaterialCodeSearch').value.trim();
@@ -201,12 +200,12 @@ function twoSearch() {
     let url = `/inventory_management/findTransaction?`;
     const queryParams = [];
 
-    // 쿼리 파라미터에 재료명 추가
+    // 쿼리 파라미터에 재료명 추가 (인코딩만 함, %는 서버에서 처리)
     if (materialName) {
         queryParams.push(`materialName=${encodeURIComponent(materialName)}`);
     }
 
-    // 쿼리 파라미터에 재료코드 추가
+    // 쿼리 파라미터에 재료코드 추가 (인코딩만 함, %는 서버에서 처리)
     if (materialCode) {
         queryParams.push(`materialCode=${encodeURIComponent(materialCode)}`);
     }
@@ -226,6 +225,9 @@ function twoSearch() {
         url += queryParams.join('&');
     }
 
+    // 쿼리 파라미터 확인 (디버깅용)
+    // console.log("Generated URL:", url);
+
     // 서버에 fetch 요청
     fetch(url)
         .then(response => {
@@ -235,26 +237,16 @@ function twoSearch() {
             return response.json();
         })
         .then(data => {
-            // 필터링: 서버에서 필터링되지 않은 경우를 대비해 클라이언트 측에서도 필터링
-            const filteredData = data.filter(transaction => {
-                const matchesMaterialName = !materialName || transaction.materialName === materialName;
-                const matchesMaterialCode = !materialCode || transaction.materialCode === materialCode;
-                const matchesDateRange = (!transactionStartDate || new Date(transaction.stockInDate) >= new Date(transactionStartDate)) &&
-                    (!transactionEndDate || new Date(transaction.stockInDate) <= new Date(transactionEndDate));
-
-                return matchesMaterialName && matchesMaterialCode && matchesDateRange;
-            });
-
             // 데이터를 최근 날짜순으로 정렬
-            filteredData.sort((a, b) => new Date(b.stockInDate) - new Date(a.stockInDate));
+            data.sort((a, b) => new Date(b.stockInDate) - new Date(a.stockInDate));
 
             const tbody = document.getElementById('transactionList');
             tbody.innerHTML = ''; // 기존 테이블 내용 초기화
 
-            if (filteredData.length === 0) {
+            if (data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7">현재 등록된 출납 내역이 없습니다.</td></tr>';
             } else {
-                filteredData.forEach(transaction => {
+                data.forEach(transaction => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${transaction.stockInDate || 'N/A'}</td>
@@ -273,7 +265,6 @@ function twoSearch() {
             alert(`검색 중 오류가 발생했습니다. 자세한 내용: ${error.message}`);
         });
 }
-
 
 function resetSearch() {
     // 검색어 초기화

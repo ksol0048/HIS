@@ -136,18 +136,24 @@ public class MaterialTransactionServiceImpl implements MaterialTransactionServic
                                                            String companyName,
                                                            Boolean belowSafetyStock,
                                                            Boolean stockManagementItem) {
-        // 기본 검색 조건에 따라 쿼리를 생성
-        log.info("------------> {}, {}", materialCode, materialName);
-        Optional<List<MaterialTransactionRegister>> optionalTransactions = materialTransactionRepository.findSearch(
-                transactionStartDate, transactionEndDate, materialName, materialCode, companyName, belowSafetyStock, stockManagementItem);
+        // 부분 일치 검색을 위해 '%' 추가
+        String partialMaterialName = (materialName != null && !materialName.isEmpty()) ? "%" + materialName + "%" : null;
+        String partialMaterialCode = (materialCode != null && !materialCode.isEmpty()) ? "%" + materialCode + "%" : null;
+        String partialCompanyName = (companyName != null && !companyName.isEmpty()) ? "%" + companyName + "%" : null;
 
-        // Optional에서 값을 꺼내 처리
+        log.info("검색 조건 - MaterialCode: {}, MaterialName: {}, CompanyName: {}, StartDate: {}, EndDate: {}",
+                partialMaterialCode, partialMaterialName, partialCompanyName, transactionStartDate, transactionEndDate);
+
+        // Repository에서 부분 검색 처리
+        Optional<List<MaterialTransactionRegister>> optionalTransactions = materialTransactionRepository.findSearch(
+                transactionStartDate, transactionEndDate, partialMaterialName, partialMaterialCode, partialCompanyName, belowSafetyStock, stockManagementItem);
+
+        // Optional에서 값을 꺼내서 처리
         return optionalTransactions.orElse(Collections.emptyList())
                 .stream()
                 .map(MaterialTransactionDTO::new)  // 결과를 DTO로 변환
                 .collect(Collectors.toList());
     }
-
 
 }
 
