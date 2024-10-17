@@ -485,7 +485,7 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
     event.stopPropagation();
 
     // 필드에서 값 가져오기
-    const stockOutId = document.getElementById('stockOutId').value; // 수정 시 사용 (stockOutId로 변경)
+    const stockOutId = document.getElementById('stockOutId').value; // 수정 시 사용 (신규 저장 시에는 비어 있어야 함)
     const stockOutDate = document.getElementById('stockOutDate').value;  // 출고일자
     const stockOut = document.getElementById('stockOut').value;  // 출고량
     const materialCode = document.getElementById('selectedMaterialCode').textContent;  // 선택된 재료 코드
@@ -494,16 +494,18 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
 
     // stockOutId가 존재하면 수정, 없으면 신규 추가
     if (stockOutId) {
+        // 수정
         url = `/inventory_management/updateStockTransaction`;  // 수정 URL
         method = "PUT";  // 수정은 PUT 메서드
     } else {
+        // 신규 저장
         url = `/inventory_management/addStockTransaction`;  // 신규 추가 URL
         method = "POST";  // 추가는 POST 메서드
     }
 
     // 서버에 보낼 데이터 객체 생성
     const stockOutData = {
-        stockOutId: stockOutId,  // stockOutId로 전송
+        stockOutId: stockOutId,  // 수정 시에는 값이 들어가고, 신규 저장 시에는 null
         stockOutDate: stockOutDate,
         stockOut: parseInt(stockOut, 10),
         materialCode: materialCode
@@ -518,32 +520,37 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
         body: JSON.stringify(stockOutData)
     })
         .then(response => {
-            // 서버에서 재고 부족 예외를 처리한 경우 400 상태 코드 또는 사용자 정의 오류 반환
+            if (response.status === 400) {
+                // 400 오류 처리: 재고량을 초과한 경우
+                return response.json().then(data => {
+                    throw new Error("현재고량을 초과해 저장할 수 없습니다.");
+                });
+            }
+            // 그 외의 오류 처리
             if (!response.ok) {
-                if (response.status === 400) {
-                    return response.json().then(data => {
-                        // 재고 부족 메시지를 클라이언트에 전달
-                        throw new Error(data.message || '재고 부족 오류 발생');
-                    });
-                } else {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                return response.json().then(data => {
+                    throw new Error(data.message || `서버 오류: ${response.status}`);
+                });
             }
             return response.json();
         })
         .then(data => {
             alert(data.message);  // 성공 메시지 표시
+
+            // 저장 또는 수정 후에는 ID를 초기화하여 새로운 저장 시 수정되지 않도록 함
             clearStockTransactionForm(); // 저장 후 필드 초기화
-            setTodayDate();
+            setTodayDate();  // 오늘 날짜로 다시 설정
             loadOutgoingTransactionList(materialCode);  // 목록 다시 로드
+
+            // 추가: ID를 초기화하여 신규 저장 모드로 전환
+            document.getElementById('stockOutId').value = '';  // ID 초기화
         })
         .catch(error => {
-            // 재고 부족 등 오류 발생 시 처리
+            // 400 오류 메시지를 alert로 출력
+            alert(error.message);
             console.error("Error:", error);
-            alert(`상세 내용: ${error.message}`);
         });
 });
-
 
 // 삭제 버튼 클릭 시 동작하는 함수
 document.getElementById('deleteStockTransactionBtn').addEventListener('click', function () {
@@ -577,9 +584,9 @@ document.getElementById('deleteStockTransactionBtn').addEventListener('click', f
 
 // 취소 버튼 클릭 시 선택한 출고 내역을 초기화하는 함수
 document.getElementById('resetStockTransaction').addEventListener('click', function () {
-    document.getElementById('stockOut').value = '';  // 출고 초기화
-    document.getElementById('transactionId').value = ''; // id 초기화
-    setTodayDate();
+    clearStockTransactionForm();  // 출고 필드 초기화
+    setTodayDate();  // 오늘 날짜로 다시 설정
+    selectedTransactionId = null;  // 기존 선택된 ID 초기화 (신규 저장 모드로 전환)
 });
 
 // 필드를 초기화하는 함수
@@ -587,7 +594,7 @@ function clearStockTransactionForm() {
     document.getElementById('stockOutDate').value = '';
     document.getElementById('stockOut').value = '';
     document.getElementById('transactionId').value = '';
-
+    document.getElementById('stockOutId').value = '';
 }
 
 
