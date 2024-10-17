@@ -27,29 +27,25 @@ public class MaterialStockOutServiceImpl implements MaterialStockOutService {
     private final MaterialRegisterRepository materialRegisterRepository;
 
     @Override
-    public ResponseEntity<?> saveOutgoingTransaction(MaterialStockOutDTO stockOutDTO) {
-        try {
-            MaterialRegister materialRegister = materialRegisterRepository.findByMaterialCode(stockOutDTO.getMaterialCode())
-                    .orElseThrow(() -> new IllegalArgumentException("재료 코드를 찾을 수 없습니다."));
+    public void saveOutgoingTransaction(MaterialStockOutDTO stockOutDTO) {
+        MaterialRegister materialRegister = materialRegisterRepository.findByMaterialCode(stockOutDTO.getMaterialCode())
+                .orElseThrow(() -> new IllegalArgumentException("재료 코드를 찾을 수 없습니다."));
 
-            Long remainingStock = calculateRemainingStock(materialRegister);
+        // 현재 재고량을 계산
+        Long remainingStock = calculateRemainingStock(materialRegister);
 
-            // 출고량이 현재 재고량보다 많은 경우 예외 처리
-            if (stockOutDTO.getStockOut() > remainingStock) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "message", "현재고량을 초과해 저장할 수 없습니다."));
-            }
-
-            // 새로운 출고 데이터를 저장
-            MaterialStockOut stockOut = new MaterialStockOut();
-            stockOut.setStockOutDate(stockOutDTO.getStockOutDate());
-            stockOut.setStockOut(stockOutDTO.getStockOut());
-            stockOut.setMaterialRegister(materialRegister);
-
-            materialStockOutRepository.save(stockOut);
-            return ResponseEntity.ok(Map.of("success", true, "message", "출고가 성공적으로 저장되었습니다."));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "출고 저장 중 오류가 발생했습니다."));
+        // 출고량이 현재 재고량보다 많은 경우 예외 처리
+        if (stockOutDTO.getStockOut() > remainingStock) {
+            throw new IllegalArgumentException("출고량이 현재 재고량보다 많습니다.");
         }
+
+        // 새로운 출고 데이터를 저장
+        MaterialStockOut stockOut = new MaterialStockOut();
+        stockOut.setStockOutDate(stockOutDTO.getStockOutDate());
+        stockOut.setStockOut(stockOutDTO.getStockOut());
+        stockOut.setMaterialRegister(materialRegister);
+
+        materialStockOutRepository.save(stockOut);
     }
 
     // 현재 재고량을 계산하는 메서드
@@ -69,7 +65,6 @@ public class MaterialStockOutServiceImpl implements MaterialStockOutService {
         return totalStockIn - totalStockOut;
     }
 
-    // 기존 출고 데이터를 수정하는 메서드
     @Override
     public void updateOutgoingTransaction(MaterialStockOutDTO stockOutDTO) {
         if (stockOutDTO.getStockOutId() == null) {
@@ -79,24 +74,37 @@ public class MaterialStockOutServiceImpl implements MaterialStockOutService {
         MaterialStockOut existingStockOut = materialStockOutRepository.findById(stockOutDTO.getStockOutId())
                 .orElseThrow(() -> new IllegalArgumentException("수정하려는 출고 데이터를 찾을 수 없습니다. ID: " + stockOutDTO.getStockOutId()));
 
-        // 재료 정보를 MaterialRegister에서 가져옴
-        MaterialRegister materialRegister = existingStockOut.getMaterialRegister();
+        // 기존 데이터와 비교하여 수정된 내용이 있는지 확인
+        boolean isModified = false;
 
-        // 현재 재고량을 계산
-        Long remainingStock = calculateRemainingStock(materialRegister);
-
-        // 기존 출고량을 더한 후에 남은 재고량과 수정하려는 출고량을 비교
-        Long adjustedRemainingStock = remainingStock + existingStockOut.getStockOut();
-
-        if (stockOutDTO.getStockOut() > adjustedRemainingStock) {
-            throw new IllegalArgumentException("수정된 출고량이 현재 재고량보다 많습니다.");
+        if (!existingStockOut.getStockOutDate().equals(stockOutDTO.getStockOutDate())) {
+            existingStockOut.setStockOutDate(stockOutDTO.getStockOutDate());
+            isModified = true;
         }
 
-        // 기존 출고 데이터를 수정
-        existingStockOut.setStockOutDate(stockOutDTO.getStockOutDate());
-        existingStockOut.setStockOut(stockOutDTO.getStockOut());
-        materialStockOutRepository.save(existingStockOut);
+        if (!existingStockOut.getStockOut().equals(stockOutDTO.getStockOut())) {
+            // 재고량을 초과하는지 확인
+            MaterialRegister materialRegister = existingStockOut.getMaterialRegister();
+            Long remainingStock = calculateRemainingStock(materialRegister);
+            Long adjustedRemainingStock = remainingStock + existingStockOut.getStockOut();
+
+            if (stockOutDTO.getStockOut() > adjustedRemainingStock) {
+                throw new IllegalArgumentException("수정된 출고량이 현재 재고량보다 많습니다.");
+            }
+
+            existingStockOut.setStockOut(stockOutDTO.getStockOut());
+            isModified = true;
+        }
+
+        // 수정된 부분이 있으면 저장
+        if (isModified) {
+            materialStockOutRepository.save(existingStockOut);
+        } else {
+            log.info("수정된 내용이 없어 저장하지 않았습니다.");
+        }
     }
+
+
 
     @Override
     public List<MaterialStockOutDTO> getOutgoingTransactionsByMaterialCode(String materialCode) {

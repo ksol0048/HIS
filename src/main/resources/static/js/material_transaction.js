@@ -484,34 +484,31 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
     event.preventDefault();
     event.stopPropagation();
 
-    // 필드에서 값 가져오기
-    const stockOutId = document.getElementById('stockOutId').value; // 수정 시 사용 (신규 저장 시에는 비어 있어야 함)
-    const stockOutDate = document.getElementById('stockOutDate').value;  // 출고일자
-    const stockOut = document.getElementById('stockOut').value;  // 출고량
-    const materialCode = document.getElementById('selectedMaterialCode').textContent;  // 선택된 재료 코드
+    const stockOutId = document.getElementById('stockOutId').value;
+    const stockOutDate = document.getElementById('stockOutDate').value;
+    const stockOut = document.getElementById('stockOut').value;
+    const materialCode = document.getElementById('selectedMaterialCode').textContent;
 
     let url, method;
 
-    // stockOutId가 존재하면 수정, 없으면 신규 추가
+    // 수정인지 신규 저장인지 확인
     if (stockOutId) {
-        // 수정
-        url = `/inventory_management/updateStockTransaction`;  // 수정 URL
-        method = "PUT";  // 수정은 PUT 메서드
+        url = `/inventory_management/updateStockTransaction`;
+        method = "PUT";
     } else {
-        // 신규 저장
-        url = `/inventory_management/addStockTransaction`;  // 신규 추가 URL
-        method = "POST";  // 추가는 POST 메서드
+        url = `/inventory_management/addStockTransaction`;
+        method = "POST";
     }
 
-    // 서버에 보낼 데이터 객체 생성
     const stockOutData = {
-        stockOutId: stockOutId,  // 수정 시에는 값이 들어가고, 신규 저장 시에는 null
+        stockOutId: stockOutId,
         stockOutDate: stockOutDate,
         stockOut: parseInt(stockOut, 10),
         materialCode: materialCode
     };
 
-    // 서버에 저장 요청 보내기
+    console.log("전송할 데이터: ", stockOutData); // 디버깅용 로그
+
     fetch(url, {
         method: method,
         headers: {
@@ -520,23 +517,13 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
         body: JSON.stringify(stockOutData)
     })
         .then(response => {
-            if (response.status === 400) {
-                // 400 오류 처리: 재고량을 초과한 경우
-                return response.json().then(data => {
-                    throw new Error("현재고량을 초과해 저장할 수 없습니다.");
-                });
-            }
-            // 그 외의 오류 처리
             if (!response.ok) {
-                return response.json().then(data => {
-                    throw new Error(data.message || `서버 오류: ${response.status}`);
-                });
+                throw new Error('HTTP error, status = ' + response.status);
             }
             return response.json();
         })
         .then(data => {
             alert(data.message);  // 성공 메시지 표시
-
             // 저장 또는 수정 후에는 ID를 초기화하여 새로운 저장 시 수정되지 않도록 함
             clearStockTransactionForm(); // 저장 후 필드 초기화
             setTodayDate();  // 오늘 날짜로 다시 설정
@@ -546,11 +533,13 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
             document.getElementById('stockOutId').value = '';  // ID 초기화
         })
         .catch(error => {
-            // 400 오류 메시지를 alert로 출력
-            alert(error.message);
-            console.error("Error:", error);
+            console.error("수정 오류:", error);
+            alert(`수정 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
         });
 });
+
+
+
 
 // 삭제 버튼 클릭 시 동작하는 함수
 document.getElementById('deleteStockTransactionBtn').addEventListener('click', function () {

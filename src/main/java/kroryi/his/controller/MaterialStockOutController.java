@@ -30,11 +30,12 @@ public class MaterialStockOutController {
             return ResponseEntity.ok(Map.of("success", true, "message", "출고 내역이 저장되었습니다."));
         } catch (IllegalArgumentException e) {
             // 재고 부족으로 인한 예외 처리
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.ok(Map.of("success", false, "message", "현재고량을 초과해 저장할 수 없습니다."));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", "서버 오류가 발생했습니다."));
         }
     }
+
 
     // 기존 출고 데이터 수정
     @PutMapping("/updateStockTransaction")
