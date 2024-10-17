@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @Controller
@@ -27,6 +28,7 @@ import java.util.Map;
 public class UserController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+
     @GetMapping("/")
     @ResponseBody
     public List<MemberJoinDTO> getMembers() {
@@ -46,7 +48,7 @@ public class UserController {
         Map<String, Object> response = new HashMap<>();
         log.info("response---------{}", response);
         try {
-            log.info("~~~~~~~~~~~~: {}",memberJoinDTO);
+            log.info("~~~~~~~~~~~~: {}", memberJoinDTO);
             memberService.join(memberJoinDTO);
             response.put("success", true);
             response.put("message", "등록 성공");
@@ -117,15 +119,16 @@ public class UserController {
         return "redirect:/users";
     }
 
-   /* @PostMapping("/searchUsers")
+    @PostMapping("/searchUsers")
     @ResponseBody
-    public List<Member> searchUsers(@RequestBody Map<String, String> params) {
+    public Optional<List<Member>> searchUsers(@RequestBody Map<String, String> params) {
         String userId = params.get("mid");
         String userName = params.get("username");
         String userRole = params.get("role");
         String startDate = params.get("startDate");
 
         // 검색 조건을 사용해 사용자 목록 필터링
-        return memberRepository.findUsersByConditions(userId, userName, userRole, startDate);
-    }*/
+        return memberRepository.searchMember(userId, userName);
+    }
 }
+
