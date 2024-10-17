@@ -2,11 +2,13 @@ package kroryi.his.dto;
 
 import kroryi.his.domain.MemberRole;
 import kroryi.his.domain.MemberRoleSet;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Set;
 
 @Data
+@AllArgsConstructor
 public class MemberJoinDTO {
     private String mid;
     private String name;
@@ -15,6 +17,6 @@ public class MemberJoinDTO {
     private boolean retirement;
     private String social;
 
-    private String roleSet;  // roleSet 값
+    private Set<MemberRoleSet> roles;  // roleSet 값
 
 }

@@ -35,7 +35,7 @@ public class MemberServiceImpl implements MemberService {
         boolean exist = memberRepository.existsById(mid);
         if (exist) throw new MidExistException();
 
-        String roleSet = memberJoinDTO.getRoleSet();
+        Set<MemberRoleSet> roleSet = memberJoinDTO.getRoles();
 
         Member member = modelMapper.map(memberJoinDTO, Member.class);
         member.changePassword(passwordEncoder.encode(memberJoinDTO.getPassword()));

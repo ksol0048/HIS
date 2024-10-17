@@ -60,7 +60,9 @@ document.getElementById('userTable').addEventListener('click', function (event) 
         mid: document.getElementById('txtPopId').value,
         password: document.getElementById('txtPopPwd').value,
         name: document.getElementById('txtPopName').value,
-        roleSet: document.getElementById('cmbPopUserAuth').value,
+        roles: [
+            { roleSet: document.getElementById('cmbPopUserAuth').value }  // 단일 선택일 경우
+        ],
         // phone : document.getElementById('txtPopTel').value,
         email: document.getElementById('txtPopMail').value,
         // address: document.getElementById('txtPop').value,
