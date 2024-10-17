@@ -58,7 +58,7 @@ if (patientInfo) {
 
     const ageInput = document.getElementById('age');
     if (window.location.href.includes("/patient_register")) {
-        PatientMaintenance(patientInfo.chartNum).then(patient => {
+        patientMaintenance(patientInfo.chartNum).then(patient => {
             console.log(patient);
             selectedMemos = patient.memos.sort((a, b) => {
                 const dateA = new Date(a.regDate);

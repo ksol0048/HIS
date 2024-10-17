@@ -65,7 +65,7 @@ public class CustomerSecurityConfig {
                         .defaultSuccessUrl("/home", true)
                         .permitAll() // 모든 사용자에 로그인 페이지 접근 허용
                 )
-                .oauth2Login(login->login.loginPage("/member/login"))
+//                .oauth2Login(login->login.loginPage("/member/login"))
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.accessDeniedHandler(accessDeniedHandler()))
                 .logout(LogoutConfigurer::permitAll

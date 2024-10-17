@@ -40,7 +40,7 @@ async function modifyMemo(memoObj,mmo) {
     return response.data;
 }
 
-async function PatientMaintenance(chartNum) {
+async function patientMaintenance(chartNum) {
     try {
         const response = await axios.post(`/patient_search/${chartNum}`, {}, {
             headers: {
