@@ -15,16 +15,6 @@ public class MemberJoinDTO {
     private boolean retirement;
     private String social;
 
-    private Set<MemberRoleSet> roles;
+    private String roleSet;  // roleSet 값
 
-    // 새로운 생성자 추가
-    public MemberJoinDTO(String mid, String name, String password, String email, boolean retirement, String social, Set<MemberRoleSet> roles) {
-        this.mid = mid;
-        this.name = name;
-        this.password = password;
-        this.email = email;
-        this.retirement = retirement;
-        this.social = social;
-        this.roles = roles;
-    }
 }

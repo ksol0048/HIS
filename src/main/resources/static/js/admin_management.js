@@ -59,9 +59,8 @@ document.getElementById('userTable').addEventListener('click', function (event) 
         // 사용자 입력값 가져오기
         mid: document.getElementById('txtPopId').value,
         password: document.getElementById('txtPopPwd').value,
-        roles: Array.from(document.getElementById('cmbPopUserAuth').value),
-        // roles: document.getElementById('cmbPopUserAuth').value,
         name: document.getElementById('txtPopName').value,
+        roleSet: document.getElementById('cmbPopUserAuth').value,
         // phone : document.getElementById('txtPopTel').value,
         email: document.getElementById('txtPopMail').value,
         // address: document.getElementById('txtPop').value,

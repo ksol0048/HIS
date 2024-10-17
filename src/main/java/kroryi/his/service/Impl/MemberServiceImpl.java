@@ -35,22 +35,14 @@ public class MemberServiceImpl implements MemberService {
         boolean exist = memberRepository.existsById(mid);
         if (exist) throw new MidExistException();
 
+        String roleSet = memberJoinDTO.getRoleSet();
+
         Member member = modelMapper.map(memberJoinDTO, Member.class);
         member.changePassword(passwordEncoder.encode(memberJoinDTO.getPassword()));
 
-        Set<MemberRoleSet> rolesSet = memberJoinDTO.getRoles();
+        MemberRoleSet memberRoleSet = modelMapper.map(roleSet, MemberRoleSet.class);
 
-        if(rolesSet.contains(MemberRole.EMP)) {
-            addRole(member.getMid(),MemberRole.EMP);
-        } else if (rolesSet.contains(MemberRole.ADMIN)) {
-            addRole(member.getMid(),MemberRole.ADMIN);
-        } else if (rolesSet.contains(MemberRole.DOCTOR)) {
-            addRole(member.getMid(),MemberRole.DOCTOR);
-        } else if (rolesSet.contains(MemberRole.NURSE)) {
-            addRole(member.getMid(),MemberRole.NURSE);
-        }else{
-            addRole(member.getMid(),MemberRole.EMP);
-        }
+        member.addRole(memberRoleSet);
         log.info("============");
         log.info(member);
         log.info(member.getRoleSet());
@@ -128,30 +120,29 @@ public class MemberServiceImpl implements MemberService {
                 .collect(Collectors.toList());
     }
 
-    // Member에 새로운 역할을 추가하는 메서드
-    public void addRole(String memberId, MemberRole newRole) {
-        // Member 조회
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
-
-        // 이미 해당 역할이 존재하는지 확인
-        boolean roleExists = member.getRoleSet().stream()
-                .anyMatch(roleSet -> roleSet.getRoleSet().equals(newRole));
-
-        if (!roleExists) {
-            // 새로운 역할 추가
-            MemberRoleSet newMemberRoleSet = new MemberRoleSet();
-            newMemberRoleSet.setMember(member);
-            newMemberRoleSet.setRoleSet(newRole);
-
-            // 역할 저장
-            memberRoleSetRepository.save(newMemberRoleSet);
-
-            // Member에 역할 추가 (양방향 매핑일 경우)
-            member.getRoleSet().add(newMemberRoleSet);
-            memberRepository.save(member);  // 필요할 경우 저장
-        } else {
-            throw new RuntimeException("Role already exists for this member");
-        }
-    }
+//    // Member에 새로운 역할을 추가하는 메서드
+//    public void addRole(String memberId, MemberRole newRole) {
+//        // Member 조회
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new RuntimeException("Member not found"));
+//
+//        // 이미 해당 역할이 존재하는지 확인
+//        boolean roleExists = member.getRoleSet().stream()
+//                .anyMatch(roleSet -> roleSet.getRoleSet().equals(newRole));
+//
+//        if (!roleExists) {
+//            // 새로운 역할 추가
+//            MemberRoleSet newMemberRoleSet = new MemberRoleSet();
+//            newMemberRoleSet.setRoleSet(newRole.toString());
+//
+//            // 역할 저장
+//            memberRoleSetRepository.save(newMemberRoleSet);
+//
+//            // Member에 역할 추가 (양방향 매핑일 경우)
+//            member.getRoleSet().add(newMemberRoleSet);
+//            memberRepository.save(member);  // 필요할 경우 저장
+//        } else {
+//            throw new RuntimeException("Role already exists for this member");
+//        }
+//    }
 }

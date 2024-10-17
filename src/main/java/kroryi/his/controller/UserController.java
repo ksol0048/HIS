@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
 import kroryi.his.domain.Member;
 import kroryi.his.dto.MemberJoinDTO;
+import kroryi.his.dto.MemberRoleSetDTO;
 import kroryi.his.repository.MemberRepository;
 import kroryi.his.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -44,17 +45,17 @@ public class UserController {
         }
 
         Map<String, Object> response = new HashMap<>();
-        log.info("response---------{}", response);
-        try {
-            log.info("~~~~~~~~~~~~: {}",memberJoinDTO);
-            memberService.join(memberJoinDTO);
-            response.put("success", true);
-            response.put("message", "등록 성공");
-        } catch (Exception e) {
-            log.error("Error saving user", e); // 에러 로그 출력
-            response.put("success", false);
-            response.put("message", "에러 발생");
-        }
+//        log.info("response---------{}", response);
+//        try {
+//            log.info("~~~~~~~~~~~~: {}",memberJoinDTO);
+//            memberService.join(memberJoinDTO);
+//            response.put("success", true);
+//            response.put("message", "등록 성공");
+//        } catch (Exception e) {
+//            log.error("Error saving user", e); // 에러 로그 출력
+//            response.put("success", false);
+//            response.put("message", "에러 발생");
+//        }
         return response;
     }
 

@@ -44,9 +44,9 @@ public class Member extends BaseEntity{
         this.retirement = retirement;
     }
 
-//    public void addRole(MemberRole role) {
-//        this.roleSet.add(role);
-//    }
+    public void addRole(MemberRoleSet role) {
+        this.roleSet.add(role);
+    }
 
     public void clearRoles() {
         this.roleSet.clear();

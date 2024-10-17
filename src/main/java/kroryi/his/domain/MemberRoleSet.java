@@ -7,18 +7,17 @@ import lombok.Data;
 
 @Entity
 @Data
-@IdClass(MemberRoleSetId.class)  // 복합 키 클래스 설정
+//@IdClass(MemberRoleSetId.class)  // 복합 키 클래스 설정
 public class MemberRoleSet {
 
     @Id
-    @ManyToOne
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String roleSet;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_mid")
-    @JsonBackReference  // 자식 엔티티에서 역참조 방지
+    @JsonBackReference  // 무한 순환 방지
     private Member member;
-
-    @Id
-    @Enumerated(EnumType.STRING)
-    private MemberRole roleSet;
-
-    // Getters and setters
 }
