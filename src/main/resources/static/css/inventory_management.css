@@ -144,5 +144,24 @@ table thead th {
 /* 최소보관수량 미달품목 하이라이트 표시*/
 .highlight {
     background-color: #f08080;
-    color: #FFFFFF !important;
+}
+
+/* 안전재고부족 설명 */
+.highlight-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* 오른쪽 정렬 */
+}
+
+.highlight-box {
+    width: 20px;
+    height: 20px;
+    background-color: #f08080;
+    border: 1px solid white;
+    margin-right: 10px;
+}
+
+.highlight-text {
+    font-size: 14px;
+    font-weight: bold;
 }
