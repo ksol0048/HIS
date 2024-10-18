@@ -90,7 +90,6 @@ document.getElementById('addCompanyBtn').addEventListener('click', (event) => {
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data);  // 서버 응답 확인
 
                     if (data.success) {
                         alert(data.message);  // 성공 메시지 출력

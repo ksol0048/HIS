@@ -226,8 +226,6 @@ function twoSearch() {
         url += queryParams.join('&');
     }
 
-    // 쿼리 파라미터 확인 (디버깅용)
-    // console.log("Generated URL:", url);
 
     // 서버에 fetch 요청
     fetch(url)
@@ -414,9 +412,6 @@ function populateMaterialAndSetStockOutDate(material) {
     // 출고일자 필드에 오늘 날짜 설정
     const today = new Date().toISOString().split('T')[0];  // 'YYYY-MM-DD' 형식으로 오늘 날짜 가져오기
     document.getElementById('stockOutDate').value = today;
-
-    // 메시지 표시 (재료가 선택되었고 출고일자가 설정되었음을 알림)
-    console.log('재료가 선택되었으며, 출고일자가 오늘 날짜로 설정되었습니다.');
 }
 
 // 더블 클릭 시 재료를 선택하고 출고일자에 오늘 날짜 설정
