@@ -49,7 +49,6 @@ public class ReservationImpl implements ReservationService {
     // 예약에서 저장을 눌렀을 경우
     public void insertReservationInformation(ReservationDTO dto) {
         Reservation reservation = modelMapper.map(dto, Reservation.class);
-        System.out.println(reservation.getReservationDate());
         reRepo.save(reservation);
     }
 
@@ -66,4 +65,3 @@ public class ReservationImpl implements ReservationService {
         }
     }
 }
-
