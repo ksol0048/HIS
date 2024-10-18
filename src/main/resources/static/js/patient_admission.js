@@ -848,18 +848,18 @@ document.addEventListener("DOMContentLoaded", function () {
     window.addEventListener('load', function () {
 
         const completedPatients = JSON.parse(sessionStorage.getItem('completedPatients')) || [];
-            completedPatients.forEach(patient => {
-                const completionTime = patient.completionTime;
-                addPatientToCompleteTable({
-                    chartNum: patient.chartNum || 'N/A',
-                    paName: patient.paName || 'N/A',
-                    selectedDoctor: patient.selectedDoctor || 'N/A',
-                    receptionTime: patient.receptionTime || 'N/A',
-                    completionTime: completionTime // 진료 완료 시간
-                });
-
-                console.log('진료완료 접수시간', patient.receptionTime);
+        completedPatients.forEach(patient => {
+            const completionTime = patient.completionTime;
+            addPatientToCompleteTable({
+                chartNum: patient.chartNum || 'N/A',
+                paName: patient.paName || 'N/A',
+                selectedDoctor: patient.selectedDoctor || 'N/A',
+                receptionTime: patient.receptionTime || 'N/A',
+                completionTime: completionTime // 진료 완료 시간
             });
+
+            console.log('진료완료 접수시간', patient.receptionTime);
+        });
 
     });
 
