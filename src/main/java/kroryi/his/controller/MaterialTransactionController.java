@@ -50,7 +50,6 @@ public class MaterialTransactionController {
         try {
             // 재료 출납 등록 로직
             MaterialTransactionRegister materialTransactionRegister = materialTransactionService.register(materialTransactionDTO);
-            log.info("Transaction Registered for Material Code: {}", materialTransactionDTO.getMaterialCode());
             return ResponseEntity.ok(Map.of("success", true, "message", "재료 출납이 등록되었습니다.", "materialTransactionRegister", materialTransactionRegister));
         } catch (IllegalArgumentException e) {
             log.warn("재료 출납 등록 실패: {}", e.getMessage());
@@ -71,7 +70,6 @@ public class MaterialTransactionController {
         try {
             // 재료 출납 수정 로직
             MaterialTransactionRegister materialTransactionRegister = materialTransactionService.update(materialTransactionDTO);
-            log.info("Transaction Updated for Material Code: {}", materialTransactionDTO.getMaterialCode());
             return ResponseEntity.ok(Map.of("success", true, "message", "재료 출납이 수정되었습니다.", "materialTransactionRegister", materialTransactionRegister));
         } catch (IllegalArgumentException e) {
             log.warn("재료 출납 수정 실패: {}", e.getMessage());
@@ -102,7 +100,6 @@ public class MaterialTransactionController {
     public ResponseEntity<?> deleteTransaction(@PathVariable Long transactionId) {
         try {
             materialTransactionService.deleteByTransactionId(transactionId);
-            log.info("Transaction Deleted for Transaction ID: {}", transactionId);
             return ResponseEntity.ok(Map.of("success", true, "message", "재료가 삭제되었습니다."));
         } catch (Exception e) {
             log.error("재료 삭제 중 오류 발생", e);

@@ -155,6 +155,7 @@ table thead tr {
     background-color: #f08080;
 }
 
+
 /* 안전재고부족 설명 */
 .highlight-info {
     display: flex;
@@ -173,4 +174,13 @@ table thead tr {
 .highlight-text {
     font-size: 14px;
     font-weight: bold;
+}
+
+.selected-highlight {
+    background-color: #696969;
+    color: white !important;
+}
+
+.selected-highlight td {
+    color: white !important;  /* td 요소의 글자색을 흰색으로 설정 */
 }

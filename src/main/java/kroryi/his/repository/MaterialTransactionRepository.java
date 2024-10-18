@@ -23,8 +23,6 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
 
     Optional<MaterialTransactionRegister> findBystockInDateAndMaterialRegister(LocalDate stockInDate, MaterialRegister materialRegister);
 
-    // MaterialRegister로 검색 (MaterialRegister 자체로 트랜잭션 조회)
-    List<MaterialTransactionRegister> findByMaterialRegister(MaterialRegister materialRegister);
 
     @Query("SELECT mt FROM MaterialTransactionRegister mt " +
             "JOIN mt.materialRegister mr " +
@@ -45,16 +43,6 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
             @Param("belowSafetyStock") Boolean belowSafetyStock,
             @Param("stockManagementItem") Boolean stockManagementItem);
 
-
-    // materialCode별 총 입고량 계산
-    @Query("SELECT SUM(mtr.stockIn) FROM MaterialTransactionRegister mtr WHERE mtr.materialRegister.materialCode = :materialCode")
-    Long getTotalStockInByMaterialCode(@Param("materialCode") String materialCode);
-
-    // belowSafetyStock 실시간 데이터 반영
-    @Modifying
-    @Transactional
-    @Query("UPDATE MaterialTransactionRegister mtr SET mtr.belowSafetyStock = :belowSafetyStock WHERE mtr.transactionId = :transactionId")
-    void updateBelowSafetyStock(@Param("transactionId") Long transactionId, @Param("belowSafetyStock") Boolean belowSafetyStock);
 
 
 }

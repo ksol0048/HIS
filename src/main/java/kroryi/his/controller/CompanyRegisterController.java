@@ -31,7 +31,6 @@ public class CompanyRegisterController {
     @PostMapping(value = "/addCompany", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> registerCompany(@Valid @RequestBody CompanyDTO companyDTO,
                                                                BindingResult bindingResult) throws BindException {
-        log.info("CompanyDTO -> {}", companyDTO);
 
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
@@ -69,7 +68,6 @@ public class CompanyRegisterController {
     @PutMapping(value = "/updateCompany", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> updateCompany(@Valid @RequestBody CompanyDTO companyDTO,
                                                              BindingResult bindingResult) throws BindException {
-        log.info("CompanyDTO -> {}", companyDTO);
 
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
@@ -84,7 +82,6 @@ public class CompanyRegisterController {
             }
 
             CompanyRegister companyRegister = companyRegisterService.update(companyDTO);
-            log.info("CompanyRegister -> {}", companyRegister);
 
             return ResponseEntity.ok(result);
 

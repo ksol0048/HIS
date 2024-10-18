@@ -78,7 +78,7 @@ function loadTransactionList() {
             tbody.innerHTML = '';  // 기존 테이블 내용 초기화
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7">현재 등록된 출납 정보가 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7">현재 등록된 입고 정보가 없습니다.</td></tr>';
             } else {
                 data.forEach(transaction => {
                     const row = document.createElement('tr');
@@ -93,7 +93,22 @@ function loadTransactionList() {
 
                     // 더블클릭 이벤트 추가: 행을 더블클릭하면 데이터를 폼에 채워줌
                     row.addEventListener('dblclick', function () {
-                        populateTransactionForm(transaction);  // 폼에 데이터를 채워줌
+                        populateTransactionForm(transaction);// 폼에 데이터를 채워줌
+
+                        // 기존 선택된 행의 하이라이트 및 글자색 제거
+                        if (window.selectedRow) {
+                            window.selectedRow.classList.remove('selected-highlight');
+                            window.selectedRow.querySelectorAll('td').forEach(td => {
+                                td.style.color = '';  // 기존 글자색 복원
+                            });
+                        }
+
+                        // 현재 선택된 행에 하이라이트 및 글자색 추가
+                        row.classList.add('selected-highlight');
+                        row.querySelectorAll('td').forEach(td => {
+                            td.style.color = 'white';  // 글자색을 흰색으로 설정
+                        });
+                        window.selectedRow = row;  // 현재 선택된 행을 저장
                     });
 
                     tbody.appendChild(row);
@@ -152,6 +167,17 @@ document.getElementById('addTransactionBtn').addEventListener('click', (event) =
             loadTransactionList();  // 목록 다시 로딩
             clearTransactionForm();  // 저장 후 필드 비우기
             setReadOnlyFields(true);  // 저장 후 필드 읽기 전용
+            // 새로운 입/출고 등록 후 현재고량 갱신
+            const materialCode = transactionData.materialCode;
+            fetch(`/inventory_management/getCurrentStock?materialCode=${encodeURIComponent(materialCode)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('selectedMaterialStock').textContent = data.remainingStock != null ? data.remainingStock.toLocaleString() : 0;
+                })
+                .catch(error => {
+                    console.error('현재고량을 불러오는 중 오류 발생:', error);
+                    document.getElementById('selectedMaterialStock').textContent = 'N/A';
+                });
         })
         .catch(error => {
             console.error("Error:", error);
@@ -225,7 +251,6 @@ function twoSearch() {
     if (queryParams.length > 0) {
         url += queryParams.join('&');
     }
-
 
     // 서버에 fetch 요청
     fetch(url)
@@ -412,6 +437,7 @@ function populateMaterialAndSetStockOutDate(material) {
     // 출고일자 필드에 오늘 날짜 설정
     const today = new Date().toISOString().split('T')[0];  // 'YYYY-MM-DD' 형식으로 오늘 날짜 가져오기
     document.getElementById('stockOutDate').value = today;
+
 }
 
 // 더블 클릭 시 재료를 선택하고 출고일자에 오늘 날짜 설정
@@ -428,6 +454,8 @@ document.getElementById('transactionList').addEventListener('dblclick', function
             materialName: materialName,
             materialCode: materialCode
         };
+        // 선택된 재료코드를 이용해 현재고량을 불러옴
+        populateOutgoingTransactionForm({ materialCode: materialCode });
         populateMaterialAndSetStockOutDate(material);
     }
 });
@@ -470,6 +498,20 @@ function populateOutgoingTransactionForm(transaction) {
     document.getElementById('stockOutDate').value = transaction.stockOutDate || ''; // 출고일자
     document.getElementById('stockOut').value = transaction.stockOut || 0; // 출고량
     document.getElementById('stockOutId').value = transaction.stockOutId || ''; // stockOutId를 hidden 필드에 저장
+
+    // 재료코드를 이용해 현재고량을 서버에서 불러오기
+    const materialCode = transaction.materialCode;  // 출고 데이터의 materialCode 사용
+
+    fetch(`/inventory_management/getCurrentStock?materialCode=${encodeURIComponent(materialCode)}`)
+        .then(response => response.json())
+        .then(data => {
+            // 서버에서 받은 현재고량을 화면에 표시
+            document.getElementById('selectedMaterialStock').textContent = data.remainingStock != null ? data.remainingStock.toLocaleString() : 0;
+        })
+        .catch(error => {
+            console.error('현재고량을 불러오는 중 오류 발생:', error);
+            document.getElementById('selectedMaterialStock').textContent = 'N/A';
+        });
 }
 
 // 페이지 로드 시 출고 데이터 리스트 로딩
@@ -519,6 +561,17 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
                 clearStockTransactionForm(); // 폼 초기화
                 setStockDate();  // 오늘 날짜로 다시 설정
                 loadOutgoingTransactionList(materialCode);  // 목록 다시 로드
+
+                // 새로운 출고량 반영 후 현재고량 갱신
+                fetch(`/inventory_management/getCurrentStock?materialCode=${encodeURIComponent(materialCode)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('selectedMaterialStock').textContent = data.remainingStock != null ? data.remainingStock.toLocaleString() : 0;
+                    })
+                    .catch(error => {
+                        console.error('현재고량을 불러오는 중 오류 발생:', error);
+                        document.getElementById('selectedMaterialStock').textContent = 'N/A';
+                    });
 
                 document.getElementById('stockOutId').value = '';  // ID 초기화
             }

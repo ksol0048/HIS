@@ -31,17 +31,12 @@ public class MaterialStatusController {
             @RequestParam(required = false) Boolean belowSafetyStock,
             @RequestParam(required = false) Boolean stockManagementItem) {
 
-        log.info("검색 요청: Start Date: {}, End Date: {}, Company Name: {}, Material Name: {}, Material Code: {}, Below Safety Stock: {}, Stock Management Item: {}",
-                startDate, endDate, companyName, materialName, materialCode, belowSafetyStock, stockManagementItem);
-
         try {
             LocalDate start = (startDate != null) ? LocalDate.parse(startDate) : null;
             LocalDate end = (endDate != null) ? LocalDate.parse(endDate) : null;
 
             List<MaterialTransactionDTO> result = materialStatusService.searchMaterialStatus(
                     start, end, materialName, materialCode, companyName, belowSafetyStock, stockManagementItem);
-            log.info("검색 결과: {}", result);
-
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("서버 오류 발생: ", e);

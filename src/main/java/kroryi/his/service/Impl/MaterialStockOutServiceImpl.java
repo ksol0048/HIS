@@ -133,4 +133,13 @@ public class MaterialStockOutServiceImpl implements MaterialStockOutService {
             throw new IllegalArgumentException("해당 ID의 출납 기록이 존재하지 않습니다: " + stockOutId);
         }
     }
+
+    @Override
+    public Long getCurrentStock(String materialCode) {
+        MaterialRegister materialRegister = materialRegisterRepository.findByMaterialCode(materialCode)
+                .orElseThrow(() -> new IllegalArgumentException("재료 코드를 찾을 수 없습니다."));
+
+        // 현재 재고량을 계산하여 반환
+        return calculateRemainingStock(materialRegister);
+    }
 }

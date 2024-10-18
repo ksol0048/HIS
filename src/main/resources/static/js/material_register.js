@@ -1,3 +1,5 @@
+
+
 // 재료 정보를 폼에 채우는 함수 (수정 모드)
 function populateMaterialForm(material) {
     document.getElementById('threeMaterialCode').value = material.materialCode;
@@ -105,7 +107,18 @@ function loadMaterialList() {
                         <td>${material.minQuantity}</td>
                         <td>${material.stockManagementItem ? "예" : "아니오"}</td>
                     `;
-                    row.addEventListener('dblclick', () => populateMaterialForm(material));
+                    row.addEventListener('dblclick', () => {
+                        populateMaterialForm(material);
+                        // 기존 선택된 행에서 하이라이트 제거
+                        if (selectedRow) {
+                            selectedRow.classList.remove('selected-highlight');
+                        }
+
+                        // 현재 선택된 행에 하이라이트 추가
+                        row.classList.add('selected-highlight');
+                        selectedRow = row;  // 선택된 행 업데이트
+                    });
+
                     tbody.appendChild(row);
                 });
             }

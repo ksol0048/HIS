@@ -110,10 +110,8 @@ public class MaterialRegisterServiceImpl implements MaterialRegisterService {
         if (optionalMaterial.isPresent()) {
             // 기존 재료가 있을 경우 수정
             materialRegister = optionalMaterial.get();
-            log.info("기존 재료를 수정합니다: {}", materialRegister);
         } else {
             // 새로운 재료를 등록
-            log.info("재료가 없으므로 새로 등록합니다: {}", materialDTO.getMaterialCode());
             materialRegister = new MaterialRegister();  // 새로운 객체 생성
             materialRegister.setMaterialCode(materialDTO.getMaterialCode());  // 새 재료의 코드 설정
             isNewMaterial = true;  // 새로운 재료 등록

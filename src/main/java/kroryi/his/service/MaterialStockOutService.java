@@ -14,4 +14,6 @@ public interface MaterialStockOutService {
     void deleteByTransactionId(Long transactionId);
 
     Map<String, Object> updateOutgoingTransaction(MaterialStockOutDTO stockOutDTO);
+
+    Long getCurrentStock(String materialCode);
 }

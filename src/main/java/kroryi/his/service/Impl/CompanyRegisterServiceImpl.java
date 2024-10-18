@@ -19,22 +19,6 @@ public class CompanyRegisterServiceImpl implements CompanyRegisterService {
     private final CompanyRegisterRepository companyRegisterRepository;
     private final ModelMapper modelMapper;
 
-//가짜데이터 등록
-//    @Override
-//    public CompanyRegister registerCompany() {
-//        CompanyRegister company = CompanyRegister.builder()
-//                .companyCode("dt12345")
-//                .companyName("조은이덴탈2")
-//                .businessNumber("0156132154")
-//                .companyNumber("053-0000-0000")
-//                .managerName("백지영2")
-//                .managerNumber("010-0000-0000")
-//                .companyMemo("첫 업체 등록")
-//                .build();
-//        log.info("company->{}", company);
-//        return companyRegisterRepository.save(company);
-//    }
-
     @Override
     public List<CompanyRegister> getAllCompanies() {
         return companyRegisterRepository.findAll();
