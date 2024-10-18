@@ -31,6 +31,11 @@
                         <i class="bi bi-gear"></i>사용자관리
                     </a>
                 </li>
+                <li class="nav-item">
+                    <form action="/logout" method="post">
+                        <button type="submit" class="btn btn-primary submitBtn">Log Out</button>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>
@@ -144,6 +149,8 @@
 <script layout:fragment="reservationscript" th:inline="javascript"></script>
 
 <script layout:fragment="chartscript" th:inline="javascript"></script>
+<script layout:fragment="chartscriptPlan" th:inline="javascript"></script>
+
 </body>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/js/axios.js"></script>
