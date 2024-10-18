@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "reservation")
 public class Reservation {
@@ -17,7 +19,7 @@ public class Reservation {
     private long seq;
 
     @Column(name = "reservation_date")
-    private String reservationDate;
+    private LocalDateTime reservationDate;
 
     @Column(name = "department")
     private String department;
@@ -39,7 +41,7 @@ public class Reservation {
 
     }
 
-    public Reservation(long seq, String reservationDate,
+    public Reservation(long seq, LocalDateTime reservationDate,
                        String department, boolean snsNotification, String chartNumber, String patientNote,
                        String reservationStatusCheck) {
         super();
@@ -60,11 +62,11 @@ public class Reservation {
         this.seq = seq;
     }
 
-    public String getReservationDate() {
+    public LocalDateTime getReservationDate() {
         return reservationDate;
     }
 
-    public void setReservationDate(String reservationDate) {
+    public void setReservationDate(LocalDateTime reservationDate) {
         this.reservationDate = reservationDate;
     }
 

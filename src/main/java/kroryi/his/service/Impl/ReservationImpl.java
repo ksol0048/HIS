@@ -30,23 +30,13 @@ public class ReservationImpl implements ReservationService {
         this.modelMapper = modelMapper;
     }
 
-
     // 캘린더에서 날짜 선택시
     public List<ReservationDTO> selectedDatePatientList(ReservationDTO dto) {
-
-        // 문자열 형식으로 날짜 가져오기
-        String reservationDate = dto.getReservationDate(); // "2024-10-21" 형식
-        List<Reservation> reservations = reRepo.findByReservationDate(reservationDate);
-
-        // 콘솔에 예약 목록 출력
-        System.out.println("선택한 날짜: " + reservationDate);
-        System.out.println("예약 목록: " + reservations);
-
+        List<Reservation> reservations = reRepo.findByReservationDate(dto.getReservationDate());
         return reservations.stream()
                 .map(reservation -> modelMapper.map(reservation, ReservationDTO.class))
                 .collect(Collectors.toList());
     }
-
 
     // 환자의 예약 정보 확인
     public List<ReservationDTO> selectedByReservation(ReservationDTO dto) {
@@ -62,7 +52,6 @@ public class ReservationImpl implements ReservationService {
         reRepo.save(reservation);
     }
 
-
     // 예약에서 수정을 눌렀을 경우
     public void updateReservationInformation(ReservationDTO dto) {
         Optional<Reservation> optionalReservation = reRepo.findById(dto.getSeq());
@@ -75,15 +64,4 @@ public class ReservationImpl implements ReservationService {
             throw new EntityNotFoundException("Reservation not found with seq: " + dto.getSeq());
         }
     }
-
-    @Override
-    public void deleteReservation(Long seq) {
-        if (!reRepo.existsById(seq)) {
-            throw new EntityNotFoundException("Reservation not found with seq: " + seq);
-        }
-        reRepo.deleteById(seq);
-
-    }
-
-
 }

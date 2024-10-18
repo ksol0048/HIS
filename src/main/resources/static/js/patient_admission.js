@@ -742,7 +742,12 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const row = completePatientsTable.insertRow();
+        const tbody = completePatientsTable.getElementsByTagName('tbody')[0];
+        if (!tbody) {
+            console.error("진료 완료 테이블의 tbody를 찾을 수 없습니다!");
+            return;
+        }
+
         completePatientCount++;
         console.log("Patient's reception time:", patient.receptionTime);
 
@@ -750,10 +755,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const formatReceptionTime = (dateTimeString) => {
             if (!dateTimeString || dateTimeString === 'N/A') return 'N/A';
             const date = new Date(dateTimeString);
-            // UTC+6 시간으로 조정
             const utcOffset = 15 * 60 * 60 * 1000; // 15시간을 밀리초로 변환
             const convertedDate = new Date(date.getTime() + utcOffset);
-
             if (isNaN(convertedDate)) return 'N/A'; // 유효하지 않은 날짜 처리
 
             let hours = convertedDate.getHours();
@@ -767,17 +770,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const formatCompleteTime = (completionTime) => {
             if (!completionTime || completionTime === 'N/A') return 'N/A'; // 값이 없거나 'N/A'일 경우
 
-            // completionTime이 "오전 01:32" 형식일 경우
+            // completionTime이 12시간 형식일 경우 처리
             if (typeof completionTime === 'string' && /[오전|오후]/.test(completionTime)) {
                 const [amPm, timePart] = completionTime.split(" "); // 오전/오후와 시간 부분을 분리
                 const [hoursStr, minutesStr] = timePart.split(":"); // 시와 분 분리
 
-
                 const hours = parseInt(hoursStr, 10); // 문자열을 정수로 변환
                 const minutes = parseInt(minutesStr, 10); // 문자열을 정수로 변환
-                console.log("시간 부분:", timePart, "오전/오후:", amPm);
-                console.log("시간:", hoursStr, "분:", minutesStr);
-                console.log("hours:", hours, "minutes:", minutes);
 
                 // 12시간 형식을 24시간 형식으로 변환
                 let convertedHours = amPm === '오후' && hours < 12 ? hours + 12 : hours;
@@ -802,7 +801,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // completionTime이 ISO 8601 형식일 경우 처리
             const date = new Date(completionTime);
-
             if (isNaN(date.getTime())) return 'N/A'; // 유효하지 않은 날짜 처리
 
             // UTC+6 시간으로 변환
@@ -817,9 +815,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`; // 포맷팅된 시간 반환
         };
 
-
-
-
         console.log("전송할 진료 완료 시간:", patient.completionTime);
 
         // completionTime 값을 가져와서 포맷팅
@@ -828,6 +823,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const formattedReceptionTime = formatReceptionTime(patient.receptionTime);
 
+        // tbody에 새로운 행 추가
+        const row = tbody.insertRow(); // tbody에서 행을 추가
         row.innerHTML = `
         <td>${completePatientCount}</td>
         <td>${patient.chartNum || 'N/A'}</td>
@@ -836,14 +833,23 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${formattedReceptionTime || 'N/A'}</td>
         <td>${formattedCpTime || 'N/A'}</td>
     `;
-        console.log("테이블에 표시되는 진료완료시간", formattedCpTime);
-        console.log("진료완료테이블 행 개수", completePatientCount);
 
-        console.log('진료 완료 시간', formattedCpTime);
+        console.log("테아블에 표시되는 진료완료시간: ",formattedCpTime);
+        console.log("완료 환자 테이블:", completePatientsTable);
+        console.log("tbody:", tbody);
+        console.log("진료 완료 테이블의 tbody 현재 내용:", tbody.innerHTML);
+
+        // 현재 tbody의 모든 행 데이터 출력
+        console.log("진료 완료 테이블의 현재 내용:");
+        for (let i = 0; i < tbody.rows.length; i++) {
+            const cells = tbody.rows[i].cells;
+            const rowData = Array.from(cells).map(cell => cell.innerText).join(', ');
+            console.log(`행 ${i + 1}: ${rowData}`);
+        }
+
         // 완료 환자 수 업데이트
         updateCompletePatientCount();
     }
-
 // 페이지 로드 시 completedPatients에서 진료 완료 시간 표시
     window.addEventListener('load', function () {
 
