@@ -39,6 +39,48 @@ public class MaterialTransactionController {
     private final MaterialRegisterService materialRegisterService;
 
     private final MaterialTransactionService materialTransactionService;
+    // 재료 출납 등록 (POST 요청)
+
+    @PostMapping("/addTransaction")
+    public ResponseEntity<?> addTransaction(@Valid @RequestBody MaterialTransactionDTO materialTransactionDTO, BindingResult bindingResult) throws BindException {
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
+        }
+
+        try {
+            // 재료 출납 등록 로직
+            MaterialTransactionRegister materialTransactionRegister = materialTransactionService.register(materialTransactionDTO);
+            log.info("Transaction Registered for Material Code: {}", materialTransactionDTO.getMaterialCode());
+            return ResponseEntity.ok(Map.of("success", true, "message", "재료 출납이 등록되었습니다.", "materialTransactionRegister", materialTransactionRegister));
+        } catch (IllegalArgumentException e) {
+            log.warn("재료 출납 등록 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("재료 출납 등록 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    // 재료 출납 수정 (PUT 요청)
+    @PutMapping("/updateTransaction")
+    public ResponseEntity<?> updateTransaction(@Valid @RequestBody MaterialTransactionDTO materialTransactionDTO, BindingResult bindingResult) throws BindException {
+        if (bindingResult.hasErrors()) {
+            throw new BindException(bindingResult);
+        }
+
+        try {
+            // 재료 출납 수정 로직
+            MaterialTransactionRegister materialTransactionRegister = materialTransactionService.update(materialTransactionDTO);
+            log.info("Transaction Updated for Material Code: {}", materialTransactionDTO.getMaterialCode());
+            return ResponseEntity.ok(Map.of("success", true, "message", "재료 출납이 수정되었습니다.", "materialTransactionRegister", materialTransactionRegister));
+        } catch (IllegalArgumentException e) {
+            log.warn("재료 출납 수정 실패: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("재료 출납 수정 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
     // 재료 목록 조회 (GET 요청)
     @ApiOperation(value = "재료 목록 조회", notes = "GET 방식으로 재료 목록을 조회합니다.")

@@ -37,9 +37,6 @@ function clearTransactionForm() {
     document.getElementById('twoMaterialName').value = '';
     document.getElementById('twoMaterialCode').value = '';
     document.getElementById('stockIn').value = 0;
-
-    // 필드를 다시 수정 가능하게 변경 (입고일자는 제외)
-    setReadOnlyFields(true);  // 입고일자는 항상 읽기 전용으로 유지
 }
 
 // 필드를 읽기 전용으로 설정하는 함수 (입고일자는 항상 읽기 전용)
@@ -49,14 +46,18 @@ function setReadOnlyFields(readOnly) {
     document.getElementById('twoMaterialCode').readOnly = readOnly;
 }
 
-// 오늘 날짜를 설정하는 함수
+// 로딩했을때 최신 날짜로 설정하는 함수
 function setTodayDate() {
     const today = new Date().toISOString().split('T')[0];  // 오늘 날짜를 'YYYY-MM-DD' 형식으로 가져옴
     document.getElementById('stockInDate').value = today;  // 입고일자 필드에 오늘 날짜 설정
     document.getElementById('stockOutDate').value = today;  // 출고일자 필드에 오늘 날짜 설정 (필요한 경우)
-
 }
 
+// 출고 날짜를 설정하는 함수
+function setStockDate() {
+    const today = new Date().toISOString().split('T')[0];  // 오늘 날짜를 'YYYY-MM-DD' 형식으로 가져옴
+    document.getElementById('stockOutDate').value = today;  // 출고일자 필드에 오늘 날짜 설정 (필요한 경우)
+}
 
 // 페이지가 로드될 때, 그리고 저장/취소/삭제 후에 오늘 날짜로 설정
 document.addEventListener('DOMContentLoaded', function() {
@@ -507,8 +508,6 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
         materialCode: materialCode
     };
 
-    console.log("전송할 데이터: ", stockOutData); // 디버깅용 로그
-
     fetch(url, {
         method: method,
         headers: {
@@ -516,27 +515,25 @@ document.getElementById('saveOutTransactionBtn').addEventListener('click', funct
         },
         body: JSON.stringify(stockOutData)
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('HTTP error, status = ' + response.status);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            alert(data.message);  // 성공 메시지 표시
-            // 저장 또는 수정 후에는 ID를 초기화하여 새로운 저장 시 수정되지 않도록 함
-            clearStockTransactionForm(); // 저장 후 필드 초기화
-            setTodayDate();  // 오늘 날짜로 다시 설정
-            loadOutgoingTransactionList(materialCode);  // 목록 다시 로드
+            if (!data.success) {
+                alert(data.message);  // 재고량 초과 시 메시지 표시
+            } else {
+                alert(data.message);  // 성공 메시지 표시
+                clearStockTransactionForm(); // 폼 초기화
+                setStockDate();  // 오늘 날짜로 다시 설정
+                loadOutgoingTransactionList(materialCode);  // 목록 다시 로드
 
-            // 추가: ID를 초기화하여 신규 저장 모드로 전환
-            document.getElementById('stockOutId').value = '';  // ID 초기화
+                document.getElementById('stockOutId').value = '';  // ID 초기화
+            }
         })
         .catch(error => {
             console.error("수정 오류:", error);
             alert(`수정 중 오류가 발생했습니다. 상세 내용: ${error.message}`);
         });
 });
+
 
 
 
@@ -559,7 +556,7 @@ document.getElementById('deleteStockTransactionBtn').addEventListener('click', f
             if (response.ok) {
                 alert('출고 기록이 삭제되었습니다.');
                 clearStockTransactionForm();  // 출고 필드만 초기화
-                setTodayDate();
+                setStockDate();
                 loadOutgoingTransactionList(document.getElementById('selectedMaterialCode').textContent);  // 삭제 후에도 재료 목록 다시 로딩
             } else {
                 throw new Error('출고 기록 삭제에 실패했습니다.');
@@ -574,7 +571,7 @@ document.getElementById('deleteStockTransactionBtn').addEventListener('click', f
 // 취소 버튼 클릭 시 선택한 출고 내역을 초기화하는 함수
 document.getElementById('resetStockTransaction').addEventListener('click', function () {
     clearStockTransactionForm();  // 출고 필드 초기화
-    setTodayDate();  // 오늘 날짜로 다시 설정
+    setStockDate();  // 오늘 날짜로 다시 설정
     selectedTransactionId = null;  // 기존 선택된 ID 초기화 (신규 저장 모드로 전환)
 });
 

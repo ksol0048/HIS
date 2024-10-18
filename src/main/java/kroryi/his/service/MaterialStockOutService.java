@@ -4,6 +4,7 @@ import kroryi.his.dto.MaterialStockOutDTO;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface MaterialStockOutService {
     void saveOutgoingTransaction(MaterialStockOutDTO stockOutDTO);
@@ -12,5 +13,5 @@ public interface MaterialStockOutService {
 
     void deleteByTransactionId(Long transactionId);
 
-    void updateOutgoingTransaction(MaterialStockOutDTO stockOutDTO);
+    Map<String, Object> updateOutgoingTransaction(MaterialStockOutDTO stockOutDTO);
 }

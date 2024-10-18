@@ -41,14 +41,24 @@ public class MaterialStockOutController {
     @PutMapping("/updateStockTransaction")
     public ResponseEntity<?> updateStockTransaction(@RequestBody MaterialStockOutDTO stockOutDTO) {
         try {
-            materialStockOutService.updateOutgoingTransaction(stockOutDTO);
+            // 출고 데이터 수정 시 재고량 초과 여부를 처리
+            Map<String, Object> result = materialStockOutService.updateOutgoingTransaction(stockOutDTO);
+
+            if (!(Boolean) result.get("success")) {
+                // 재고량 초과 시 메시지 반환
+                return ResponseEntity.status(HttpStatus.OK).body(result);
+            }
+
             log.info("Stock transaction updated: {}", stockOutDTO);
-            return ResponseEntity.ok(Map.of("success", true, "message", "출고 데이터가 수정되었습니다."));
+            return ResponseEntity.ok(result);
+
         } catch (Exception e) {
             log.error("Error updating stock transaction", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "출고 데이터 수정 중 오류가 발생했습니다."));
         }
     }
+
 
 
     @GetMapping("/getByMaterialCode")
