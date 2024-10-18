@@ -28,19 +28,6 @@ public class PageResponseDTO<E> {
     private int defaultPageRange;
 
 
-//    Board board = Board.builder()
-//            .title("하하하" + i)
-//            .content("내용" +i)
-//            .writer("사용자" + (i%10))
-//            .build();
-//     @Builder(builderMethodName = "withAll")
-//    Board board = Board.withAll()
-//            .title("하하하" + i)
-//            .content("내용" +i)
-//            .writer("사용자" + (i%10))
-//            .build();
-
-
     @Builder(builderMethodName = "withAll")
     public PageResponseDTO(PageRequestDTO pageRequestDTO, List<E> dtoList, int total, int pageRange) {
         if (total <= 0) {

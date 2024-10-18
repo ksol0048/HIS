@@ -3,8 +3,7 @@ package kroryi.his.controller;
 import io.swagger.annotations.ApiOperation;
 import jakarta.validation.Valid;
 import kroryi.his.domain.Member;
-import kroryi.his.dto.MemberJoinDTO;
-import kroryi.his.dto.MemberRoleSetDTO;
+import kroryi.his.dto.*;
 import kroryi.his.repository.MemberRepository;
 import kroryi.his.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +31,17 @@ public class UserController {
     @ResponseBody
     public List<MemberJoinDTO> getMembers() {
         return memberService.getMembers(); // DTO 리스트 반환
+    }
+
+    @GetMapping("/paginglist")
+    @ResponseBody
+    public PageResponseDTO<MemberListAllDTO> getPagingList(PageRequestDTO pageRequestDTO, Model model) {
+        if (pageRequestDTO.getPage() < 1) {
+            pageRequestDTO.setPage(1);
+        }
+        PageResponseDTO<MemberListAllDTO> responseDTO =
+                memberService.listWithAll(pageRequestDTO);
+        return responseDTO; // DTO 리스트 반환
     }
 
 

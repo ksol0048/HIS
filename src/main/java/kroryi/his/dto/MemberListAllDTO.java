@@ -5,20 +5,20 @@ import kroryi.his.domain.MemberRoleSet;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
-@Builder
 @Data
 @AllArgsConstructor
-public class MemberJoinDTO {
+@NoArgsConstructor
+@Builder
+public class MemberListAllDTO {
     private String mid;
     private String name;
-    private String password;
     private String email;
-    private boolean retirement;
-    private String social;
-
-    private Set<MemberRoleSet> roles;  // roleSet 값
-
+    private LocalDateTime regDate;
+    private Set<MemberRoleSet> role;
 }

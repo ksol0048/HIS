@@ -4,6 +4,9 @@ import kroryi.his.domain.Member;
 import kroryi.his.domain.MemberRole;
 import kroryi.his.domain.MemberRoleSet;
 import kroryi.his.dto.MemberJoinDTO;
+import kroryi.his.dto.MemberListAllDTO;
+import kroryi.his.dto.PageRequestDTO;
+import kroryi.his.dto.PageResponseDTO;
 import kroryi.his.mapper.UserMapper;
 import kroryi.his.repository.MemberRepository;
 import kroryi.his.repository.MemberRoleSetRepository;
@@ -11,6 +14,10 @@ import kroryi.his.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +35,9 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private UserMapper userMapper;
+
+    @Value("${paging.range}")
+    private int defaultPageRange;
 
     @Override
     public void join(MemberJoinDTO memberJoinDTO) throws MemberService.MidExistException {
@@ -117,7 +127,6 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public List<MemberJoinDTO> getMembers() {
         List<Member> members = memberRepository.findAll();
-        log.info("dddddddddddddd0< {}", members);
         return members.stream()
                 .map(member -> new MemberJoinDTO(
                         member.getMid(),
@@ -131,29 +140,59 @@ public class MemberServiceImpl implements MemberService {
                 .collect(Collectors.toList());
     }
 
-//    // Member에 새로운 역할을 추가하는 메서드
-//    public void addRole(String memberId, MemberRole newRole) {
-//        // Member 조회
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new RuntimeException("Member not found"));
-//
-//        // 이미 해당 역할이 존재하는지 확인
-//        boolean roleExists = member.getRoleSet().stream()
-//                .anyMatch(roleSet -> roleSet.getRoleSet().equals(newRole));
-//
-//        if (!roleExists) {
-//            // 새로운 역할 추가
-//            MemberRoleSet newMemberRoleSet = new MemberRoleSet();
-//            newMemberRoleSet.setRoleSet(newRole.toString());
-//
-//            // 역할 저장
-//            memberRoleSetRepository.save(newMemberRoleSet);
-//
-//            // Member에 역할 추가 (양방향 매핑일 경우)
-//            member.getRoleSet().add(newMemberRoleSet);
-//            memberRepository.save(member);  // 필요할 경우 저장
-//        } else {
-//            throw new RuntimeException("Role already exists for this member");
-//        }
-//    }
+
+    @Override
+    public PageResponseDTO<MemberJoinDTO> list(PageRequestDTO pageRequestDTO) {
+        String[] types = pageRequestDTO.getTypes();
+        String keyword = pageRequestDTO.getKeyword();
+        Pageable pageable = pageRequestDTO.getPageable("mid");
+        Page<Member> result = memberRepository.searchAll(types, keyword, pageable);
+
+        log.info("list---------> {}", result);
+
+        // 아래는 BoardDTO Board 클래스의 필드가 철자가 불일치 할경우 사용
+        PropertyMap<Member, MemberJoinDTO> boardMap = new PropertyMap<Member, MemberJoinDTO>() {
+            @Override
+            protected void configure() {
+                map(source.getRoleSet()).setRoles(null);
+            }
+        };
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.addMappings(boardMap);
+
+        // resulet에는 total , dtolist,
+        List<MemberJoinDTO> dtoList = result.getContent().stream()
+                .map(board -> modelMapper.map(board, MemberJoinDTO.class))
+                .collect(Collectors.toList());
+
+
+        return PageResponseDTO.<MemberJoinDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .pageRange(defaultPageRange)
+                .dtoList(dtoList)
+                .total((int) result.getTotalElements())
+                .build();
+    }
+
+    @Override
+    public PageResponseDTO<MemberListAllDTO> listWithAll(PageRequestDTO pageRequestDTO) {
+
+        String[] types = pageRequestDTO.getTypes();
+        String keyword = pageRequestDTO.getKeyword();
+        Pageable pageable = pageRequestDTO.getPageable("mid");
+
+        Page<MemberListAllDTO> result = memberRepository.searchWithAll(types,keyword,pageable);
+
+        log.info("listWithAll-> {}", result);
+        log.info("listWithAll Page-> {}", pageable);
+
+        return PageResponseDTO.<MemberListAllDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(result.getContent())
+                .pageRange(defaultPageRange)
+                .total((int)result.getTotalElements())
+                .build();
+
+    }
+
 }

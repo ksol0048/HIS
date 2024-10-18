@@ -2,7 +2,7 @@ window.onload = function () {
     axios.get('/admin_management/') // 적절한 API 엔드포인트를 사용
         .then(response => {
             let members = response.data; // 서버에서 가져온 데이터
-            console.log(members)
+            // console.log(members)
             const tbody = document.querySelector('#membersTable tbody');
             // members가 배열이 아닐 경우 배열로 변환
             if (!Array.isArray(members)) {
@@ -11,35 +11,39 @@ window.onload = function () {
 
             // 중첩된 데이터를 변환하는 로직
             const transformedMembers = members.map(member => {
-                // roles에서 중첩된 member 정보를 제거하고 새로운 객체 생성
-                console.log("1111" + member)
-                const transformedRoles = member.roles.map(roleSet => {
-                    return {
-                        id: roleSet.id,
-                        role: roleSet.role
-                    };
-                });
-                // 중첩된 roles만 변환한 새로운 member 객체 반환
-                return {
-                    mid: member.mid,
-                    name: member.name,
-                    password: member.password,
-                    email: member.email,
-                    retirement: member.retirement,
-                    roles: transformedRoles
-                };
+                // // roles에서 중첩된 member 정보를 제거하고 새로운 객체 생성
+                // console.log("1111" + member)
+                // const transformedRoles = member.roles.map(roleSet => {
+                //     console.log(roleSet)
+                //     return {
+                //         role: roleSet
+                //     };
+                // });
+                //
+                // console.log(transformedRoles)
+                // // 중첩된 roles만 변환한 새로운 member 객체 반환
+                // return {
+                //     mid: member.mid,
+                //     name: member.name,
+                //     password: member.password,
+                //     email: member.email,
+                //     retirement: member.retirement,
+                //     roles: transformedRoles
+                // };
             });
 
             // 변환된 데이터 출력
-            console.log(transformedMembers);
+            console.log(members);
             // 사용자 리스트를 반복하며 테이블에 추가
-            transformedMembers.forEach(user => {
+            members.forEach(user => {
                 const row = document.createElement('tr');
+                const roles = user.roles.map(role => role.roleSet).join(', ');
+
                 row.innerHTML = `
                         <td>${user.mid}</td>
                         <td>${user.name}</td>
                         <td>${user.email}</td>
-                        // <td>${user.roles.join(', ')}</td> <!-- Set이나 배열을 문자열로 변환 -->
+                        <td>${roles}</td> <!-- Set이나 배열을 문자열로 변환 -->
                     `;
                 tbody.appendChild(row);
             });

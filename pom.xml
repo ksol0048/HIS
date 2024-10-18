@@ -37,6 +37,16 @@
             <version>5.1.0</version>
             <classifier>jakarta</classifier>
         </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>5.1.0</version>
+            <scope>provided</scope>
+            <classifier>jakarta</classifier>
+        </dependency>
+
+
+
         <!-- https://mvnrepository.com/artifact/org.modelmapper/modelmapper -->
         <dependency>
             <groupId>org.modelmapper</groupId>
@@ -130,6 +140,8 @@
             <artifactId>thumbnailator</artifactId>
             <version>0.4.20</version>
         </dependency>
+
+
     </dependencies>
 
     <build>

@@ -3,9 +3,18 @@ package kroryi.his.service;
 import kroryi.his.domain.Member;
 import kroryi.his.domain.MemberRole;
 import kroryi.his.dto.MemberJoinDTO;
+import kroryi.his.dto.MemberListAllDTO;
+import kroryi.his.dto.PageRequestDTO;
+import kroryi.his.dto.PageResponseDTO;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public interface MemberService {
 
@@ -30,4 +39,32 @@ public interface MemberService {
     List<Member> getMembersByRole(MemberRole role);
 
     List<MemberJoinDTO> getMembers();
+
+//페이지 검색
+    PageResponseDTO<MemberJoinDTO> list(PageRequestDTO pageRequestDTO);
+
+    PageResponseDTO<MemberListAllDTO> listWithAll(PageRequestDTO pageRequestDTO);
+
+    default Member dtoToEntity(MemberJoinDTO memberJoinDTO){
+
+        Member board = Member.builder()
+                .mid(memberJoinDTO.getMid())
+                .name(memberJoinDTO.getName())
+                .email(memberJoinDTO.getEmail())
+                .roleSet(memberJoinDTO.getRoles())
+                .build();
+
+        return board;
+    }
+    default MemberJoinDTO entityToDTO(Member member) {
+        MemberJoinDTO memberJoinDTO = MemberJoinDTO.builder()
+                .mid(member.getMid())
+                .name(member.getName())
+                .email(member.getEmail())
+                .roles(member.getRoleSet())
+                .build();
+
+        return memberJoinDTO;
+    }
+
 }
