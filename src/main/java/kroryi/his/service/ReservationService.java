@@ -9,5 +9,6 @@ public interface ReservationService {
     List<ReservationDTO> selectedByReservation(ReservationDTO dto);
     void insertReservationInformation(ReservationDTO dto);
     void updateReservationInformation(ReservationDTO dto);
+    void deleteReservation(Long seq);
 }
 

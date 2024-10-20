@@ -3,6 +3,7 @@ package kroryi.his.controller;
 import java.util.List;
 
 import ch.qos.logback.core.CoreConstants;
+import groovy.lang.Lazy;
 import kroryi.his.dto.ReservationDTO;
 import kroryi.his.service.ReservationService;
 import org.slf4j.Logger;
@@ -10,12 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 
 
 @CrossOrigin(origins = "*") // 모든 출처를 허용 (보안상 좋지 않을 수 있으니 주의)
@@ -66,6 +62,9 @@ public class ReservationController {
         }
     }
 
+
+
+
     // 예약에서 업데이트 되는 경우
     @PostMapping("/updateReservationInformation")
     public ResponseEntity<String> updateReservationInformation(@RequestBody ReservationDTO dto) {
@@ -81,5 +80,13 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @DeleteMapping("/deleteReservation")
+    public ResponseEntity<String> deleteReservation(@RequestParam Long seq) {
+        System.out.println(seq);
+        rServ.deleteReservation(seq);
+        return ResponseEntity.ok("예약이 성공적으로 삭제되었습니다.");
+    }
+
 }
 
