@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+
+<div layout:fragment="content">
+    <form th:action="@{/board/modify}" method="post" id="f1">
+
+        <div class="row mt-3">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        게시물 제목
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">번호</span>
+                            <input name="bno" type="text" class="form-control" th:value="${dto.bno}" readonly>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">제목</span>
+                            <input name="title" type="text" class="form-control" th:value="${dto.title}">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">내용</span>
+                            <textarea name="content" cols="30" rows="10" class="form-control col-sm-5">[[${dto.content}]]</textarea>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">작성자</span>
+                            <input name="writer" type="text" class="form-control" th:value="${dto.writer}" readonly>
+                        </div>
+                        <!--                        이미지 등록-->
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">이미지</span>
+                            <div class="float-end uploadHidden">
+                                <button type="button"
+                                        class="btn btn-primary uploadFileBtn">
+                                    이미지 등록
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">등록일자</span>
+                            <input name="registerDate" type="text" class="form-control"
+                                   th:value="${#temporals.format(dto.registerDate, 'yyyy-MM-dd HH:mm:ss')}" readonly>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">수정일자</span>
+                            <input name="modifyDate" type="text" class="form-control"
+                                   th:value="${#temporals.format(dto.modifyDate, 'yyyy-MM-dd HH:mm:ss')}" readonly>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col">
+                <div class="container-fluid d-flex uploadResult" style="flex-wrap:wrap">
+                    <th:block th:each="fileName:${dto.fileNames}">
+                        <div class="card col-4" th:with="arr = ${fileName.split('_')}">
+                            <div class="card-header d-flex justify-content-center">
+                                <!--                                [[${arr[1]}]]-->
+                                <button type="button" class="btn-close btn-danger"
+                                        th:onclick="removeFile([[${arr[0]}]],
+                                 [[${arr[1]}]],
+                                 this
+                                )"></button>
+                            </div>
+                            <div class="card-body">
+                                <img th:src="|/view/s_${fileName}|" th:data-src="${fileName}" alt="">
+                            </div>
+                        </div>
+                    </th:block>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="my-4">
+            <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
+                <a th:href="|@{/board/list}?${link}|" class="text-decoration-none">
+                    <button type="button" class="btn btn-primary listBtn">목록</button>
+                </a>
+
+                <button type="button" class="btn btn-secondary modBtn">수정</button>
+
+                <a th:href="|@{/board/remove(bno=${dto.bno})}&${link}|" class="text-decoration-none">
+                    <button type="button" class="btn btn-danger  removeBtn">삭제</button>
+                </a>
+
+            </div>
+        </div>
+
+    </form>
+
+    <!--    첨무파일 추가 모달창-->
+    <div class="modal uploadModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">업로드 파일</h5>
+                    <button class="btn-close" type="button"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="file" name="files" class="form-control" multiple>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary uploadBtn" type="button">
+                        업로드
+                    </button>
+                    <button class="btn btn-outline-dark closeUploadBtn" type="button">
+                        닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1"
+         role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <h5 class="modal-title" id="errorModalLabel">에러 발생</h5>
+                <button class="btn-close" type="button"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</div>
+
+
+<script layout:fragment="script" th:inline="javascript">
+    const uploadResult = document.querySelector(".uploadResult")
+    const removeFileList = []
+    const uploadModal = new bootstrap.Modal(document.querySelector(".uploadModal"))
+    const errors = [[${errors}]]
+    console.log(errors)
+    let errorMsg = ''
+    if (errors) {
+        for (let i = 0; i < errors.length; i++) {
+            errorMsg += `${errors[i].field}은 ${errors[i].code}\n`
+        }
+        alert(errorMsg)
+    }
+
+
+    const link = [[${pageRequestDTO.getLink}]]
+    const formObj = document.querySelector("#f1")
+
+    const errorMessage = document.querySelector("#errorMessage");
+
+    const errorModal = new bootstrap.Modal(document.querySelector("#errorModal"))
+
+    document.querySelector(".modBtn").addEventListener("click", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        appendFileData()
+
+        axios.post(`/board/modify?${link}`, formObj)
+            .then((response)=>{
+                // console.log("성공 : {}"+response.data)
+                location.href = `/board/read?bno=[[${dto.bno}]]&${link}`
+            })
+            .catch((error)=>{
+                if(error.response){
+                    if(error.response.status === 404){
+                        console.log("에러 404: 자원을 찾을 수 없습니다.")
+                        console.log("상태 : {}", error.response.data.status)
+                        console.log("메세지 : {}", error.response.data.message)
+                    }else if(error.response.status === 403){
+                        console.log("에러 403: 접근 제한")
+                        console.log("상태 : {}", error.response.data.status)
+                        console.log("메세지 : {}", error.response.data.message)
+                    }else{
+                        console.log("에러 : {}", error.response.status)
+                    }
+                }else{
+                    console.log("에러 : {}", error.message)
+                }
+                errorMessage.innerHTML = error.message;
+                errorModal.show()
+
+            })
+        // formObj.action = `/board/modify?${link}`
+        // callRemoveFiles()
+        // formObj.method = 'post'
+        // formObj.submit()
+    }, false)
+
+    function appendFileData() {
+        const target = document.querySelector(".uploadHidden")
+        const uploadFiles = uploadResult.querySelectorAll("img")
+        let str = ''
+        for (let i = 0; i < uploadFiles.length; i++) {
+            const uploadFile = uploadFiles[i]
+            const imgLink = uploadFile.getAttribute("data-src")
+            str += `<input type="hidden" name='fileNames' value="${imgLink}">`
+        }
+        console.log(str)
+        target.innerHTML = str;
+
+    }
+
+
+    function callRemoveFiles() {
+        removeFileList.forEach(({uuid, fileName}) => {
+            removeFileToServer({uuid, fileName})
+        })
+    }
+
+    function appendNotShownData() {
+        if (removeFileList.length === 0) {
+            return
+        }
+        const target = document.querySelector(".uploadHidden")
+        let str = ''
+        for (let i = 0; i < removeFileList.length; i++) {
+            const {uuid, fileName} = removeFileList[i]
+            str += `<input type="hidden" name="fileNames" value="${uuid}_${fileName}">`
+        }
+        target.innerHTML += str;
+    }
+
+
+    function removeFile(uuid, fileName, obj) {
+        if (!confirm("파일을 삭제 하시겠습니까?")) {
+            return
+        }
+        console.log(uuid)
+        console.log(fileName)
+        console.log(obj)
+        removeFileList.push({uuid, fileName})
+        const targetDiv = obj.closest(".card")
+        targetDiv.remove()
+    }
+
+
+    document.querySelector(".uploadFileBtn").addEventListener("click", e => {
+        console.log("11111111111111111")
+        e.stopPropagation()
+        e.preventDefault()
+        uploadModal.show()
+    }, false)
+
+    document.querySelector(".uploadBtn").addEventListener("click", e => {
+        //빈 formObj객체를 생성
+        const formObj = new FormData();
+        // <input type="files">에 업로드 할 선택된 파일 정보 배열데이터
+        const fileInput = document.querySelector("input[name='files']")
+        console.log(fileInput.files);
+        const files = fileInput.files
+
+        // 선택된 파일 목록을 formObj에 추가
+        for (let i = 0; i < files.length; i++) {
+            formObj.append("files", files[i])
+        }
+
+        //upload.js에 있는 uploadToServer axios에 formObj전달
+        uploadToServer(formObj).then(result => {
+            //then은 axios가 서버로 데이터 전송 후 성공 했을때 실행
+            // console.log(result)
+            // result는 Controller에서 데이터/이미지를 등록 후 응답 정보
+            for (const uploadResult of result) {
+                showUploadFile(uploadResult)
+            }
+
+            uploadModal.hide()
+        }).catch(e => {
+            //axios가 실패했을 경우 실행
+            uploadModal.hide()
+        })
+
+    }, false)
+
+    function showUploadFile({uuid, fileName, link}) {
+        console.log(link)
+        const str = `<div class="card col-4">
+        <div class="card-header d-flex justify-content-center">
+        ${fileName}
+        <button type="button" class="btn-sm btn-danger"
+        onclick="javascript:removeFile('${uuid}', '${fileName}', this)">X</button>
+            </div>
+
+        <div class="card-body">
+        <img src="/view/${link}" data-src="${uuid + "_" + fileName}">
+        </div>
+        </div>
+
+        `
+        uploadResult.innerHTML += str
+
+    }
+
+    document.querySelector(".removeBtn").addEventListener("click", e=>{
+        e.preventDefault()
+        e.stopPropagation()
+        appendFileData()
+        appendNotShownData()
+        formObj.action = `/board/remove`
+        formObj.method = 'post'
+        formObj.submit()
+    },false)
+
+
+</script>

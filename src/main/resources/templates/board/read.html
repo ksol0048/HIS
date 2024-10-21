@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+
+<div layout:fragment="content">
+
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    제시물 제목
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">번호</span>
+                        <input type="text" class="form-control" th:value="${dto.bno}" readonly>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">제목</span>
+                        <input type="text" class="form-control" th:value="${dto.title}" readonly>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">내용</span>
+                        <textarea cols="30" rows="10" class="form-control col-sm-5"
+                                  readonly>[[${dto.content}]]</textarea>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">작성자</span>
+                        <input type="text" class="form-control" th:value="${dto.writer}" readonly>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">등록일자</span>
+                        <input type="text" class="form-control"
+                               th:value="${#temporals.format(dto.registerDate, 'yyyy-MM-dd HH:mm:ss')}" readonly>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">수정일자</span>
+                        <input type="text" class="form-control"
+                               th:value="${#temporals.format(dto.modifyDate, 'yyyy-MM-dd HH:mm:ss')}" readonly>
+                    </div>
+
+
+                </div>
+                <div class="col">
+                    <div class="card" style="width:200px"
+                         th:if="${dto.fileNames !=null && dto.fileNames.size() > 0 }">
+                        <img th:each="fileName:${dto.fileNames}"
+                             th:src="|/view/${fileName}|" alt="" class="card-img-top">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="my-4"
+         th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+         th:with="email=${#authentication.principal.attributes['kakao_account']['email']}">
+        <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
+            <a th:href="|@{/board/list}?${link}|" class="text-decoration-none">
+                <button type="button" class="btn btn-primary">목록보기</button>
+            </a>
+            <a th:if="${email !=null && email == dto.getWriter()}" th:href="|@{/board/modify(bno=${dto.bno})}&${link}|" class="text-decoration-none">
+                <button type="button" class="btn btn-secondary">수정하기</button>
+            </a>
+        </div>
+    </div>
+    <div class="my-4"
+         th:if="${#authentication.principal instanceof T(org.springframework.security.core.userdetails.UserDetails)}"
+         th:with="user=${#authentication.principal}">
+        <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
+            <a th:href="|@{/board/list}?${link}|" class="text-decoration-none">
+                <button type="button" class="btn btn-primary">목록보기</button>
+            </a>
+            <a th:if="${user !=null && user.username == dto.writer}" th:href="|@{/board/modify(bno=${dto.bno})}&${link}|" class="text-decoration-none">
+                <button type="button" class="btn btn-secondary">수정하기</button>
+            </a>
+        </div>
+    </div>
+
+    <!--  댓글영역    시작-->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="my-4">
+                <button class="btn btn-info addReplyBtn">댓글 추가</button>
+            </div>
+            <ul class="list-group replyList">
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col">
+            <ul class="pagination replyPaging">
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="modal registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">댓글 등록</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">댓글 내용</span>
+                        <input type="text" class="form-control replyText">
+                    </div>
+                    <!-- 카카오 사용자일 경우 (OAuth2User) -->
+                    <input type="text" class="form-control replyer" name="replyer"
+                           th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                               th:value="${#authentication.principal.attributes['kakao_account']['email']}"
+                           readonly>
+
+                    <!-- 로컬 사용자일 경우 (UserDetails) -->
+                    <input type="text" class="form-control replyer"  name="replyer"
+                           th:if="${#authentication.principal instanceof T(org.springframework.security.core.userdetails.UserDetails)}"
+                           th:value="${#authentication.principal.username}"
+                           readonly>
+
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary registerBtn">등록</button>
+                        <button type="button" class="btn btn-outlink-dark closeRegisterBtn">
+                            닫기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  댓글 수정 모달-->
+
+    <div class="modal modifyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title replyHeader"></h5>
+                    <button class="btn-close" type="button"
+                            data-bs-dismiss="modal" aria-label="닫기"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">댓글 내용</span>
+                        <input type="text" class="form-control modifyText">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info modifyBtn">수정하기</button>
+                    <button type="button" class="btn btn-danger removeBtn">삭제하기</button>
+                    <button type="button" class="btn btn-outline-dark closeModifyBtn">닫기</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script src="/js/reply.js"></script>
+
+</div>
+
+
+<script layout:fragment="script" th:inline="javascript">
+    let currentUser = /*[[${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User) ? #authentication.principal.attributes['kakao_account']['email'] : #authentication.principal.username}]]*/ 'Anonymous';
+
+    let hasAuth = false
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const page = urlParams.get('page')
+    const size = urlParams.get('size')
+
+    const bno = [[${dto.bno}]]
+
+    const replyList = document.querySelector('.replyList')
+    const replyPaging = document.querySelector('.replyPaging')
+
+    // 수정모달
+    const modifyModal = new bootstrap.Modal(document.querySelector(".modifyModal"))
+    const replyHeader = document.querySelector(".replyHeader")
+    const modifyText = document.querySelector(".modifyText")
+    const modifyBtn = document.querySelector(".modifyBtn")
+    const removeBtn = document.querySelector(".removeBtn")
+    const closeModifyBtn = document.querySelector(".closeModifyBtn")
+
+
+    // 등록모달
+    const registerModal = new bootstrap.Modal(document.querySelector(".registerModal"))
+    const registerBtn = document.querySelector(".registerBtn")
+    const replyText = document.querySelector(".replyText")
+    const replyer = document.querySelector(".replyer")
+    const closeRegisterBtn = document.querySelector(".closeRegisterBtn")
+
+    modifyBtn.addEventListener("click", (e)=>{
+
+        if(!hasAuth){
+            alert("댓글 작성자만 수정이 가능 합니다.")
+            modifyModal.hide()
+            return
+        }
+
+        const replyObj = {
+            bno:bno,
+            rno:replyHeader.innerHTML,
+            replyText:modifyText.value
+        }
+
+        modifyReply(replyObj).then( result =>{
+            console.log(result.rno +'의 댓글이 수정 되었습니다.')
+            replyText.value =''
+            modifyModal.hide()
+            printReplies(page,size)
+        }).catch(e=>{
+            console.error(e)
+        })
+    },false)
+
+
+    closeModifyBtn.addEventListener("click", e=>{
+        modifyModal.hide()
+    },false)
+
+    removeBtn.addEventListener("click", e=>{
+        removeReply(replyHeader.innerHTML).then(result=>{
+            console.log(result.rno + '의 댓글이 삭제 되었습니다.')
+            replyText.value=''
+            modifyModal.hide()
+            this.page =1
+            printReplies(page,size)
+        }).catch(e=>{
+            console.log(e)
+        })
+    },false)
+
+
+
+    document.querySelector(".addReplyBtn").addEventListener("click", (e) => {
+        console.log("aaaaaaaaaaaaaaaaaaaaaaaaa")
+
+        registerModal.show()
+    }, false)
+
+    closeRegisterBtn.addEventListener("click", (e) => {
+        registerModal.hide()
+    }, false)
+
+    registerBtn.addEventListener("click", (e) => {
+        const replyObj = {
+            bno: bno,
+            replyText: replyText.value,
+            replyer: replyer.value
+        }
+
+        addReply(replyObj).then(result => {
+            console.log(result.rno)
+            registerModal.hide()
+            replyText.value = ''
+            replyer.value = ''
+            printReplies(page, size, false)
+
+        }).catch(e => {
+            alert("예외 발생")
+        })
+
+
+    })
+
+    replyList.addEventListener("click", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const target = e.target
+        if (!target || target.tagName != 'SPAN') {
+            return
+        }
+        const rno = target.getAttribute("data-rno")
+        if (!rno) {
+            return;
+        }
+        getReply(rno).then(reply => {
+            console.log(reply.replyer)
+            console.log("currentuser->"+ currentUser)
+
+            replyHeader.innerHTML = reply.rno
+            modifyText.value = reply.replyText
+            modifyModal.show()
+            hasAuth = currentUser === reply.replyer
+
+        }).catch(e => console.log("에러 발생"))
+
+    }, false)
+
+
+    replyPaging.addEventListener("click", (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const target = e.target
+        if (!target || target.tagName != 'A') {
+            return
+        }
+
+        const pageNum = target.getAttribute("data-page")
+        this.page = pageNum
+        printReplies(pageNum, size)
+    })
+
+
+    function printList(dtoList) {
+        let str = '';
+        if (dtoList && dtoList.length > 0) {
+            for (const dto of dtoList) {
+                str += `<li class="list-group-item d-flex replyItem">
+               <span class="col-2">${dto.rno}</span>
+               <span class="col-6" data-rno="${dto.rno}">${dto.replyText}</span>
+                <span class="col-2">${dto.replyer}</span>
+                <span class="col-2">${dto.regDate}</span>
+                </li>`
+
+            }
+
+        }
+
+        replyList.innerHTML = str
+    }
+
+
+    function printPages(data) {
+        let pageStr = '';
+        if (data.prev) {
+            pageStr += `<li class="page-item">
+      <a class="page-link" data-page="${data.start - 1}">이전</a>
+      </li>`
+        }
+        for (let i = data.start; i <= data.end; i++) {
+            pageStr += `<li class="page-item ${i == data.page ? "active" : ""}">
+        <a class="page-link" data-page="${i}">${i}</a></li>`
+        }
+
+        if (data.next) {
+            pageStr += `<li class="page-item">
+        <a class="page-link" data-page="${data.end + 1}">다음</a></li>`
+        }
+
+        replyPaging.innerHTML = pageStr
+
+
+    }
+
+    function printReplies(page, size, goLast) {
+        getList({bno, page, size, goLast}).then(
+            data => {
+                printList(data.dtoList)
+                printPages(data)
+            }
+        ).catch(e => {
+            console.error(e)
+        })
+    }
+
+    printReplies(page, size)
+
+</script>

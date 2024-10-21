@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+
+<div layout:fragment="content">
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    게시글 등록
+                </div>
+                <div class="card-body">
+                    <form action="/board/register" method="post">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">제목 :</span>
+                            <input type="text" name="title" class="form-control" placeholder="제목을 입력하세요!">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">내용 :</span>
+                            <textarea class="form-control col-sm-5" rows="5" name="content"></textarea>
+                        </div>
+                        <!-- 카카오 사용자일 경우 (OAuth2User) -->
+                        <input type="text" class="form-control" name="writer"
+                               th:if="${#authentication.principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)}"
+                               th:value="${#authentication.principal.attributes['kakao_account']['email']}"
+                               readonly>
+
+                        <!-- 로컬 사용자일 경우 (UserDetails) -->
+                        <input type="text" class="form-control" name="writer"
+                               th:if="${#authentication.principal instanceof T(org.springframework.security.core.userdetails.UserDetails)}"
+                               th:value="${#authentication.principal.username}"
+                               readonly>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">이미지:</span>
+                            <div class="float-end uploadHidden">
+                                <button type="button" class="btn btn-primary uploadFileBtn">
+                                    파일추가
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="my-4">
+                            <div class="float-end">
+                                <button class="btn btn-primary submitBtn" type="submit">등록</button>
+                                <button class="btn btn-secondary" type="reset">취소</button>
+                            </div>
+                        </div>
+
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!--    첨부파일 섬네일 보이는곳-->
+    <div class="row mt-3">
+        <div class="col">
+            <div class="container-fluid d-flex uploadResult" style="flex-wrap:wrap">
+            </div>
+        </div>
+    </div>
+
+<!--    첨무파일 추가 모달창-->
+    <div class="modal uploadModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">업로드 파일</h5>
+                    <button class="btn-close" type="button"
+                            data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="file" name="files" class="form-control" multiple>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary uploadBtn" type="button">
+                        업로드
+                    </button>
+                    <button class="btn btn-outline-dark closeUploadBtn" type="button">
+                        닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+    const auth = [[${#authentication.principal}]]
+    console.log(auth)
+
+    const errors = [[${errors}]]
+    console.log(errors)
+    let errorMsg = ''
+    if(errors){
+        for(let i=0; i < errors.length; i++){
+            errorMsg += `${errors[i].field}은 ${errors[i].code}\n`
+        }
+        alert(errorMsg)
+    }
+
+    const uploadModal = new bootstrap.Modal(document.querySelector(".uploadModal"))
+    document.querySelector(".uploadFileBtn").addEventListener("click", e=>{
+        console.log("11111111111111111")
+        e.stopPropagation()
+        e.preventDefault()
+        uploadModal.show()
+    },false)
+
+    document.querySelector(".uploadBtn").addEventListener("click", e=>{
+        //빈 formObj객체를 생성
+        const formObj = new FormData();
+        // <input type="files">에 업로드 할 선택된 파일 정보 배열데이터
+        const fileInput = document.querySelector("input[name='files']")
+        console.log(fileInput.files);
+        const files = fileInput.files
+
+        // 선택된 파일 목록을 formObj에 추가
+        for(let i=0;i < files.length; i++){
+            formObj.append("files", files[i])
+        }
+
+        //upload.js에 있는 uploadToServer axios에 formObj전달
+        uploadToServer(formObj).then(result=>{
+            //then은 axios가 서버로 데이터 전송 후 성공 했을때 실행
+            // console.log(result)
+            // result는 Controller에서 데이터/이미지를 등록 후 응답 정보
+            for( const uploadResult of result){
+                showUploadFile(uploadResult)
+            }
+
+            uploadModal.hide()
+        }).catch(e=>{
+            //axios가 실패했을 경우 실행
+            uploadModal.hide()
+        })
+
+    },false)
+
+    const uploadResult = document.querySelector(".uploadResult")
+    function showUploadFile({uuid, fileName, link}) {
+        console.log(link)
+        const str = `<div class="card col-4">
+        <div class="card-header d-flex justify-content-center">
+        ${fileName}
+        <button type="button" class="btn-sm btn-danger"
+        onclick="javascript:removeFile('${uuid}', '${fileName}', this)">X</button>
+            </div>
+
+        <div class="card-body">
+        <img src="/view/${link}" data-src="${uuid+"_"+fileName}">
+        </div>
+        </div>
+
+        `
+        uploadResult.innerHTML += str
+
+    }
+
+    function removeFile(uuid,fileName, obj){
+        console.log(uuid)
+        console.log(fileName)
+        console.log(obj)
+        const targetDiv = obj.closest(".card")
+        removeFileToServer(uuid,fileName).then(data=>{
+            targetDiv.remove()
+        })
+    }
+
+    document.querySelector(".submitBtn").addEventListener("click", e=>{
+        e.preventDefault()
+        e.stopPropagation()
+        const target = document.querySelector(".uploadHidden")
+        const uploadFiles = uploadResult.querySelectorAll("img")
+
+        let str = ''
+        for(let i=0; i< uploadFiles.length;i++){
+            const uploadFile = uploadFiles[i]
+            const imgLink = uploadFile.getAttribute("src")
+            str +=`<input type='hidden' name='fileNames' value="${imgLink}">`
+        }
+
+        target.innerHTML = str;
+
+        const formObj = document.querySelector("form")
+        formObj.submit();
+        formObj.reset()
+    })
+
+
+
+</script>
