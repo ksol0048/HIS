@@ -76,7 +76,7 @@
                 <h2>예약</h2>
                 <div class="form-group">
                     <label for="reservation-date">예약일자</label>
-                    <input type="date" id="reservation-date" name="reservation-date">
+                    <input type="datetime-local" id="reservation-date" name="reservation-date">
                 </div>
 
                 <!--            <div class="form-group">-->
@@ -167,7 +167,7 @@
 
                 <div class="btn-group">
                     <button type="button" onclick="saveUpdate()" style="margin-bottom: 10px">저장</button>
-                    <button type="button" style="margin-bottom: 10px">삭제</button>
+                    <button type="button" onclick="deleteReservation()" style="margin-bottom: 10px">삭제</button>
                 </div>
             </div>
         </div>
@@ -255,7 +255,6 @@
             console.log(patient_Info)
         }
 
-
         const monthYear = document.getElementById('monthYear');
     const calendarBody = document.getElementById('calendar-body');
     let currentDate = new Date();
@@ -328,12 +327,18 @@
                         // 해당 작업은 다른 날짜를 클릭했을때 기존 내용을 지워야 하기 때문임
                         tableBody.innerHTML = ''; // 기존 내용 제거
 
+
                         // 데이터 배열을 순회하여 테이블에 추가
                         data.forEach(item => {
+
+                            // 시간만 추출 (예: "2024-10-21T00:13" -> "00:13")
+                            const time = new Date(item.reservationDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+
                             const row = document.createElement('tr'); // 새로운 행 생성
                             row.id = 'reservationTableListParent'; // ID 추가
                             row.innerHTML = `
-    <td>${item.reservationDate}</td>
+    <td>${time}</td>
     <td>${item.department}</td>
     <td>${item.patientNote}</td>
     <td class="reservationTableListNumber">${item.seq}</td>
@@ -470,26 +475,6 @@
         // 에약 일자
         let reservationDate = document.getElementById('reservation-date').value;
 
-        // // 에약 종류 - 예약 상태
-        // let reservationstatus = "";
-        // if (document.getElementById('patient-reservation').checked) {
-        //     reservationstatus = "patient";
-        // }
-        //
-        // else {
-        //     reservationstatus = "other";
-        // }
-        //
-        // // 에약 종류 - 예약 환자
-        // let patientStatus = "";
-        // if (document.getElementById('registered-patient').checked) {
-        //     patientStatus = "registered";
-        // }
-        //
-        // else {
-        //     patientStatus = "unregistered";
-        // }
-
         // 환자 이름
         let department = document.getElementById('department').value;
 
@@ -562,6 +547,41 @@
 
         return;
     }
+
+        function deleteReservation() {
+            const indexNumber = document.getElementById('index-number').innerHTML.trim();
+
+            if (!indexNumber) {
+                alert("삭제할 예약을 선택해주세요.");
+                return;
+            }
+
+            const confirmation = confirm("정말로 삭제하시겠습니까?");
+            if (!confirmation) return;
+
+            // 보낼 데이터 객체로 변환
+            const data = {
+                seq: indexNumber
+            };
+
+            // 서버에 삭제 요청 보내기
+            fetch(`http://localhost:8080/api/main/deleteReservation?seq=${data.seq}`, { // seq를 URL에 포함
+                method: 'DELETE', // DELETE 요청
+                headers: {
+                    'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
+                }
+            })
+                .then(data => {
+                    alert("예약이 성공적으로 삭제되었습니다.");
+                    // 삭제 후 UI 갱신 등 추가 로직
+                    renderCalendar(); // 예: 캘린더 다시 렌더링
+                })
+                .catch(error => {
+                    console.error('에러 발생:', error);
+                    alert("삭제 중 오류가 발생했습니다.");
+                });
+
+        }
 
 
     function prevMonth() {
