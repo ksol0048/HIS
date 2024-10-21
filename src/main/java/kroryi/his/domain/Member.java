@@ -23,8 +23,9 @@ public class Member extends BaseEntity{
     private String email;
     private boolean retirement;
     private String social;
+    private String address;
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference  // 부모 엔티티에서 참조 관리
     private Set<MemberRoleSet> roleSet = new HashSet<>();;
 

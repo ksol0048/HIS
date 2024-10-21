@@ -7,14 +7,9 @@ import kroryi.his.dto.MemberListAllDTO;
 import kroryi.his.dto.PageRequestDTO;
 import kroryi.his.dto.PageResponseDTO;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public interface MemberService {
 
@@ -32,9 +27,9 @@ public interface MemberService {
     //사용자 정보 수정
     void saveModifyUserInfo(Map<String, Object> map);
 
-    Member getUserById(Long id);
+    Optional<Member> getUserById(String id);
 
-    void deleteUser(Long id);
+    void deleteUser(String id);
 
     List<Member> getMembersByRole(MemberRole role);
 

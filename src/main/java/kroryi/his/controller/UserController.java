@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @Controller
@@ -35,10 +36,11 @@ public class UserController {
 
     @GetMapping("/paginglist")
     @ResponseBody
-    public PageResponseDTO<MemberListAllDTO> getPagingList(PageRequestDTO pageRequestDTO, Model model) {
+    public PageResponseDTO<MemberListAllDTO> getPagingList(PageRequestDTO pageRequestDTO, Model model,@RequestParam("page") int page) {
         if (pageRequestDTO.getPage() < 1) {
             pageRequestDTO.setPage(1);
         }
+        log.info("Paging------> {}", pageRequestDTO);
         PageResponseDTO<MemberListAllDTO> responseDTO =
                 memberService.listWithAll(pageRequestDTO);
         return responseDTO; // DTO 리스트 반환
@@ -116,21 +118,30 @@ public class UserController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showUpdateUserForm(@PathVariable("id") Long id, Model model) {
-        Member member = memberService.getUserById(id);
+    public String showUpdateUserForm(@PathVariable("id") String id, Model model) {
+        Optional<Member> member = memberService.getUserById(id);
         model.addAttribute("member");
         return "member-form";
     }
 
+    @GetMapping("/editform/{id}")
+    @ResponseBody
+    public Optional<Member> getEditUserForm(@PathVariable("id") String id) {
+        Optional<Member> member = memberService.getUserById(id);
+        log.info("getEditUserForm -> {}", member);
+        return member;
+    }
+
+
     @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable("id") Long id) {
+    public String deleteUser(@PathVariable("id") String id) {
         memberService.deleteUser(id);
         return "redirect:/users";
     }
 
    /* @PostMapping("/searchUsers")
     @ResponseBody
-    public List<Member> searchUsers(@RequestBody Map<String, String> params) {
+    public List<Member> searchUsers(@RequestBody Map<String, String> params,@RequestParam("page") int page) {
         String userId = params.get("mid");
         String userName = params.get("username");
         String userRole = params.get("role");

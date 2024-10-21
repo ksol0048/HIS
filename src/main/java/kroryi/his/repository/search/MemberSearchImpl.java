@@ -156,18 +156,22 @@ public class MemberSearchImpl extends
         }
         // 전체 개수 계산을 위한 쿼리 (페이징 미적용)
         JPQLQuery<Member> memberJPQLQuery = from(member);
-
         memberJPQLQuery.leftJoin(roleSet).on(roleSet.member.eq(member));
         memberJPQLQuery.where(booleanBuilder);
         memberJPQLQuery.groupBy(member);
+
         getQuerydsl().applyPagination(pageable,memberJPQLQuery);
 
+// 카운트 쿼리 (roleSet 조인 제외)
+        JPQLQuery<Long> countQuery = queryFactory
+                .select(member.mid.countDistinct())
+                .from(member)
+                .groupBy(member.mid, member.email, member.name)  // 중복 제거를 위해 그룹화
+                .leftJoin(roleSet).on(roleSet.member.eq(member))
 
-//        JPQLQuery<Member> memberJPQLQuery = from(member)
-//                .where(booleanBuilder)
-//                .groupBy(member);
+                .where(booleanBuilder);  // roleSet 조인 없이 카운트만 수행
 
-        long totalCount = memberJPQLQuery.fetchCount();  // deprecated 메서드는 fetch().size()로 변경 가능
+        long totalCount = countQuery.fetchCount();  // deprecated 메서드는 fetch().size()로 변경 가능
 
         // Tuple에서 페이징 처리
         List<Tuple> tupleList = getQuerydsl()
@@ -180,48 +184,42 @@ public class MemberSearchImpl extends
                                         roleSet.roleSet
                                 )
                                 .from(member)
-//                                .groupBy(member)
+                                .groupBy(member.mid, member.email, member.name, roleSet.roleSet)  // 중복 제거를 위해 그룹화
                                 .where(booleanBuilder)
                                 .leftJoin(member.roleSet, roleSet)
                 )
                 .fetch();
 
-        System.out.println("2222222222222222222222222->" + tupleList);
-
-
-
-
         // Tuple에서 DTO로 변환
-        List<MemberListAllDTO> dtoList = tupleList.stream().map(tuple -> {
-            String mid = tuple.get(member.mid);   // 개별 필드 추출
-            String name = tuple.get(member.name);
-            String email = tuple.get(member.email);
+        List<MemberListAllDTO> dtoList = tupleList.stream()
+                .collect(Collectors.groupingBy(tuple -> tuple.get(member.mid)))  // 회원 ID로 그룹핑
+                .entrySet()
+                .stream()
+                .map(entry -> {
+                    Tuple tuple = entry.getValue().get(0);  // 첫 번째 튜플
+                    String mid = tuple.get(member.mid);
+                    String name = tuple.get(member.name);
+                    String email = tuple.get(member.email);
 
-            MemberRole roles = tuple.get(roleSet.roleSet);
-            System.out.println("22222222211111112333331111->" + tuple.get(member.mid)+ ":" + tuple.get(member.roleSet));
+                    // 모든 역할을 Set으로 수집
+                    Set<MemberRole> roles = entry.getValue().stream()
+                            .map(t -> t.get(roleSet.roleSet))  // 각 튜플에서 역할 가져오기
+                            .collect(Collectors.toSet());
 
-            MemberRoleSet roleSetEntity = new MemberRoleSet();
-            roleSetEntity.setRoleSet(roles);  // ADMIN, EMP 등 역할에 맞는 Enum 변환
+                    // DTO 생성
+                    return MemberListAllDTO.builder()
+                            .mid(mid)
+                            .name(name)
+                            .email(email)
+                            .roles(roles)  // 역할을 추가
+                            .build();
+                })
+                .collect(Collectors.toList());
 
-            // 역할 리스트 생성
-            Set<MemberRoleSet> roleSetList = new HashSet<>();
-            roleSetList.add(roleSetEntity);  // 각 사용자의 역할을 리스트에 추가
-
-            System.out.println("2222222221111111233333->" + roles);
-//            System.out.println("2222222221111111233334->" + roleNames);
-
-
-
-            // DTO로 변환
-            return MemberListAllDTO.builder()
-                    .mid(mid)
-                    .name(name)
-                    .email(email)
-                    .role(roleSetList)
-                    .build();
-        }).collect(Collectors.toList());
-
-        log.info("totalCount->{}", totalCount);
+        log.info("totalCount->1 {}",  totalCount);
+        log.info("totalCount->1 {}",  pageable);
+        log.info("totalCount->2 {}",  dtoList.size());
+        log.info("totalCount->3 {}", (long) tupleList.size());
 
 
         return new PageImpl<>(dtoList, pageable, totalCount);

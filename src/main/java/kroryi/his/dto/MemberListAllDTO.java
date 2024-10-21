@@ -20,5 +20,5 @@ public class MemberListAllDTO {
     private String name;
     private String email;
     private LocalDateTime regDate;
-    private Set<MemberRoleSet> role;
+    private Set<MemberRole> roles;
 }

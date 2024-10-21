@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,12 +111,13 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Member getUserById(Long id) {
-        return null;
+    public Optional<Member> getUserById(String id) {
+        Optional<Member> member = memberRepository.findById(id);
+        return member;
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(String id) {
 
     }
 

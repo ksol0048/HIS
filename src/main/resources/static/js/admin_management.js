@@ -1,5 +1,5 @@
 window.onload = function () {
-    axios.get('/admin_management/') // 적절한 API 엔드포인트를 사용
+    axios.get('/admin_management/paginglist') // 적절한 API 엔드포인트를 사용
         .then(response => {
             let members = response.data; // 서버에서 가져온 데이터
             // console.log(members)
@@ -8,34 +8,10 @@ window.onload = function () {
             if (!Array.isArray(members)) {
                 members = [members];
             }
-
-            // 중첩된 데이터를 변환하는 로직
-            const transformedMembers = members.map(member => {
-                // // roles에서 중첩된 member 정보를 제거하고 새로운 객체 생성
-                // console.log("1111" + member)
-                // const transformedRoles = member.roles.map(roleSet => {
-                //     console.log(roleSet)
-                //     return {
-                //         role: roleSet
-                //     };
-                // });
-                //
-                // console.log(transformedRoles)
-                // // 중첩된 roles만 변환한 새로운 member 객체 반환
-                // return {
-                //     mid: member.mid,
-                //     name: member.name,
-                //     password: member.password,
-                //     email: member.email,
-                //     retirement: member.retirement,
-                //     roles: transformedRoles
-                // };
-            });
-
             // 변환된 데이터 출력
-            console.log(members);
+            console.log(members[0].dtoList);
             // 사용자 리스트를 반복하며 테이블에 추가
-            members.forEach(user => {
+            members[0].dtoList.forEach(user => {
                 const row = document.createElement('tr');
                 const roles = user.roles.map(role => role.roleSet).join(', ');
 
