@@ -47,36 +47,32 @@ public class CustomerSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         log.info("--보안환경설정--");
         http
-                .csrf(csrf->csrf.disable())
-                .rememberMe(me->me
+                .csrf(csrf -> csrf.disable())
+                .rememberMe(me -> me
                         .key("12345")
                         .tokenRepository(persistentTokenRepository())
                         .userDetailsService(userDetailsService)
-                        .tokenValiditySeconds(60*60*24*30)
+                        .tokenValiditySeconds(60 * 60 * 24 * 30)
                 )
-                .authorizeHttpRequests(
-                        authorize -> authorize
-                                .requestMatchers("/member/login").permitAll()
-
-                                .anyRequest().authenticated() // 모든 사이트 다 막고 시작
-//                                .anyRequest().permitAll()
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/member/login").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/member/login") // 로그인 페이지로 이동
+                        .loginPage("/member/login")
                         .defaultSuccessUrl("/home", true)
-                        .permitAll() // 모든 사용자에 로그인 페이지 접근 허용
+                        .permitAll()
                 )
-//                .oauth2Login(login->login.loginPage("/member/login"))
                 .exceptionHandling(exceptionHandling ->
-                        exceptionHandling.accessDeniedHandler(accessDeniedHandler()))
-                .logout(LogoutConfigurer::permitAll
-                );
+                        exceptionHandling.accessDeniedHandler(accessDeniedHandler())
+                )
+                .logout(LogoutConfigurer::permitAll);
 
         return http.build();
     }
+
 
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
