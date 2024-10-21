@@ -26,11 +26,12 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarColor02">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
+                <li class="nav-item" th:if="${#authorization.expression('hasAnyRole(''ADMIN'')')}">
                     <a class="nav-link" href="admin_management" id="admin_management">
-                        <i class="bi bi-gear"></i>사용자관리
+                        <i class="bi bi-gear"></i> 사용자관리
                     </a>
                 </li>
+
                 <li class="nav-item">
                     <form action="/logout" method="post">
                         <button type="submit" class="btn btn-primary submitBtn">Log Out</button>
@@ -131,6 +132,9 @@
     </div>
 </div><!--    register modal-->
 
+
+<!--home-->
+<div layout:fragment="home" style="width: 100%"></div>
 <!--사용자관리-->
 <div layout:fragment="admin_management" style="width: 100%"></div>
 <!--환자등록-->

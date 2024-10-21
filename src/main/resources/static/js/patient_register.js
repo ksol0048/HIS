@@ -23,6 +23,8 @@ const emailLocal = document.getElementById("emailLocal");
 const emailDomain = document.getElementById("emailDomain");
 
 patient_register.addEventListener("click", (e) => {
+
+
     // 환자 정보를 담은 객체
     const patientObj = {
         name: name.value,
