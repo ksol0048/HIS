@@ -1,7 +1,8 @@
 const searchModal = new bootstrap.Modal(document.querySelector(".SearchModal"))
 const closeBtn = document.querySelector(".closeBtn")
 const patient_name_keyword = document.querySelector("#patient_name_keyword")
-
+const departmentElement = document.getElementById('department');
+const chartNumberElement = document.getElementById('chart-number');
 
 let selectedRow = null; // 클릭된 행을 저장할 변수
 
@@ -107,7 +108,7 @@ document.querySelector("#addReplyBtn").addEventListener("click", (e) => {
 
                 row.addEventListener("click", () => {
                     if (selectedRow) {
-                        selectedRow.classList.remove('selected');
+                        selectedRow.classList.remove('selected');``
                     }
                     selectedRow = row;
                     selectedRow.classList.add('selected');
@@ -143,7 +144,6 @@ document.querySelector(".SearchBtn").addEventListener("click", () => {
             </div>
         `;
 
-
         const ageInput = document.getElementById('age');
         if (window.location.href.includes("/patient_register")) {
             patientData.forEach((patient, index) => {
@@ -158,6 +158,9 @@ document.querySelector(".SearchBtn").addEventListener("click", () => {
                     ageInput.value = menu_age;
                 }
             })
+        }else if(window.location.href.includes("/reservation")){
+            departmentElement.value=menu_name;
+            chartNumberElement.value=menu_chartNum;
         }
 
 
