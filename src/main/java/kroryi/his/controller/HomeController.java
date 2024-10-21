@@ -49,10 +49,4 @@ public class HomeController {
     public String inventory_management() {
         return "inventory_management";
     }
-
-    //    공지사항 게시판
-    @GetMapping("/board/list")
-    public String boardList() {
-        return "board/list";
-    }
 }
