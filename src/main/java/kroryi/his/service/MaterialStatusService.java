@@ -1,5 +1,6 @@
 package kroryi.his.service;
 
+import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialTransactionDTO;
 
 import java.time.LocalDate;
@@ -16,6 +17,8 @@ public interface MaterialStatusService {
                                                       String companyName,
                                                       Boolean belowSafetyStock,
                                                       Boolean stockManagementItem) ;
+
+    List<MaterialTransactionDTO> getLowStockItems();
 
 
 }

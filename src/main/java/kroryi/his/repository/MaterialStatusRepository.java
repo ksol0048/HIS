@@ -46,5 +46,7 @@ public interface MaterialStatusRepository extends JpaRepository<MaterialTransact
     @Query("UPDATE MaterialTransactionRegister mtr SET mtr.belowSafetyStock = :belowSafetyStock WHERE mtr.transactionId = :transactionId")
     void updateBelowSafetyStock(@Param("transactionId") Long transactionId, @Param("belowSafetyStock") Boolean belowSafetyStock);
 
+    @Query("SELECT m FROM MaterialTransactionRegister m WHERE m.remainingStock < m.materialRegister.minQuantity")
+    List<MaterialTransactionRegister> findLowStockItems();
 
 }

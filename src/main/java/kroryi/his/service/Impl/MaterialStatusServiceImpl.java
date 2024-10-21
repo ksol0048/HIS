@@ -1,12 +1,10 @@
 package kroryi.his.service.Impl;
 
-import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialTransactionDTO;
 import kroryi.his.repository.MaterialRegisterRepository;
 import kroryi.his.repository.MaterialStatusRepository;
 import kroryi.his.repository.MaterialStockOutRepository;
-import kroryi.his.repository.MaterialTransactionRepository;
 import kroryi.his.service.MaterialStatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -79,9 +77,34 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
                 })
                 .collect(Collectors.toList());
 
+
         // firstRegisterDate 기준으로 정렬 (가장 최근 등록된 항목이 위로 오도록)
         return dtoList.stream()
                 .sorted(Comparator.comparing(MaterialTransactionDTO::getFirstRegisterDate).reversed()) // 날짜를 내림차순으로 정렬
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<MaterialTransactionDTO> getLowStockItems() {
+        List<MaterialTransactionRegister> lowStockItems = materialStatusRepository.findLowStockItems();
+
+        return lowStockItems.stream()
+                .map(transaction -> {
+                    MaterialTransactionDTO dto = new MaterialTransactionDTO(transaction);
+                    // 재고량 계산
+                    Long totalStockIn = materialStatusRepository.getTotalStockInByMaterialCode(transaction.getMaterialRegister().getMaterialCode());
+                    Long totalStockOut = materialStockOutRepository.getTotalStockOutByMaterialCode(transaction.getMaterialRegister().getMaterialCode());
+
+                    totalStockIn = (totalStockIn != null) ? totalStockIn : 0L;
+                    totalStockOut = (totalStockOut != null) ? totalStockOut : 0L;
+                    Long remainingStock = totalStockIn - totalStockOut;
+
+                    dto.setRemainingStock(remainingStock); // DTO에 재고량 설정
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
 }
