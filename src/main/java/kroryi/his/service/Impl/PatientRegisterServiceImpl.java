@@ -1,9 +1,12 @@
 package kroryi.his.service.Impl;
 
+import kroryi.his.domain.Member;
+import kroryi.his.domain.MemberRole;
 import kroryi.his.domain.PatientRegister;
 import kroryi.his.domain.PatientRegisterMemo;
 import kroryi.his.dto.PatientDTO;
 import kroryi.his.dto.PatientMemoDTO;
+import kroryi.his.repository.MemberRepository;
 import kroryi.his.repository.PatientMemoRepository;
 import kroryi.his.repository.PatientRegisterRepository;
 import kroryi.his.service.PatientRegisterService;
@@ -17,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class PatientRegisterServiceImpl implements PatientRegisterService {
     private final PatientRegisterRepository patientRegisterRepository;
     private final ModelMapper modelMapper;
     private final PatientMemoRepository patientMemoRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public String generateChartNum() {
@@ -117,6 +122,16 @@ public class PatientRegisterServiceImpl implements PatientRegisterService {
     public PatientRegister getPatient(String chartNum) {
         return patientRegisterRepository.findById(chartNum)
                 .orElseThrow(() -> new RuntimeException("환자를 찾을 수 없습니다."));
+    }
+
+    @Override
+    public List<String> getDoctorNames() {
+        return memberRepository.findAll() // 모든 회원 조회
+                .stream()
+                .filter(member -> member.getRoleSet().stream()
+                        .anyMatch(roleSet -> roleSet.getRoleSet().equals(MemberRole.DOCTOR))) // DOCTOR인지 확인
+                .map(Member::getName) // 이름을 추출
+                .collect(Collectors.toList()); // 리스트로 반환
     }
 }
 

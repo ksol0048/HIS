@@ -1,50 +1,64 @@
 package kroryi.his.controller;
 
+import jakarta.servlet.http.HttpSession;
+import kroryi.his.dto.MemberSecurityDTO;
 import kroryi.his.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-@Service
 @Controller
 @RequestMapping("/member")
 @Log4j2
 @RequiredArgsConstructor
 public class MemberController {
-
     private final MemberService memberService;
+    private final AuthenticationManager authenticationManager;
 
     @GetMapping("/login")
-    public String loginGET(String error, String logout) {
+    public String loginGET(@RequestParam(required = false) String error, @RequestParam(required = false) String logout) {
         log.info("로그인 컨트롤러");
-        log.info("로그아웃 : {}", logout);
-        if(logout != null) {
+        if (logout != null) {
             log.info("회원 로그아웃");
         }
-
-        return "user/login";
-    }
-/*
-    @GetMapping("/join")
-    public void joinGET() {
-        log.info("join get.......");
-    }
-
-    @PostMapping("/join")
-    public String joinPOST(MemberJoinDTO memberJoinDTO, RedirectAttributes redirectAttributes) {
-        log.info("join post--->{}", memberJoinDTO);
-        try {
-            memberService.join(memberJoinDTO);
-        }catch (MemberService.MidExistException e){
-            redirectAttributes.addFlashAttribute("error", "mid");
-            return "redirect:/user/join";
+        if (error != null) {
+            log.error("로그인 실패: {}", error);
         }
+        return "user/login"; // 로그인 페이지로 리턴
+    }
 
-        redirectAttributes.addFlashAttribute("result","success");
+    @PostMapping("/login-proc")
+    public String loginProc(@RequestParam String username, @RequestParam String password, HttpSession session) {
+        try {
+            // Create authentication token
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
 
-        return "redirect:/user/login";
-    }*/
+            // Authenticate the user
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+
+            // Store the authentication in the SecurityContext
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("Authenticated user: {}", authentication.getPrincipal());
+
+            // Optionally store user information in the session
+            MemberSecurityDTO memberSecurityDTO = (MemberSecurityDTO) authentication.getPrincipal();
+            session.setAttribute("user", memberSecurityDTO);
+            log.info("Current Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
+
+            // Redirect to home or dashboard after successful login
+            return "redirect:/home";
+        } catch (Exception e) {
+            log.error("Authentication failed: {}", e.getMessage());
+            return "redirect:/member/login?error"; // Redirect back to login with error
+        }
+    }
+
 }

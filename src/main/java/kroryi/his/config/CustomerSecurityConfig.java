@@ -9,12 +9,14 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,9 +30,8 @@ import java.util.Map;
 @Log4j2
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록이 됨.
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
-@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true) // securedEnabled => Secured 애노테이션 사용 여부, prePostEnabled => PreAuthorize 어노테이션 사용 여부.
+@EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class CustomerSecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
@@ -41,7 +42,6 @@ public class CustomerSecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
@@ -57,22 +57,32 @@ public class CustomerSecurityConfig {
                         .tokenValiditySeconds(60 * 60 * 24 * 30)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/member/login").permitAll()
+                        .requestMatchers("/member/login/**").permitAll()
+                        .requestMatchers("/member/login-proc").permitAll()
+//                        .requestMatchers("/home").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/member/login")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .loginProcessingUrl("/member/login-proc")
                         .defaultSuccessUrl("/home", true)
                         .permitAll()
                 )
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.accessDeniedHandler(accessDeniedHandler())
                 )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 세션 생성 정책
+                        .maximumSessions(1) // 최대 세션 수
+                        .expiredUrl("/login?expired") // 세션 만료 시 리다이렉트 URL
+                )
+                .userDetailsService(userDetailsService)
                 .logout(LogoutConfigurer::permitAll);
 
         return http.build();
     }
-
 
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
@@ -97,5 +107,16 @@ public class CustomerSecurityConfig {
             response.getWriter().write(new ObjectMapper()
                     .writeValueAsString(responseEntity.getBody()));
         };
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder());
+
+        return authenticationManagerBuilder.build(); // Directly return the builder's result
     }
 }

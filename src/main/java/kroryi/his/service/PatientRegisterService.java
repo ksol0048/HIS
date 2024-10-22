@@ -25,4 +25,7 @@ public interface PatientRegisterService {
 
     PatientRegister getPatient(String chartNum);
 
+    // DOCTOR 역할을 가진 회원의 이름을 가져오는 메소드
+    public List<String> getDoctorNames() ;
+
 }

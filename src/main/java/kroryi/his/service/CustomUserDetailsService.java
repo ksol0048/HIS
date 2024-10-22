@@ -6,7 +6,10 @@ import kroryi.his.dto.MemberSecurityDTO;
 import kroryi.his.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -53,6 +56,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         );
 
         log.info("----------------memberSecurityDTO: {}", memberSecurityDTO);
+
+        // Create Authentication object
+        Authentication authentication = new UsernamePasswordAuthenticationToken(memberSecurityDTO, null, memberSecurityDTO.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication); // Store Authentication in SecurityContext
+
+        // Log current Authentication
+        log.info("Current Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
         return memberSecurityDTO;
     }
 }

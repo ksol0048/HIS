@@ -85,8 +85,9 @@
                                     <span class="input-group-text" style="width: 6rem;">주치의</span>
                                     <select class="form-select" name="mainDoc" id="mainDoc">
                                         <option selected value="">주치의</option>
-                                        <option value="m">남</option>
-                                        <option value="w">여</option>
+                                        <th:block th:each="doctor : ${doctorNames}">
+                                            <option th:value="${doctor}" th:text="${doctor}"></option>
+                                        </th:block>
                                     </select>
                                 </div>
                             </div>

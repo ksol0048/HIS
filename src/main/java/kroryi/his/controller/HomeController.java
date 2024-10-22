@@ -2,7 +2,6 @@ package kroryi.his.controller;
 
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -48,5 +47,10 @@ public class HomeController {
     @GetMapping("/inventory_management")
     public String inventory_management() {
         return "inventory_management";
+    }
+
+    @GetMapping("/list")
+    public String list() {
+        return "board/list";
     }
 }
