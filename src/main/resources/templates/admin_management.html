@@ -90,43 +90,73 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col">
-                            <small>아이디</small>
-                            <input type="text" class="form-control" id="txtPopId" name="mid" value="" size="20"
-                                   placeholder="아이디 입력"
-                                   required>
-                            <small>비밀번호</small>
-                            <input type="password" class="form-control" id="txtPopPwd" value="" name="password"
-                                   placeholder="비밀번호 입력"
-                                   required>
-                            <small>사용자 권한</small>
-                            <select class="form-control" id="cmbPopUserAuth" name="role">
-                                <option value="0">일반사용자</option>
-                                <option value="1">관리자</option>
-                                <option value="2">의사</option>
-                                <option value="3">간호사</option>
-
-                            </select>
-                            <small>이름</small>
-                            <input type="text" class="form-control popTxt" id="txtPopName" value="" name="name"
-                                   placeholder="이름 입력">
-                            <small>전화번호</small>
-                            <input type="number" class="form-control popTxt" id="txtPopTel" min="0"
-                                   placeholder="전화번호 입력" value="">
-                            <small>이메일</small>
-                            <input type="email" class="form-control popTxt" id="txtPopMail" name="email"
-                                   placeholder="이메일 입력"
-                                   value="">
-
-                            <small>주소</small>
-                            <input type="email" class="form-control popTxt" id="txtPop" placeholder="주소 입력"
-                                   value="">
-                            <small>특이사항</small>
-                            <textarea class="form-control" id="note" placeholder="특이사항"></textarea><br>
-                            <div class="card-footer">
-                                <div class="col" style="text-align: right;">
-                                    <button id="userTable" class="btn btn-success">저장</button>
+                            <form id="UserFormData">
+                                <small class="mr-2">아이디</small>
+                                <div class="form-inline">
+                                    <input type="text" class="form-control mr-2" id="txtPopId" name="mid" value="" size="20"
+                                           placeholder="아이디 입력"
+                                           required
+                                           style="display: inline-block; width: auto;"
+                                    >
+                                    <button type="button" class="btn btn-primary mr-2" onclick="checkDuplicateId()">
+                                        중복체크
+                                    </button>
+                                    <input type="checkbox" id="idCheckStatus" disabled unchecked>
+                                    <span id="idCheckMsg"></span> <!-- 중복 체크 결과 메시지를 표시 -->
                                 </div>
-                            </div>
+
+                                <small>비밀번호</small>
+                                <input type="password" class="form-control" id="txtPopPwd" value="" name="password"
+                                       placeholder="비밀번호 입력"
+                                       required>
+                                <small>사용자 권한</small>
+                                <select class="form-control" id="cmbPopUserAuth" multiple name="role">
+                                    <option value="0">일반사용자</option>
+                                    <option value="1">관리자</option>
+                                    <option value="2">의사</option>
+                                    <option value="3">간호사</option>
+
+                                </select>
+                                <small>이름</small>
+                                <input type="text" class="form-control popTxt" id="txtPopName" value="" name="name"
+                                       placeholder="이름 입력">
+                                <small>전화번호</small>
+                                <input type="text" class="form-control popTxt" id="txtPopTel" min="0"
+                                       placeholder="전화번호 입력" value="">
+                                <small>전화번호(핸드폰)</small>
+                                <input type="text" class="form-control popTxt" id="txtPopHandPhone" min="0"
+                                       placeholder="핸드폰 번호 입력" value="">
+                                <small>이메일</small>
+                                <input type="email" class="form-control popTxt" id="txtPopMail" name="email"
+                                       placeholder="이메일 입력"
+                                       value="">
+
+                                <small>주소</small>
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user"
+                                               id="zipCode" name="zipCode" placeholder="우편번호" readonly
+                                               onclick="sample4_execDaumPostcode()">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control form-control-user" id="streetAdr"
+                                           name="streetAdr" placeholder="도로명 주소" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control form-control-user" id="detailAdr"
+                                           name="detailAdr" placeholder="상세 주소" onclick="addrCheck()">
+                                </div>
+                                <small>특이사항</small>
+                                <textarea class="form-control" id="note" placeholder="특이사항"></textarea><br>
+                                <div class="card-footer">
+                                    <div class="col" style="text-align: right;">
+                                        <input type="reset" id="userTableRest" class="btn btn-danger" value="취소">
+                                        <button id="userTable" class="btn btn-success">저장</button>
+                                    </div>
+                                </div>
+
+                            </form>
                         </div>
                         <div class="col">
                             <div class="card m-2 mb-1" style="height: 100%">
@@ -185,4 +215,5 @@
         </div>
     </div>
     <script src="/js/admin_management.js"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </div>

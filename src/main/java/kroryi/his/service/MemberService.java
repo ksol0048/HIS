@@ -62,4 +62,5 @@ public interface MemberService {
         return memberJoinDTO;
     }
 
+    boolean isDuplicateMemberId(String mid);
 }

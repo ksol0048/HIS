@@ -1,9 +1,18 @@
 window.onload = function () {
-    axios.get('/admin_management/paginglist') // 적절한 API 엔드포인트를 사용
+    loadPage(1);
+    addRowClickEvent();
+};
+
+
+function loadPage(pageNumber) {
+
+    axios.get(`/admin_management/paginglist?page=${pageNumber}`) // 적절한 API 엔드포인트를 사용
         .then(response => {
             let members = response.data; // 서버에서 가져온 데이터
             // console.log(members)
             const tbody = document.querySelector('#membersTable tbody');
+            // 기존 tbody의 모든 tr 요소 삭제
+            tbody.innerHTML = '';
             // members가 배열이 아닐 경우 배열로 변환
             if (!Array.isArray(members)) {
                 members = [members];
@@ -11,10 +20,26 @@ window.onload = function () {
             // 변환된 데이터 출력
             console.log(members[0].dtoList);
             // 사용자 리스트를 반복하며 테이블에 추가
+
             members[0].dtoList.forEach(user => {
                 const row = document.createElement('tr');
-                const roles = user.roles.map(role => role.roleSet).join(', ');
-
+                const roles = user.roles.map(role => role).join(', ');
+                row.setAttribute("data-mid", user.mid);
+                row.addEventListener('click', function() {
+                    const memberId = this.getAttribute('data-mid');  // 클릭한 행의 data-mid 값을 가져옴
+                    console.log("Selected member ID:", memberId);
+                    // 회원 정보 조회 API 호출 (예시 API)
+                    axios.get(`/admin_management/editform/${memberId}`)
+                        .then(response => {
+                            const memberInfo = response.data;
+                            // 회원 정보 처리 로직 (예: 모달 창에 정보 표시 등)
+                            console.log(memberInfo);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching member info:', error);
+                        });
+                });
+                console.log(roles)
                 row.innerHTML = `
                         <td>${user.mid}</td>
                         <td>${user.name}</td>
@@ -22,12 +47,51 @@ window.onload = function () {
                         <td>${roles}</td> <!-- Set이나 배열을 문자열로 변환 -->
                     `;
                 tbody.appendChild(row);
+                renderPagination(members[0])
             });
+
         })
         .catch(error => {
             console.error('Error fetching members:', error);
         });
-};
+
+}
+
+
+// 페이지네이션을 동적으로 생성하는 함수
+function renderPagination(responseDTO) {
+    const paginationList = document.getElementById('pagination-list');
+    paginationList.innerHTML = '';  // 기존 페이지네이션 초기화
+
+    // "이전" 버튼 추가
+    if (responseDTO.prev) {
+        const prevItem = document.createElement('li');
+        prevItem.classList.add('page-item');
+        prevItem.innerHTML = `<a class="page-link" data-num="${members[0].start - 1}" onclick="loadPage(${responseDTO.start - 1})">이전</a>`;
+        paginationList.appendChild(prevItem);
+    }
+
+    // 중간 페이지 번호들 추가
+    for (let i = responseDTO.start; i <= responseDTO.end; i++) {
+        const pageItem = document.createElement('li');
+        pageItem.classList.add('page-item');
+        if (responseDTO.page === i) {
+            pageItem.classList.add('active');
+        }
+        pageItem.innerHTML = `<a class="page-link" data-num="${i}" onclick="loadPage(${i})">${i}</a>`;
+        paginationList.appendChild(pageItem);
+    }
+
+    // "다음" 버튼 추가
+    if (responseDTO.next) {
+        const nextItem = document.createElement('li');
+        nextItem.classList.add('page-item');
+        nextItem.innerHTML = `<a class="page-link" data-num="${responseDTO.end + 1}" onclick="loadPage(${responseDTO.end + 1})">다음</a>`;
+        paginationList.appendChild(nextItem);
+    }
+}
+
+
 
 // 저장 버튼 클릭 이벤트
 document.getElementById('userTable').addEventListener('click', function (event) {
@@ -203,48 +267,58 @@ function searchUser() {
         rows[i].style.display = match ? "" : "none";
     }
 }
-//
-// document.getElementById("btnSearch").addEventListener("click", function () {
-//     // 검색 조건을 가져옴
-//     const userId = document.getElementById("txtId").value;
-//     const userName = document.getElementById("txtName").value;
-//     const userRole = document.getElementById("cmbAuth").value;
-//     const startDate = document.getElementById("transactionStartDate").value;
-//
-//     // 검색 조건을 객체로 만들기
-//     const searchParams = {
-//         id: userId,
-//         name: userName,
-//         role: userRole,
-//         startDate: startDate
-//     };
-//
-//     // AJAX 요청을 통해 서버로 검색 조건을 전송
-//     fetch("/searchUsers", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json"
-//         },
-//         body: JSON.stringify(searchParams)
-//     })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.length > 0) {
-//                 // 검색된 사용자가 있으면 첫 번째 사용자 정보를 수정 폼에 표시
-//                 const user = data[0];  // 예를 들어 첫 번째 사용자 선택
-//
-//                 // 사용자 정보를 수정 창에 채우기
-//                 document.getElementById("txtPopId").value = user.id;
-//                 document.getElementById("txtPopPwd").value = "";  // 비밀번호는 보안상 빈칸으로 둠
-//                 document.getElementById("cmbPopUserAuth").value = user.role;
-//                 document.getElementById("txtPopName").value = user.username;
-//                 document.getElementById("txtPopTel").value = user.phone || "";  // 전화번호
-//                 document.getElementById("txtPopMail").value = user.email;
-//                 document.getElementById("txtPop").value = user.address || "";  // 주소
-//                 document.getElementById("note").value = user.note || "";  // 특이사항
-//             } else {
-//                 alert("검색된 사용자가 없습니다.");
-//             }
-//         })
-//         .catch(error => console.error('Error:', error));
-// });
+
+
+function userUpdateSetForm(){
+    document.getElementById("btnSearch").addEventListener("click", function () {
+        // 검색 조건을 가져옴
+        const userId = document.getElementById("txtId").value;
+        const userName = document.getElementById("txtName").value;
+        const userEmail = document.getElementById("txtPopMail")
+        const userRetirement = document.getElementById("txtRetirement")
+        const userPhone = document.getElementById("txtPhone")
+        const userSocial = document.getElementById("txtSocial")
+
+        const userRole = document.getElementById("cmbAuth").value;
+        const startDate = document.getElementById("transactionStartDate").value;
+
+        // 검색 조건을 객체로 만들기
+        const searchParams = {
+            id: userId,
+            name: userName,
+            role: userRole,
+            startDate: startDate
+        };
+
+        // AJAX 요청을 통해 서버로 검색 조건을 전송
+        fetch("/searchUsers", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(searchParams)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    // 검색된 사용자가 있으면 첫 번째 사용자 정보를 수정 폼에 표시
+                    const user = data[0];  // 예를 들어 첫 번째 사용자 선택
+
+                    // 사용자 정보를 수정 창에 채우기
+                    document.getElementById("txtPopId").value = user.id;
+                    document.getElementById("txtPopPwd").value = "";  // 비밀번호는 보안상 빈칸으로 둠
+                    document.getElementById("cmbPopUserAuth").value = user.role;
+                    document.getElementById("txtPopName").value = user.username;
+                    document.getElementById("txtPopTel").value = user.phone || "";  // 전화번호
+                    document.getElementById("txtPopMail").value = user.email;
+                    document.getElementById("txtPop").value = user.address || "";  // 주소
+                    document.getElementById("note").value = user.note || "";  // 특이사항
+                } else {
+                    alert("검색된 사용자가 없습니다.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+}
+

@@ -28,6 +28,7 @@ import java.util.Optional;
 public class UserController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+
     @GetMapping("/")
     @ResponseBody
     public List<MemberJoinDTO> getMembers() {
@@ -139,7 +140,7 @@ public class UserController {
         return "redirect:/users";
     }
 
-   /* @PostMapping("/searchUsers")
+    @PostMapping("/searchUsers")
     @ResponseBody
     public List<Member> searchUsers(@RequestBody Map<String, String> params,@RequestParam("page") int page) {
         String userId = params.get("mid");
@@ -148,6 +149,6 @@ public class UserController {
         String startDate = params.get("startDate");
 
         // 검색 조건을 사용해 사용자 목록 필터링
-        return memberRepository.findUsersByConditions(userId, userName, userRole, startDate);
-    }*/
+        return memberRepository.findByIdOrUsernameOrEmailAndRolesIn(userId, userName, userRole);
+    }
 }

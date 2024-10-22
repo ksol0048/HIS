@@ -21,9 +21,14 @@ public class Member extends BaseEntity{
     private String name;
     private String password;
     private String email;
+    private String phone;
+    private String tel;
     private boolean retirement;
     private String social;
+    private int zipCode;
     private String address;
+    private String detailAddress;
+    private String note;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference  // 부모 엔티티에서 참조 관리

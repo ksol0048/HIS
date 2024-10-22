@@ -197,4 +197,7 @@ public class MemberServiceImpl implements MemberService {
 
     }
 
+    public boolean isDuplicateMemberId(String mid) {
+        return memberRepository.existsByMid(mid);  // 해당 아이디가 존재하면 true 반환
+    }
 }
