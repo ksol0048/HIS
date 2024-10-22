@@ -31,4 +31,6 @@ public interface MaterialRegisterRepository extends JpaRepository<MaterialRegist
 
     Optional<MaterialRegister> findByMaterialCode(String materialCode);
 
+    List<MaterialRegister> findByStockManagementItemTrue();
+
 }

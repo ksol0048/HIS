@@ -126,3 +126,13 @@ body {
 .completed-circle{
     background-color: #28a745;
 }
+
+.move-to-material-transaction {
+    cursor: pointer;
+    transition: transform 0.3s, color 0.3s;
+}
+
+.move-to-material-transaction:hover {
+    transform: scale(1.1);
+    color: #007bff;
+}

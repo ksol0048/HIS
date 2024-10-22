@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Builder
-@Table(name = "medical_chart", schema = "project_db")
+@Table(name = "medical_chart")
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicalChart {
@@ -34,7 +34,7 @@ public class MedicalChart {
     private String teethNum;
 
 
-    @Column(name = "medical_content")
+    @Column(name = "medical_content", nullable = false)
     private String medicalContent;
 
     @Column(name = "check_doc")

@@ -44,5 +44,8 @@ public interface MaterialTransactionRepository extends JpaRepository<MaterialTra
             @Param("stockManagementItem") Boolean stockManagementItem);
 
 
+    // materialCode별 총 입고량 계산
+    @Query("SELECT SUM(mtr.stockIn) FROM MaterialTransactionRegister mtr WHERE mtr.materialRegister.materialCode = :materialCode")
+    Long getTotalStockInByMaterialCode(@Param("materialCode") String materialCode);
 
 }

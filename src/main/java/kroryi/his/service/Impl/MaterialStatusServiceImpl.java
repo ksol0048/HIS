@@ -1,26 +1,26 @@
 package kroryi.his.service.Impl;
 
+import kroryi.his.domain.MaterialRegister;
 import kroryi.his.domain.MaterialTransactionRegister;
 import kroryi.his.dto.MaterialTransactionDTO;
 import kroryi.his.repository.MaterialRegisterRepository;
 import kroryi.his.repository.MaterialStatusRepository;
 import kroryi.his.repository.MaterialStockOutRepository;
+import kroryi.his.repository.MaterialTransactionRepository;
 import kroryi.his.service.MaterialStatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Log4j2
 @Service
 public class MaterialStatusServiceImpl implements MaterialStatusService {
+    private final MaterialTransactionRepository materialTransactionRepository;
     private final MaterialStatusRepository materialStatusRepository;
     private final MaterialStockOutRepository materialStockOutRepository;
     private final MaterialRegisterRepository materialRegisterRepository;
@@ -82,29 +82,42 @@ public class MaterialStatusServiceImpl implements MaterialStatusService {
         return dtoList.stream()
                 .sorted(Comparator.comparing(MaterialTransactionDTO::getFirstRegisterDate).reversed()) // 날짜를 내림차순으로 정렬
                 .collect(Collectors.toList());
+
+
     }
 
     @Override
     public List<MaterialTransactionDTO> getLowStockItems() {
-        List<MaterialTransactionRegister> lowStockItems = materialStatusRepository.findLowStockItems();
+        List<MaterialRegister> materials = materialRegisterRepository.findByStockManagementItemTrue();
+        List<MaterialTransactionDTO> resultList = new ArrayList<>();
 
-        return lowStockItems.stream()
-                .map(transaction -> {
-                    MaterialTransactionDTO dto = new MaterialTransactionDTO(transaction);
-                    // 재고량 계산
-                    Long totalStockIn = materialStatusRepository.getTotalStockInByMaterialCode(transaction.getMaterialRegister().getMaterialCode());
-                    Long totalStockOut = materialStockOutRepository.getTotalStockOutByMaterialCode(transaction.getMaterialRegister().getMaterialCode());
+        for (MaterialRegister material : materials) {
+            // Get total stock in for the material
+            Long totalStockIn = materialTransactionRepository.getTotalStockInByMaterialCode(material.getMaterialCode());
+            // Get total stock out for the material
+            Long totalStockOut = materialStockOutRepository.getTotalStockOutByMaterialCode(material.getMaterialCode());
 
-                    totalStockIn = (totalStockIn != null) ? totalStockIn : 0L;
-                    totalStockOut = (totalStockOut != null) ? totalStockOut : 0L;
-                    Long remainingStock = totalStockIn - totalStockOut;
+            totalStockIn = (totalStockIn != null) ? totalStockIn : 0L;
+            totalStockOut = (totalStockOut != null) ? totalStockOut : 0L;
 
-                    dto.setRemainingStock(remainingStock); // DTO에 재고량 설정
-                    return dto;
-                })
-                .collect(Collectors.toList());
+            // Calculate remaining stock
+            Long remainingStock = totalStockIn - totalStockOut;
+
+            // Determine if the remaining stock is below the minimum quantity
+            boolean isBelowSafetyStock = remainingStock < material.getMinQuantity();
+
+            // Only add to the result list if both stockManagementItem and belowSafetyStock are true
+            if (material.isStockManagementItem() && isBelowSafetyStock) {
+                MaterialTransactionDTO dto = MaterialTransactionDTO.builder()
+                        .materialCode(material.getMaterialCode())
+                        .materialName(material.getMaterialName())
+                        .remainingStock(remainingStock)
+                        .build();
+
+                resultList.add(dto);
+            }
+        }
+
+        return resultList;
     }
-
-
-
 }
