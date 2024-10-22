@@ -14,6 +14,82 @@
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <link rel="stylesheet" href="/css/layout.css">
 
+<style>
+    /* 기본 레이아웃 스타일 */
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    /* 왼쪽 아래에 고정된 채팅 버튼 */
+    .chat-button {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        border: none;
+        cursor: pointer;
+        z-index: 1000;
+    }
+
+    /* 패널 슬라이딩 애니메이션 */
+    .chat-panel {
+        position: fixed;
+        left: -300px; /* 처음엔 화면 밖에 위치 */
+        top: 0;
+        bottom: 0;
+        width: 300px;
+        background-color: #f1f1f1;
+        padding: 10px;
+        border-right: 1px solid #ccc;
+        z-index: 999;
+        transition: transform 0.3s ease;
+        transform: translateX(0); /* 이동 효과를 위한 transform */
+    }
+
+    .open {
+        transform: translateX(300px); /* 패널을 오른쪽으로 슬라이드 */
+    }
+
+    /* 중앙 채팅창 스타일 */
+    .chat-room {
+        margin-left: 320px;
+        display: none;  /* 기본적으로 숨김 */
+    }
+
+    /* 메시지 리스트 */
+    .message-list {
+        list-style: none;
+        padding: 0;
+        height: 400px;
+        overflow-y: scroll;
+    }
+
+    .message-item {
+        margin-bottom: 10px;
+    }
+
+    /* 메시지 입력창 스타일 */
+    .message-input {
+        display: flex;
+        margin-top: 20px;
+    }
+
+    .message-input input {
+        flex-grow: 1;
+        margin-right: 10px;
+    }
+</style>
+
 <body>
 <!--네비바-->
 <nav class="navbar navbar-expand-lg bg-dark py-1" data-bs-theme="dark">
@@ -129,8 +205,45 @@
             </div>
         </div>
     </div>
-</div><!--    register modal-->
+</div>
 
+<!-- 왼쪽 채팅 패널 -->
+<div id="chatPanel" class="chat-panel">
+    <!-- 채팅방 목록 패널 -->
+    <div id="chatRoomListPanel" class="chat-room-list">
+        <h5>채팅방 목록</h5>
+        <ul id="roomList" class="list-group">
+            <!-- 채팅방 목록이 동적으로 생성됩니다. -->
+        </ul>
+        <button id="createChatRoomBtn" class="btn btn-primary mt-3">새로운 채팅방 생성</button>
+    </div>
+</div>
+
+<!-- 왼쪽 아래에 떠 있는 채팅 버튼 -->
+<button id="chatButton" class="chat-button">
+    <i class="bi bi-chat"></i>
+</button>
+
+<!-- 채팅 모달 -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatModalLabel">채팅방</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="messageList" class="message-list">
+                    <!-- 채팅 메시지가 여기에 표시됩니다. -->
+                </ul>
+                <div class="message-input">
+                    <input id="messageInput" type="text" placeholder="메시지를 입력하세요" class="form-control">
+                    <button id="sendMessageButton" class="btn btn-primary">전송</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!--home-->
 <div layout:fragment="home" style="width: 100%"></div>
@@ -154,8 +267,84 @@
 
 <script layout:fragment="chartscript" th:inline="javascript"></script>
 <script layout:fragment="chartscriptPlan" th:inline="javascript"></script>
-
 </body>
+<script>
+    // HTML 요소들 가져오기
+    const chatButton = document.getElementById('chatButton');
+    const chatPanel = document.getElementById('chatPanel');
+    const roomList = document.getElementById('roomList');
+    const messageList = document.getElementById('messageList');
+    const messageInput = document.getElementById('messageInput');
+    const sendMessageButton = document.getElementById('sendMessageButton');
+    const chatModalLabel = document.getElementById('chatModalLabel');
+
+    let chatRooms = [];
+    let currentRoomId = null;
+
+    // 왼쪽 아래 채팅 버튼 클릭 시 채팅방 목록 패널을 슬라이딩으로 보여줌
+    chatButton.addEventListener('click', () => {
+        chatPanel.classList.toggle('open');  // 패널의 open 클래스를 추가/제거하여 나타내기
+    });
+
+    // 새로운 채팅방 생성
+    document.getElementById('createChatRoomBtn').addEventListener('click', () => {
+        const roomId = `room-${chatRooms.length + 1}`;
+        const roomName = `채팅방 ${chatRooms.length + 1}`;
+        chatRooms.push({ id: roomId, name: roomName, messages: [] });
+        renderChatRooms();
+    });
+
+    // 채팅방 목록 렌더링
+    function renderChatRooms() {
+        roomList.innerHTML = '';  // 기존 목록을 초기화
+
+        chatRooms.forEach(room => {
+            const li = document.createElement('li');
+            li.classList.add('list-group-item');
+            li.textContent = room.name;
+            li.addEventListener('click', () => openChatRoom(room.id));  // 클릭하면 해당 채팅방 열림
+            roomList.appendChild(li);
+        });
+    }
+
+    // 채팅방 열기
+    function openChatRoom(roomId) {
+        currentRoomId = roomId;
+        const room = chatRooms.find(r => r.id === roomId);
+        chatModalLabel.textContent = room.name;  // 모달 제목을 채팅방 이름으로 설정
+
+        // 메시지 목록 렌더링
+        renderMessages(room.messages);
+
+        // 모달을 열기
+        const chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+        chatModal.show();
+    }
+
+    // 메시지 렌더링
+    function renderMessages(messages) {
+        messageList.innerHTML = '';  // 기존 메시지 초기화
+
+        messages.forEach(message => {
+            const li = document.createElement('li');
+            li.classList.add('message-item');
+            li.textContent = message;
+            messageList.appendChild(li);
+        });
+    }
+
+    // 메시지 전송
+    sendMessageButton.addEventListener('click', () => {
+        const message = messageInput.value;
+        if (message && currentRoomId) {
+            const room = chatRooms.find(r => r.id === currentRoomId);
+            room.messages.push(message);
+            renderMessages(room.messages);
+            messageInput.value = '';  // 입력창 초기화
+        }
+    });
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/js/axios.js"></script>
 <script src="/js/layout.js"></script>
