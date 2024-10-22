@@ -25,4 +25,5 @@ public class PatientAdmissionDTO implements Serializable {
     private String treatStatus;
 
 
+
 }

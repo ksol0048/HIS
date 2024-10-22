@@ -13,8 +13,9 @@ public interface PatientAdmissionService {
 
     List<PatientAdmission> getWaitingPatients();
 
-    List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate);
 
+
+    long getCompleteTreatmentCount(String count, LocalDate date);
 //    boolean existsByChartNum(Integer chartNum); // 차트 번호로 존재 여부 체크
 //
 //    PatientAdmission findByChartNum(Integer chartNum); // 차트 번호로 환자 정보 조회

@@ -386,7 +386,63 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Script is loaded');
+            console.log('DOM fully loaded and parsed'); // 로그 추가
+            // 현재 날짜를 yyyy-MM-dd 형식으로 가져오는 함수
+            function getCurrentDate() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
 
+            // 주어진 상태 코드에 맞는 환자 수를 가져오는 함수
+            function fetchTreatmentCount(status) {
+                const currentDate = getCurrentDate();
+                const url = `/api/patient-admission/completeTreatment/${status}/${currentDate}`;
+
+                console.log(`Fetching data from: ${url}`); // URL 확인
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                console.error('Error details:', err); // 에러 세부 정보 출력
+                                throw new Error(err.message || '진료 시작 실패');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(count => {
+                        console.log(`Status ${status} has ${count} patients.`); // 받은 데이터 확인
+
+                        // 각각의 상태에 따른 카운트 업데이트
+                        if (status === 1) {
+                            document.getElementById('home-waitingCount').textContent = count;
+                        } else if (status === 2) {
+                            document.getElementById('home-inTreatmentCount').textContent = count;
+                        } else if (status === 3) {
+                            document.getElementById('home-completedCount').textContent = count;
+                        }
+                    })
+                    .catch(error => console.error('Error fetching count:', error));
+            }
+
+            // 5초마다 대기중, 진료중, 진료완료 환자 수를 업데이트
+            setInterval(() => {
+                console.log('Fetching treatment counts...'); // 로그 추가
+                fetchTreatmentCount(1); // 대기중 환자 수
+                fetchTreatmentCount(2); // 진료중 환자 수
+                fetchTreatmentCount(3); // 진료완료 환자 수
+            }, 1000);
+        });
+
+
+    </script>
 </div>
+
 </body>
 </html>

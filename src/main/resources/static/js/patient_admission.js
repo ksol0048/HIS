@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 chartNum: selectedPatient.chartNum, // 차트 번호
                 paName: selectedPatient.name, // 환자 이름
                 mainDoc: null,  // 의사는 null로 설정
-                rvTime: selectedPatient.rvTime, // 환자의 방문 시간
+                rvTime: null, // 예약 시간 초기화 (서버에서 가져옴)
                 receptionTime: new Date().toISOString() // 현재 날짜 및 시간
             };
 
@@ -52,12 +52,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.log(data);
                     alert("환자 접수가 완료되었습니다."); // 접수 완료 알림 추가
 
+                    // 예약 시간도 포함된 환자 데이터 추가
+                    patientData.rvTime = data.rvTime; // 서버에서 반환된 예약 시간
+
                     // 대기 중 테이블에 추가
                     addPatientToWaitingTable({
                         chartNum: patientData.chartNum, // 차트 번호
                         paName: patientData.paName, // 환자 이름
                         treatStatus: "1", // 대기 상태
-                        receptionTime: patientData.receptionTime // 접수 시간
+                        receptionTime: patientData.receptionTime, // 접수 시간
+                        rvTime: patientData.rvTime // 예약 시간 추가
                     });
                 })
                 .catch(error => {
@@ -69,6 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("선택된 환자가 없습니다.");
         }
     });
+
 
 
 
@@ -261,7 +266,25 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("포맷된 진료 완료 시간: ", formattedTime);
         return formattedTime; // 포맷팅된 시간 반환
     }
+    function formatRvTimeForDB(rvTime) {
+        // rvTime이 유효한 날짜 문자열인지 확인
+        const date = new Date(rvTime);
 
+        // 유효한 날짜가 아닐 경우 null 반환
+        if (isNaN(date.getTime())) {
+            return null;
+        }
+
+        // 원하는 형식으로 변환 (예: "YYYY-MM-DD HH:mm:ss")
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 1을 더해줌
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        // 최종적으로 원하는 포맷으로 조합하여 반환
+        return `${year}-${month}-${day} ${hours}:${minutes}:00`; // 초는 00으로 고정
+    }
 
 
     // 진료 완료 버튼 클릭 시 모달 표시
@@ -295,6 +318,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const selectedDoctor = selectedRow.cells[3].textContent;
         const receptionTime = selectedRow.cells[4].textContent;
         const viTime = selectedRow.cells[5].textContent;
+        const rvTime = selectedRow.cells[6] ? selectedRow.cells[6].textContent : null; // rvTime이 포함된 열의 인덱스 조정 필요
+        console.log("rvTime:", rvTime);
 
 
 
@@ -312,6 +337,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // receptionTime 변환
         const formattedReceptionTimeForDB = formatReceptionTimeForDB(receptionTime);
         console.log("변환된 receptionTime 값:", formattedReceptionTimeForDB); // 변환된 receptionTime 로그 출력
+
+        const formattedRvTimeForDB = rvTime ? formatRvTimeForDB(rvTime) : null; // rvTime 변환 함수 필요
+        console.log("변환된 rvTime 값:", formattedRvTimeForDB);
 
         // 환자 이름과 확인 메시지 설정
         const completeInfo = document.getElementById('completeInfo');
@@ -338,6 +366,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 mainDoc: selectedDoctor,
                 receptionTime: formattedReceptionTimeForDB, // 변환된 receptionTime 사용
                 viTime:formattedViTimeForDB, // viTime을 여기에서 사용
+                rvTime: formatRvTimeForDB,
                 completionTime:completionTime.toISOString() // 추가된 진료 완료 시간
             };
 
@@ -507,31 +536,46 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function formatRvTime(rvTime) {
+        if (!rvTime) return 'N/A'; // rvTime이 없으면 'N/A' 반환
+
+        const date = new Date(rvTime);
+        return date.toLocaleString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true // 오전/오후 형식
+        });
+    }
+
     // 대기 중 테이블에 환자 추가
     function addPatientToWaitingTable(patient) {
-        // 테이블의 현재 행 개수를 기반으로 번호를 설정
         const row = waitingPatientsTable.insertRow();
         const currentRowCount = waitingPatientsTable.rows.length; // 현재 행 수
 
-        row.innerHTML = `
+        const formattedRvTime = formatRvTime(patient.rvTime);
 
-    <td>${currentRowCount}</td> <!-- 새로운 행 번호는 현재 테이블의 행 수 -->
-    <td>${patient.chartNum || 'N/A'}</td>
-    <td>${patient.paName || 'N/A'}</td>
-    <td>
-        <select>
-            <option value="의사1">의사1</option>
-            <option value="의사2">의사2</option>
-            <option value="의사3">의사3</option>
-        </select>
-    </td>
-    <td>${patient.rvTime ? new Date(patient.rvTime).toLocaleString() : 'N/A'}</td>
-    <td>${patient.receptionTime ? new Date(patient.receptionTime).toLocaleTimeString([], {
+
+
+        row.innerHTML = `
+        <td>${currentRowCount}</td>
+        <td>${patient.chartNum || 'N/A'}</td>
+        <td>${patient.paName || 'N/A'}</td>
+        <td>
+            <select>
+                <option value="의사1">의사1</option>
+                <option value="의사2">의사2</option>
+                <option value="의사3">의사3</option>
+            </select>
+        </td>
+        <td>${formattedRvTime}</td>
+        <td>${patient.receptionTime ? new Date(patient.receptionTime).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit'
         }) : 'N/A'}</td>
+        
+        
     `;
-
+        console.log("테이블에 표시되는 예약시간: ",formattedRvTime)
         row.addEventListener('click', () => {
             const previouslySelected = waitingPatientsTable.querySelector('tr.selected');
             if (previouslySelected) {
@@ -539,6 +583,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             row.classList.add('selected');
         });
+
         const existingPatients = JSON.parse(sessionStorage.getItem('waitingPatients')) || [];
         existingPatients.push(patient); // 새로운 환자 추가
         sessionStorage.setItem('waitingPatients', JSON.stringify(existingPatients));
