@@ -6,10 +6,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "reservation")
 public class Reservation {
 
@@ -19,7 +21,7 @@ public class Reservation {
     private long seq;
 
     @Column(name = "reservation_date")
-    private LocalDateTime reservationDate;
+    private String reservationDate;
 
     @Column(name = "department")
     private String department;
@@ -41,7 +43,7 @@ public class Reservation {
 
     }
 
-    public Reservation(long seq, LocalDateTime reservationDate,
+    public Reservation(long seq, String reservationDate,
                        String department, boolean snsNotification, String chartNumber, String patientNote,
                        String reservationStatusCheck) {
         super();
@@ -53,62 +55,4 @@ public class Reservation {
         this.patientNote = patientNote;
         this.reservationStatusCheck = reservationStatusCheck;
     }
-
-    public long getSeq() {
-        return seq;
-    }
-
-    public void setSeq(long seq) {
-        this.seq = seq;
-    }
-
-    public LocalDateTime getReservationDate() {
-        return reservationDate;
-    }
-
-    public void setReservationDate(LocalDateTime reservationDate) {
-        this.reservationDate = reservationDate;
-    }
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
-    public boolean isSmsNotification() {
-        return snsNotification;
-    }
-
-    public void setSmsNotification(boolean snsNotification) {
-        this.snsNotification = snsNotification;
-    }
-
-    public String getChartNumber() {
-        return chartNumber;
-    }
-
-    public void setChartNumber(String chartNumber) {
-        this.chartNumber = chartNumber;
-    }
-
-    public String getPatientNote() {
-        return patientNote;
-    }
-
-    public void setPatientNote(String patientNote) {
-        this.patientNote = patientNote;
-    }
-
-    public String getReservationStatusCheck() {
-        return reservationStatusCheck;
-    }
-
-    public void setReservationStatusCheck(String reservationStatusCheck) {
-        this.reservationStatusCheck = reservationStatusCheck;
-    }
-
-
 }
