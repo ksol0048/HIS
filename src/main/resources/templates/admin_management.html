@@ -19,12 +19,10 @@
                         <table class="table table-striped" id="membersTable">
                             <thead>
                             <tr>
-                                <th>아이디</th>
-                                <th>이름</th>
-                                <th>이메일</th>
-                                <th>권한</th>
-                                <!--                                <th>비밀번호</th>-->
-
+                                <th style="width: 100px;">아이디</th>
+                                <th style="width: 150px;">이름</th>
+                                <th style="width: 200px;">이메일</th>
+                                <th style="width: 120px;">권한</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -34,11 +32,16 @@
                                 <td th:text="${user.name}"></td>
                                 <td th:text="${user.email}"></td>
                                 <td th:text="${user.roles}"></td>
-<!--                                <td th:text="${user.password}"></td>-->
                             </tr>
                             </tbody>
                         </table>
                     </div>
+
+                </div>
+                <div class="d-flex justify-content-center" id="pagination">
+                    <ul class="pagination flex-wrap" id="pagination-list">
+                        <!-- 페이지 버튼이 동적으로 삽입될 부분 -->
+                    </ul>
                 </div>
                 <div class="card-footer">
                     <div class="row">
@@ -158,54 +161,7 @@
 
                             </form>
                         </div>
-                        <div class="col">
-                            <div class="card m-2 mb-1" style="height: 100%">
-                                <div class="card-header text-center">
-                                    <span>사용자 정보 수정</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col">
-                                            <small>아이디</small>
-                                            <input type="text" class="form-control" value="" size="20"
-                                                   placeholder="아이디 입력"
-                                                   required>
-                                            <small>비밀번호</small>
-                                            <input type="password" class="form-control" value=""
-                                                   placeholder="비밀번호 입력"
-                                                   required>
-                                            <small>사용자 권한</small>
-                                            <select class="form-control" id="">
-                                                <option value="1">일반사용자</option>
-                                                <option value="2">관리자</option>
-                                            </select>
-                                            <small>이름</small>
-                                            <input type="text" class="form-control popTxt" value=""
-                                                   placeholder="이름 입력">
-                                            <small>전화번호</small>
-                                            <input type="number" class="form-control popTxt" min="0"
-                                                   placeholder="전화번호 입력" value="">
-                                            <small>이메일</small>
-                                            <input type="email" class="form-control popTxt"
-                                                   placeholder="이메일 입력"
-                                                   value="">
 
-                                            <small>주소</small>
-                                            <input type="email" class="form-control popTxt"
-                                                   placeholder="주소 입력"
-                                                   value="">
-                                            <small>특이사항</small>
-                                            <textarea class="form-control"  placeholder="특이사항"></textarea><br>
-                                        </div>
-                                    </div>
-                                    <div class="card-footer">
-                                        <div class="col" style="text-align: right;">
-                                            <a  class="btn btn-success">저장</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div layout:fragment="content">
                     </div>

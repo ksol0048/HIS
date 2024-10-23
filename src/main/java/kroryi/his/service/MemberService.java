@@ -29,8 +29,6 @@ public interface MemberService {
 
     Optional<Member> getUserById(String id);
 
-    void deleteUser(String id);
-
     List<Member> getMembersByRole(MemberRole role);
 
     List<MemberJoinDTO> getMembers();
@@ -63,4 +61,7 @@ public interface MemberService {
     }
 
     boolean isDuplicateMemberId(String mid);
+
+    void deleteUser(MemberJoinDTO memberJoinDTO) throws MidExistException;
+
 }

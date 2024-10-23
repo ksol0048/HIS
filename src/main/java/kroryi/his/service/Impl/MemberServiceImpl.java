@@ -117,11 +117,6 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void deleteUser(String id) {
-
-    }
-
-    @Override
     public List<Member> getMembersByRole(MemberRole role) {
         return memberRepository.findByRoleSet(role);
     }
@@ -129,15 +124,20 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public List<MemberJoinDTO> getMembers() {
         List<Member> members = memberRepository.findAll();
+        log.info("getMembers---> {}", members);
         return members.stream()
                 .map(member -> new MemberJoinDTO(
                         member.getMid(),
+                        member.getEmail(),
                         member.getName(),
                         member.getPassword(),
-                        member.getEmail(),
                         member.isRetirement(),
                         member.getSocial(),
-                        member.getRoleSet()
+                        member.getRegDate(),
+                        member.getModDate(),
+                        member.getAddress(),
+                        member.getDetailAddress(),
+                        member.getZipCode()
                 ))
                 .collect(Collectors.toList());
     }
@@ -183,16 +183,16 @@ public class MemberServiceImpl implements MemberService {
         String keyword = pageRequestDTO.getKeyword();
         Pageable pageable = pageRequestDTO.getPageable("mid");
 
-        Page<MemberListAllDTO> result = memberRepository.searchWithAll(types,keyword,pageable);
+        Page<MemberListAllDTO> result = memberRepository.searchWithAll(types, keyword, pageable);
 
-        log.info("listWithAll-> {}", result);
+        log.info("listWithAll-> {}", result.stream().toList());
         log.info("listWithAll Page-> {}", pageable);
 
         return PageResponseDTO.<MemberListAllDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)
                 .dtoList(result.getContent())
                 .pageRange(defaultPageRange)
-                .total((int)result.getTotalElements())
+                .total((int) result.getTotalElements())
                 .build();
 
     }
@@ -200,4 +200,12 @@ public class MemberServiceImpl implements MemberService {
     public boolean isDuplicateMemberId(String mid) {
         return memberRepository.existsByMid(mid);  // 해당 아이디가 존재하면 true 반환
     }
+
+    @Override
+    public void deleteUser(MemberJoinDTO memberJoinDTO) throws MidExistException {
+
+        memberRepository.deleteById(memberJoinDTO.getMid());
+    }
+
+
 }

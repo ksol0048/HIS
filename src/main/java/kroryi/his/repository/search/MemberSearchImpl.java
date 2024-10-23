@@ -181,6 +181,8 @@ public class MemberSearchImpl extends
                                         member.mid,
                                         member.email,
                                         member.name,
+                                        member.tel,
+                                        member.phone,
                                         roleSet.roleSet
                                 )
                                 .from(member)
@@ -200,6 +202,8 @@ public class MemberSearchImpl extends
                     String mid = tuple.get(member.mid);
                     String name = tuple.get(member.name);
                     String email = tuple.get(member.email);
+                    String tel = tuple.get(member.tel);
+                    String phone = tuple.get(member.phone);
 
                     // 모든 역할을 Set으로 수집
                     Set<MemberRole> roles = entry.getValue().stream()
@@ -211,6 +215,8 @@ public class MemberSearchImpl extends
                             .mid(mid)
                             .name(name)
                             .email(email)
+                            .tel(tel)
+                            .phone(phone)
                             .roles(roles)  // 역할을 추가
                             .build();
                 })

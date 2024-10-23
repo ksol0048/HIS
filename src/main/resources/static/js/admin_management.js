@@ -1,6 +1,21 @@
+const idCheckStatus = document.getElementById('idCheckStatus');
+const idCheckMsg = document.getElementById('idCheckMsg');
+const userFormData = document.getElementById('UserFormData')
+const txtPopId = document.getElementById('txtPopId')
+const txtPopName = document.getElementById('txtPopName');
+const txtPopPwd = document.getElementById('txtPopPwd');
+const txtPopMail = document.getElementById('txtPopMail');
+const txtPopHandPhone = document.getElementById('txtPopHandPhone');
+const txtPopTel = document.getElementById('txtPopTel');
+const cmbPopUserAuth = document.getElementById('cmbPopUserAuth');
+const zipCode = document.getElementById("zipCode");
+const streetAdr = document.getElementById("streetAdr");
+const detailAdr = document.getElementById("detailAdr");
+const note = document.getElementById("note");
+const userTableRest = document.getElementById("userTableRest");
+
 window.onload = function () {
     loadPage(1);
-    addRowClickEvent();
 };
 
 
@@ -25,15 +40,62 @@ function loadPage(pageNumber) {
                 const row = document.createElement('tr');
                 const roles = user.roles.map(role => role).join(', ');
                 row.setAttribute("data-mid", user.mid);
-                row.addEventListener('click', function() {
+                row.addEventListener('click', function () {
                     const memberId = this.getAttribute('data-mid');  // 클릭한 행의 data-mid 값을 가져옴
                     console.log("Selected member ID:", memberId);
                     // 회원 정보 조회 API 호출 (예시 API)
                     axios.get(`/admin_management/editform/${memberId}`)
                         .then(response => {
+
+                            userFormData.reset();
                             const memberInfo = response.data;
                             // 회원 정보 처리 로직 (예: 모달 창에 정보 표시 등)
                             console.log(memberInfo);
+                            txtPopId.value = memberInfo.mid
+                            txtPopName.value = memberInfo.name
+                            txtPopPwd.value = memberInfo.password
+                            txtPopMail.value = memberInfo.email
+                            zipCode.value = memberInfo.zipCode
+                            streetAdr.value = memberInfo.address
+                            detailAdr.value = memberInfo.detailAddress
+                            note.value = memberInfo.note
+                            if(memberInfo.tel !== null){
+                                txtPopTel.value = formatPhoneNumber(memberInfo.tel);
+                            }
+                            if(memberInfo.phone !== null){
+                                txtPopHandPhone.value = formatPhoneNumber(memberInfo.phone);
+                            }
+
+                            // cmbPopUserAuth.value = memberInfo.role
+
+                            // 역할 배열과 <select> 옵션 간의 매핑 테이블
+                            const roleMap = {
+                                "EMP": "0",    // 일반사용자
+                                "ADMIN": "1",  // 관리자
+                                "DOCTOR": "2", // 의사
+                                "NURSE": "3"   // 간호사
+                            };
+
+
+                            // 모든 <option>의 선택을 초기화
+                            const options = cmbPopUserAuth.options;
+                            for (let i = 0; i < options.length; i++) {
+                                options[i].selected = false;  // 모든 옵션 선택 해제
+                            }
+
+                            // memberInfo.roleSet 배열을 순회하여 해당하는 옵션을 선택
+                            memberInfo.roleSet.forEach(role => {
+                                const optionValue = roleMap[role.roleSet];  // role을 매핑 테이블에서 찾아봄
+                                if (optionValue !== undefined) {
+                                    for (let i = 0; i < options.length; i++) {
+                                        if (options[i].value === optionValue) {
+                                            options[i].selected = true;  // 해당 옵션을 선택 상태로 설정
+                                        }
+                                    }
+                                }
+                            });
+
+
                         })
                         .catch(error => {
                             console.error('Error fetching member info:', error);
@@ -56,6 +118,20 @@ function loadPage(pageNumber) {
         });
 
 }
+
+function formatPhoneNumber(phoneNumber) {
+    // 전화번호가 11자리일 경우, 3-4-4 형식으로 변환
+    if (phoneNumber.length === 11) {
+        return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
+    // 전화번호가 10자리일 경우, 3-3-4 형식으로 변환
+    if (phoneNumber.length === 10) {
+        return phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+    // 기본적으로 원래의 전화번호를 반환
+    return phoneNumber;
+}
+
 
 
 // 페이지네이션을 동적으로 생성하는 함수
@@ -92,25 +168,26 @@ function renderPagination(responseDTO) {
 }
 
 
-
 // 저장 버튼 클릭 이벤트
 document.getElementById('userTable').addEventListener('click', function (event) {
     event.preventDefault(); // 기본 동작 방지
 
-
     // 저장할 사용자 데이터 객체 생성
     const userData = {
         // 사용자 입력값 가져오기
-        mid: document.getElementById('txtPopId').value,
-        password: document.getElementById('txtPopPwd').value,
-        name: document.getElementById('txtPopName').value,
+        mid: txtPopId.value,
+        password: txtPopPwd.value,
+        name: txtPopName.value,
         roles: [
-            { roleSet: document.getElementById('cmbPopUserAuth').value }  // 단일 선택일 경우
+            {roleSet: cmbPopUserAuth.value}  // 단일 선택일 경우
         ],
-        // phone : document.getElementById('txtPopTel').value,
-        email: document.getElementById('txtPopMail').value,
-        // address: document.getElementById('txtPop').value,
-        // note : document.getElementById('note').value
+        tel : txtPopTel.value,
+        phone : txtPopHandPhone.value,
+        email: txtPopMail.value,
+        address: streetAdr.value,
+        detailAddress: detailAdr.value,
+        zipCode: zipCode.value,
+        note : note.value
     };
     console.log(userData)
     // 필수 입력값 체크
@@ -269,7 +346,7 @@ function searchUser() {
 }
 
 
-function userUpdateSetForm(){
+function userUpdateSetForm() {
     document.getElementById("btnSearch").addEventListener("click", function () {
         // 검색 조건을 가져옴
         const userId = document.getElementById("txtId").value;
@@ -322,3 +399,70 @@ function userUpdateSetForm(){
 
 }
 
+function sample4_execDaumPostcode() {
+
+    new daum.Postcode({
+        oncomplete: function (data) {
+            // 우편번호
+            console.log(data.zonecode)
+            zipCode.value = data.zonecode;
+            // 도로명 및 지번주소
+            streetAdr.value = data.roadAddress;
+        }
+    }).open();
+}
+
+function addrCheck() {
+    if (zipCode.value == '' && streetAdr.value == '') {
+        alert("우편번호를 클릭하여 주소를 검색해주세요.");
+        zipCode.focus();
+    }
+}
+
+
+function checkDuplicateId() {
+    const memberId = txtPopId.value;
+
+    // 입력된 아이디가 없으면 메시지 숨김
+    if (!memberId) {
+        idCheckMsg.textContent = '';
+        return;
+    }
+
+    // 서버로 중복 체크 요청
+    axios.get(`/admin_management/checkId`, {
+        params: { mid: memberId }
+    })
+        .then(response => {
+            if (response.data) {
+                // 중복 아이디가 존재할 경우
+                idCheckMsg.textContent = '이미 존재하는 아이디입니다.';
+                idCheckMsg.style.color = 'red';
+                idCheckStatus.checked = false;
+
+            } else {
+                // 중복되지 않는 아이디일 경우
+                idCheckMsg.textContent = '사용 가능한 아이디입니다.';
+                idCheckMsg.style.color = 'green';
+                idCheckStatus.checked = true;
+            }
+        })
+        .catch(error => {
+            console.error('Error checking ID:', error);
+            idCheckMsg.textContent = '중복 체크 중 오류가 발생했습니다.';
+            idCheckMsg.style.color = 'red';
+            idCheckStatus.checked = false;
+        });
+}
+
+userTableRest.addEventListener("click", (e)=>{
+    userFormData.reset();
+    idCheckMsg.innerText = ''
+    idCheckStatus.checked = false;
+
+})
+
+txtPopId.addEventListener("focusin", (e)=>{
+    idCheckMsg.innerText = ''
+    idCheckStatus.checked = false;
+})

@@ -18,7 +18,10 @@ import java.util.Set;
 public class MemberListAllDTO {
     private String mid;
     private String name;
+    private String password;
     private String email;
+    private String phone;
+    private String tel;
     private LocalDateTime regDate;
     private Set<MemberRole> roles;
 }
