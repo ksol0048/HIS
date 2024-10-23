@@ -21,8 +21,45 @@ const phoneNum2 = document.getElementById("phoneNum2");
 const phoneNum3 = document.getElementById("phoneNum3");
 const emailLocal = document.getElementById("emailLocal");
 const emailDomain = document.getElementById("emailDomain");
+let globalUserData;
+
+window.globalUserData = {};
+function fetchUserSession() {
+    fetch('/api/user/session')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Assigning fetched data to the global variable
+            globalUserData = data;
+            console.log('Global user data:', globalUserData);
+        })
+        .catch(error => {
+            console.error('Error fetching user session:', error);
+        });
+}
+
+// Call the function to fetch user session
+fetchUserSession();
 
 patient_register.addEventListener("click", (e) => {
+    globalUserData.authorities.forEach(auth => {
+        console.log(auth.authority);
+    });
+
+    // 권한 체크를 직접 수행합니다.
+    const hasPermission = globalUserData.authorities.some(auth =>
+        auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+    );
+
+    // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+    if (!hasPermission) {
+        alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+        return; // 등록 과정 중단
+    }
 
 
     // 환자 정보를 담은 객체
@@ -64,23 +101,6 @@ patient_register.addEventListener("click", (e) => {
         firstVisit.value = result.firstVisit || '';
         lastVisit.value = result.lastVisit || '';
 
-        // 메모 테이블에서 동적으로 추가된 모든 메모를 가져옴
-        const tables = document.getElementById('memoTable').getElementsByTagName('tbody')[0];
-        const rows = Array.from(tables.getElementsByTagName('tr')); // 모든 테이블 행 가져오기
-
-        rows.forEach((row, index) => {
-            // 각 행의 메모 날짜와 내용을 추출
-            const mmo = row.querySelector(`#mmo_${index}`);
-            // 인덱스가 result.memos의 범위 내에 있는지 확인
-            if (index < result.memos.length) {
-                const memo = result.memos[index]; // 해당 메모 가져오기
-                // 로그 출력 (필요시 제거 가능)
-                mmo.value = memo.mmo;
-            }
-
-        })
-        // memos.value = result.memos || '';
-
         // 자택전화 나누기
         const [homeNum1, homeNum2, homeNum3] = result.homeNum.split('-');
         document.getElementById("homeNum").value = homeNum1 || '';
@@ -98,6 +118,7 @@ patient_register.addEventListener("click", (e) => {
         document.getElementById("emailLocal").value = emailLocalPart || '';
         document.getElementById("emailDomain").value = emailDomainPart || '';
     }
+
 
     if (chartNum.value) {
         modifyPatient(patientObj, chartNum.value).then(setPatientFields).catch(e => {
