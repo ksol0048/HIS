@@ -73,5 +73,28 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
         patientAdmissionRepository.save(patientAdmission);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate) {
+        // 시작 시간과 종료 시간을 사용하여 데이터베이스에서 환자 접수 정보 조회
+        List<PatientAdmission> admissions = patientAdmissionRepository.findByReceptionTimeBetween(startDate, endDate);
+
+        // PatientAdmission 엔티티를 PatientAdmissionDTO로 변환
+        return admissions.stream()
+                .map(this::convertToDTO)
+                .toList();
+    }
+    private PatientAdmissionDTO convertToDTO(PatientAdmission admission) {
+        PatientAdmissionDTO dto = new PatientAdmissionDTO();
+        dto.setChartNum(admission.getChartNum());
+        dto.setPaName(admission.getPaName());
+        dto.setMainDoc(admission.getMainDoc());
+        dto.setReceptionTime(admission.getReceptionTime());
+        dto.setRvTime(admission.getRvTime());
+        dto.setTreatStatus(admission.getTreatStatus());
+        dto.setViTime(admission.getViTime());
+        dto.setCompletionTime(admission.getCompletionTime());
+        return dto;
+    }
 
 }

@@ -196,6 +196,29 @@ public class PatientAdmissionController {
         return ResponseEntity.ok(count);
     }
 
+    @GetMapping("/date/{date}")
+    public List<PatientAdmissionDTO> getAdmissionsByDate(@PathVariable String date) {
+        try {
+            // 날짜 문자열을 LocalDate로 변환
+            LocalDate localDate = LocalDate.parse(date);
+            LocalDateTime startDate = localDate.atStartOfDay(); // 시작 시간
+            LocalDateTime endDate = localDate.plusDays(1).atStartOfDay(); // 끝 시간
+
+            System.out.println("시작 날짜: " + startDate); // 시작 날짜 로그
+            System.out.println("종료 날짜: " + endDate); // 종료 날짜 로그
+
+            // 해당 날짜의 환자 접수 정보를 가져옴
+            List<PatientAdmissionDTO> admissions = patientAdmissionService.getAdmissionsByReceptionTime(startDate, endDate);
+
+            System.out.println("가져온 환자 접수 정보: " + admissions); // 가져온 환자 접수 정보 로그
+
+            return admissions;
+        } catch (Exception e) {
+            e.printStackTrace(); // 예외 발생 시 스택 트레이스를 출력
+            return Collections.emptyList(); // 비어 있는 리스트 반환
+        }
+    }
+
 //    @PutMapping("/treatment/update/{chartNum}")
 //    public ResponseEntity<String> updateTreatment(@PathVariable Integer chartNum, @RequestBody PatientAdmissionDTO patientAdmissionDTO) {
 //        try {

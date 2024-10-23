@@ -19,4 +19,6 @@ public interface PatientAdmissionService {
     Optional<PatientAdmission> findByChartNumAndReceptionTime(Integer chartNum, LocalDateTime receptionTime);
 
     void updatePatientAdmission(PatientAdmission patientAdmission);
+
+    List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate);
 }
