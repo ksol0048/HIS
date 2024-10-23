@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -20,8 +21,7 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
 
 
     @Override
-    public void savePatientAdmission(PatientAdmissionDTO patientAdmissionDTO) {
-        try {
+    public PatientAdmission savePatientAdmission(PatientAdmissionDTO patientAdmissionDTO) {
             PatientAdmission patientAdmission = new PatientAdmission();
             patientAdmission.setChartNum(patientAdmissionDTO.getChartNum());
             patientAdmission.setPaName(patientAdmissionDTO.getPaName());
@@ -37,11 +37,7 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
             patientAdmission.setCompletionTime(patientAdmissionDTO.getCompletionTime());
             patientAdmission.setTreatStatus(patientAdmissionDTO.getTreatStatus());
 
-            patientAdmissionRepository.save(patientAdmission);
-        } catch (Exception e) {
-            System.err.println("저장 중 오류 발생: " + e.getMessage());
-            throw e;
-        }
+            return  patientAdmissionRepository.save(patientAdmission);
     }
 
 
@@ -60,6 +56,21 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
 
 
         return patientAdmissionRepository.countByTreatStatusAndReceptionTimeBetween(count,startDate, endDate);
+    }
+
+    @Override
+    public Optional<PatientAdmission> findByChartNumAndReceptionTime(Integer chartNum, LocalDateTime receptionTime) {
+        // receptionTime에서 날짜만 추출하여 LocalDate로 변환
+        LocalDate receptionDate = LocalDate.from(receptionTime);
+        return patientAdmissionRepository.findByChartNumAndReceptionDate(chartNum, receptionDate);
+    }
+
+
+
+
+    @Override
+    public void updatePatientAdmission(PatientAdmission patientAdmission) {
+        patientAdmissionRepository.save(patientAdmission);
     }
 
 

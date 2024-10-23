@@ -18,6 +18,13 @@ public interface PatientAdmissionRepository extends JpaRepository<PatientAdmissi
 
     List<PatientAdmission> findByReceptionTimeBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-
     long countByTreatStatusAndReceptionTimeBetween(String count, LocalDateTime startDate, LocalDateTime endDate);
+
+
+    @Query("SELECT p FROM PatientAdmission p WHERE p.chartNum = :chartNum AND DATE(p.receptionTime) = :receptionDate")
+    Optional<PatientAdmission> findByChartNumAndReceptionDate(@Param("chartNum") Integer chartNum, @Param("receptionDate") LocalDate receptionDate);
+
+
+
+
 }

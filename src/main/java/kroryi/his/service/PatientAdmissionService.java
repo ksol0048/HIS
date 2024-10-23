@@ -6,17 +6,17 @@ import kroryi.his.dto.PatientAdmissionDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface PatientAdmissionService {
-    void savePatientAdmission(PatientAdmissionDTO patientAdmissionDTO);
+    PatientAdmission savePatientAdmission(PatientAdmissionDTO patientAdmissionDTO);
 
     List<PatientAdmission> getWaitingPatients();
 
-
-
     long getCompleteTreatmentCount(String count, LocalDate date);
-//    boolean existsByChartNum(Integer chartNum); // 차트 번호로 존재 여부 체크
-//
-//    PatientAdmission findByChartNum(Integer chartNum); // 차트 번호로 환자 정보 조회
+
+    Optional<PatientAdmission> findByChartNumAndReceptionTime(Integer chartNum, LocalDateTime receptionTime);
+
+    void updatePatientAdmission(PatientAdmission patientAdmission);
 }
