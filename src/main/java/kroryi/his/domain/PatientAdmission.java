@@ -3,6 +3,7 @@ package kroryi.his.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
+@ToString
 @Table(name = "patient_admissions")
 public class PatientAdmission {
 

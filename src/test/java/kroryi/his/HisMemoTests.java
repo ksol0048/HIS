@@ -1,10 +1,12 @@
 package kroryi.his;
 
+import kroryi.his.domain.PatientAdmission;
 import kroryi.his.domain.PatientRegister;
 import kroryi.his.domain.PatientRegisterMemo;
 import kroryi.his.dto.PatientMemoDTO;
 import kroryi.his.repository.PatientMemoRepository;
 import kroryi.his.repository.PatientRegisterRepository;
+import kroryi.his.service.PatientAdmissionService;
 import kroryi.his.service.PatientRegisterMemoService;
 import kroryi.his.service.PatientRegisterService;
 import lombok.extern.log4j.Log4j2;
@@ -36,6 +38,9 @@ public class HisMemoTests {
 
     @Autowired
     PatientRegisterMemoService patientRegisterMemoService;
+
+    @Autowired
+    PatientAdmissionService patientAdmissionService;
 
     @Test
     public void testMemoList(){
@@ -79,7 +84,13 @@ public class HisMemoTests {
 
     @Test
     public void testSearchChartNum(){
-        PatientRegister register = patientRegisterService.getPatient("240912046");
+        PatientRegister register = patientRegisterService.getPatient("240930001");
             log.info(register.toString());
+    }
+
+    @Test
+    public void testSearchTopChart(){
+        PatientAdmission register = patientAdmissionService.getLatestCompletionTime(240930001);
+        log.info(register.toString());
     }
 }
