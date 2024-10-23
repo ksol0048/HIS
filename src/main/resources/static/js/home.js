@@ -35,56 +35,40 @@ function goToMaterialManagementPage() {
 
 
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('스크립트가 로드되었습니다.');
-    console.log('DOM이 완전히 로드되고 파싱되었습니다.');
+async function fetchInitialCounts() {
+    const today = new Date().toISOString().split('T')[0]; // 오늘 날짜를 yyyy-MM-dd 형식으로
+    const statuses = [1, 2, 3]; // 요청할 상태 배열
 
-    function getCurrentDate() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
+    try {
+        for (const status of statuses) {
+            const response = await fetch(`/completeTreatment/${status}/${today}`); // API 호출
+
+            if (!response.ok) {
+                throw new Error(`환자 수 가져오기 실패: ${response.statusText}`);
+            }
+
+            const count = await response.json(); // 응답을 JSON으로 변환
+            console.log(`상태 ${status}에 ${count}명의 환자가 있습니다.`); // 콘솔에 출력
+
+            // 각각의 상태에 따른 카운트 업데이트
+            if (status === 1) {
+                document.getElementById('home-waitingCount').textContent = count;
+            } else if (status === 2) {
+                document.getElementById('home-inTreatmentCount').textContent = count;
+            } else if (status === 3) {
+                document.getElementById('home-completedCount').textContent = count;
+            }
+        }
+    } catch (error) {
+        console.error('에러 발생:', error); // 에러가 발생하면 콘솔에 출력
     }
+}
 
-    function fetchTreatmentCount(status) {
-        const currentDate = getCurrentDate();
-        const url = `/api/patient-admission/completeTreatment/${status}/${currentDate}`;
+// 페이지 로드 시 호출
+document.addEventListener('DOMContentLoaded', fetchInitialCounts);
 
-        console.log(`데이터를 가져오는 URL: ${url}`);
 
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        console.error('오류 세부 정보:', err);
-                        throw new Error(err.message || '진료 시작 실패');
-                    });
-                }
-                return response.json();
-            })
-            .then(count => {
-                console.log(`상태 ${status}에 ${count}명의 환자가 있습니다.`);
 
-                if (status === 1) {
-                    document.getElementById('home-waitingCount').textContent = count;
-                } else if (status === 2) {
-                    document.getElementById('home-inTreatmentCount').textContent = count;
-                } else if (status === 3) {
-                    document.getElementById('home-completedCount').textContent = count;
-                }
-            })
-            .catch(error => console.error('카운트 가져오기 오류:', error));
-    }
 
-    function updatePatientCounts() {
-        console.log('환자 수를 가져오는 중...');
-        fetchTreatmentCount(1);
-        fetchTreatmentCount(2);
-        fetchTreatmentCount(3);
-    }
 
-    document.getElementById('updateButton').addEventListener('click', updatePatientCounts);
-    updatePatientCounts();
-});
 

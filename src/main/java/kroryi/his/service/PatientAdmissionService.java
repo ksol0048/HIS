@@ -21,4 +21,6 @@ public interface PatientAdmissionService {
     void updatePatientAdmission(PatientAdmission patientAdmission);
 
     List<PatientAdmissionDTO> getAdmissionsByReceptionTime(LocalDateTime startDate, LocalDateTime endDate);
+
+    void cancelAdmission(Integer pid);
 }

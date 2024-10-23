@@ -8,12 +8,12 @@ import kroryi.his.service.PatientAdmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
@@ -26,6 +26,7 @@ public class PatientAdmissionController {
 
     @Autowired
     private ReservationRepository reservationRepository;
+    private SimpMessagingTemplate messagingTemplate;
 
     // 환자 등록
     @PostMapping("/register")
@@ -133,10 +134,6 @@ public class PatientAdmissionController {
 
 
 
-
-
-
-
     // 진료 중 대기 환자 목록 반환
     @GetMapping("/treatment/waiting")
     public ResponseEntity<List<PatientAdmission>> getWaitingPatientsForTreatment() {
@@ -187,15 +184,6 @@ public class PatientAdmissionController {
 
 
 
-
-    @GetMapping("/completeTreatment/{number}/{date}")
-    public ResponseEntity<Long> completeTreatment(@PathVariable String number, @PathVariable String date) {
-        LocalDate localDate = LocalDate.parse(date); // yyyy-MM-dd 형식으로 입력
-
-        long count = patientAdmissionService.getCompleteTreatmentCount(number, localDate);
-        return ResponseEntity.ok(count);
-    }
-
     @GetMapping("/date/{date}")
     public List<PatientAdmissionDTO> getAdmissionsByDate(@PathVariable String date) {
         try {
@@ -219,25 +207,14 @@ public class PatientAdmissionController {
         }
     }
 
-//    @PutMapping("/treatment/update/{chartNum}")
-//    public ResponseEntity<String> updateTreatment(@PathVariable Integer chartNum, @RequestBody PatientAdmissionDTO patientAdmissionDTO) {
-//        try {
-//            // 오늘 날짜의 시작과 끝 시간을 계산
-//            LocalDateTime startOfToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN); // 오늘의 00:00:00
-//            LocalDateTime endOfToday = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);   // 오늘의 23:59:59
-//
-//            // 차트 번호와 오늘의 receptionTime을 기준으로 환자 정보 업데이트
-//            boolean updated = patientAdmissionService.updatePatientRecord(chartNum, patientAdmissionDTO, startOfToday, endOfToday);
-//
-//            if (updated) {
-//                return ResponseEntity.ok("환자 정보가 성공적으로 업데이트되었습니다.");
-//            } else {
-//                return ResponseEntity.status(404).body("해당 조건에 맞는 환자를 찾을 수 없습니다.");
-//            }
-//        } catch (Exception e) {
-//            return ResponseEntity.status(500).body("환자 정보 업데이트 중 오류가 발생했습니다: " + e.getMessage());
-//        }
-//    }
-
+    @DeleteMapping("/{pid}")
+    public ResponseEntity<Void> cancelAdmission(@PathVariable Integer pid) {
+        try {
+            patientAdmissionService.cancelAdmission(pid);
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
+    }
 
 }

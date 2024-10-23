@@ -84,6 +84,17 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
                 .map(this::convertToDTO)
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public void cancelAdmission(Integer pid) {
+        // 환자 삭제 로직
+        if (!patientAdmissionRepository.existsById(Math.toIntExact(pid))) {
+            throw new RuntimeException("환자를 찾을 수 없습니다."); // 예외 처리
+        }
+        patientAdmissionRepository.deleteById(Math.toIntExact(pid));
+    }
+
     private PatientAdmissionDTO convertToDTO(PatientAdmission admission) {
         PatientAdmissionDTO dto = new PatientAdmissionDTO();
         dto.setChartNum(admission.getChartNum());

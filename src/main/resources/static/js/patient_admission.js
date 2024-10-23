@@ -608,7 +608,7 @@ document.addEventListener("DOMContentLoaded", function () {
             hour: '2-digit',
             minute: '2-digit'
         }) : 'N/A'}</td>
-        <td style="display: none;">${patient.pid}</td>
+        <td>${patient.pid}</td>
        
         
         
@@ -648,7 +648,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     mainDoc: patient.mainDoc || null,
                     rvTime: patient.rvTime || null,
                     receptionTime: patient.receptionTime || new Date().toISOString(),
-                    treatStatus: "1" // 대기 상태
+                    treatStatus: "1", // 대기 상태
+                    pid:patient.pid
+
                 });
             }
         });
@@ -979,13 +981,6 @@ document.addEventListener("DOMContentLoaded", function () {
         header.textContent = `진료 완료 환자: ${completePatientCount}명`;
     }
 
-
-    // // 매 5초마다 환자 목록 갱신
-    // setInterval(() => {
-    //     const selectedDate = new Date(document.getElementById('currentDate').value);
-    //     fetchAndDisplayPatients(selectedDate); // 현재 선택된 날짜의 환자 목록 갱신
-    // }, 5000);
-
 });
 
 
@@ -1029,6 +1024,7 @@ document.addEventListener("DOMContentLoaded", function () {
         selectedRow.classList.add("clicked");
 
         console.log("Selected patient:", selectedRow.cells[2].textContent);
+        console.log("11111111111",selectedRow.cells[6].textContent);
     });
 
     // 접수 취소 버튼 클릭 시 모달 표시
@@ -1053,17 +1049,37 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // 모달에서 '예' 버튼 클릭 시 행 삭제
+    // 모달에서 '예' 버튼 클릭 시 행 삭제 및 데이터베이스에서 삭제
     confirmCancelBtn.addEventListener("click", function () {
-        if (selectedRow) {
-            selectedRow.remove(); // 선택된 행 삭제
-            updateRowIndexes(); // 행 번호 업데이트
-            updateWaitingPatientCount(); // 환자 수 업데이트
-            selectedRow = null; // 선택된 행 초기화
-        }
 
-        // 모달 닫기
-        cancelModal.hide();
+        if (selectedRow) {
+
+            const pid = selectedRow.cells[6].textContent; // 숨겨진 pid 가져오기
+            console.log(selectedRow.cells[6].textContent);
+            console.log("Selected PID:", pid);
+            // 데이터베이스에서 환자 접수 취소 요청
+            fetch(`/api/patient-admission/${pid}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        selectedRow.remove(); // 선택된 행 삭제
+                        updateRowIndexes(); // 행 번호 업데이트
+                        updateWaitingPatientCount(); // 환자 수 업데이트
+                        selectedRow = null; // 선택된 행 초기화
+                        console.log('Admission cancelled successfully.');
+                    } else {
+                        alert('환자 접수 취소 실패. 다시 시도하세요.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('서버와의 통신 중 오류가 발생했습니다.');
+                });
+
+            // 모달 닫기
+            cancelModal.hide();
+        }
     });
 
     // '아니요' 버튼 클릭 시 모달 닫기
