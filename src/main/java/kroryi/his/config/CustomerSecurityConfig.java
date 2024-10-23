@@ -11,11 +11,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,12 +28,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import javax.sql.DataSource;
 import java.util.Collections;
 import java.util.Map;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 @Log4j2
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class CustomerSecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
@@ -46,11 +44,13 @@ public class CustomerSecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         log.info("--보안환경설정--");
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -62,10 +62,10 @@ public class CustomerSecurityConfig {
                         .tokenValiditySeconds(60 * 60 * 24 * 30)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/member/login/**").permitAll()
-                        .requestMatchers("/member/login-proc").permitAll()
+                                .requestMatchers("/member/login/**").permitAll()
+                                .requestMatchers("/member/login-proc").permitAll()
 //                        .requestMatchers("/home").authenticated()
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/member/login")
