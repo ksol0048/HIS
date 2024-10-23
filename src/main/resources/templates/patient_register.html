@@ -69,8 +69,8 @@
                                     <span class="input-group-text" style="width: 6rem;">나이(만)</span>
                                     <input type="text" name="age" id="age" class="form-control" placeholder="나이(자동입력)"
                                            readonly>
-                                    <select class="btn btn-outline-primary" name="gender" id="gender">
-                                        <option selected value="">성별</option>
+                                    <select class="btn btn-outline-primary" name="gender" id="gender" required>
+                                        <option value="" disabled selected>성별</option>
                                         <option value="m">남</option>
                                         <option value="w">여</option>
                                     </select>
@@ -79,12 +79,12 @@
                             <div class="row">
                                 <div class="input-group mb-3 col">
                                     <span class="input-group-text" style="width: 6rem;">생년월일</span>
-                                    <input type="date" name="birthDate" id="birthDate" class=" form-control">
+                                    <input type="date" name="birthDate" id="birthDate" class=" form-control" required>
                                 </div>
                                 <div class="input-group mb-3 col">
                                     <span class="input-group-text" style="width: 6rem;">주치의</span>
-                                    <select class="form-select" name="mainDoc" id="mainDoc">
-                                        <option selected value="">주치의</option>
+                                    <select class="form-select" name="mainDoc" id="mainDoc" required>
+                                        <option value="" disabled selected>주치의</option>
                                         <th:block th:each="doctor : ${doctorNames}">
                                             <option th:value="${doctor}" th:text="${doctor}"></option>
                                         </th:block>
@@ -120,13 +120,13 @@
                                     <div class="input-group mb-3 col">
                                         <span class="input-group-text" style="width: 6rem;">휴대전화</span>
                                         <input type="text" class="form-control" id="phoneNum" autocomplete="off"
-                                               maxlength="3" placeholder="010">
+                                               maxlength="3" placeholder="010" required>
                                         <span class="input-group-text">-</span>
                                         <input type="text" class="form-control" id="phoneNum2" autocomplete="off"
-                                               maxlength="4" placeholder="1234">
+                                               maxlength="4" placeholder="1234" required>
                                         <span class="input-group-text">-</span>
                                         <input type="text" class="form-control" id="phoneNum3" autocomplete="off"
-                                               maxlength="4" placeholder="5678">
+                                               maxlength="4" placeholder="5678" required>
                                     </div>
                                     <div class="col">
                                         <label for="zipp_btn" class="form-label">■ 주소 *</label><br/>

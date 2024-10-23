@@ -35,6 +35,17 @@ document.getElementById('addMaterialBtn').addEventListener('click', (event) => {
     event.preventDefault();  // 기본 폼 제출 동작을 막음
     event.stopPropagation();  // 이벤트 전파 방지
 
+    // 권한 체크를 직접 수행합니다.
+    const hasPermission = globalUserData.authorities.some(auth =>
+        auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+    );
+
+    // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+    if (!hasPermission) {
+        alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+        return; // 등록 과정 중단
+    }
+
     const materialCode = document.getElementById('threeMaterialCode').value;
 
     // POST 또는 PUT 요청을 보낼지 결정
@@ -264,6 +275,17 @@ document.getElementById('companySearchIcon').addEventListener('click', function(
 
 // 재료 삭제 버튼 클릭 시 데이터 전송
 document.getElementById('deleteMaterialBtn').addEventListener('click', function() {
+    // 권한 체크를 직접 수행합니다.
+    const hasPermission = globalUserData.authorities.some(auth =>
+        auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+    );
+
+    // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+    if (!hasPermission) {
+        alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+        return; // 등록 과정 중단
+    }
+
     const materialCode = document.getElementById('threeMaterialCode').value;
 
     if (confirm("정말로 이 재료를 삭제하시겠습니까?")) {

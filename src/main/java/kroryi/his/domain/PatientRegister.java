@@ -1,6 +1,7 @@
 package kroryi.his.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -36,16 +37,16 @@ public class PatientRegister {
 //        patientRegisterMemo.upDatePatientRegister(this);
     }
     // 환자이름
-//    @NotNull
+    @NotNull
     @Column(name = "pa_name", length = 100)
     private String name;
 
     // 주민번호 앞자리
-//    @NotNull
+    @NotNull
     @Column(name = "first_reident_num", length = 30)
     private String firstPaResidentNum;
     // 주민번호 앞자리
-//    @NotNull
+    @NotNull
     @Column(name = "last_reident_num", length = 30)
     private String lastPaResidentNum;
 
@@ -54,7 +55,7 @@ public class PatientRegister {
     private LocalDate birthDate;
 
     // 성별
-//    @NotNull
+    @NotNull
     @Column(name = "pa_gender")
     private String gender;
 
@@ -63,7 +64,7 @@ public class PatientRegister {
     private String homeNum;
 
     // 휴대전화
-//    @NotNull
+    @NotNull
     @Column(name = "pa_phone_num")
     private String phoneNum;
 
@@ -80,7 +81,7 @@ public class PatientRegister {
     private String detailedAddress;
 
     // 주치의
-//    @NotNull
+    @NotNull
     @Column(name = "main_doc")
     private String mainDoc;
 

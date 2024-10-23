@@ -60,6 +60,17 @@ document.getElementById('addCompanyBtn').addEventListener('click', (event) => {
     event.preventDefault();  // 기본 submit 동작 방지
     event.stopPropagation();
 
+    // 권한 체크를 직접 수행합니다.
+    const hasPermission = globalUserData.authorities.some(auth =>
+        auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+    );
+
+    // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+    if (!hasPermission) {
+        alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+        return; // 등록 과정 중단
+    }
+
     const companyCode = document.getElementById('fourCompanyCode').value;
     const companyData = {
         companyCode: companyCode,
@@ -173,6 +184,17 @@ document.getElementById('forSearchReset').addEventListener('click', function() {
 
 // 업체 삭제 버튼 클릭 시 데이터 전송
 document.getElementById('deleteCompanyBtn').addEventListener('click', function() {
+    // 권한 체크를 직접 수행합니다.
+    const hasPermission = globalUserData.authorities.some(auth =>
+        auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+    );
+
+    // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+    if (!hasPermission) {
+        alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+        return; // 등록 과정 중단
+    }
+
     const companyCode = document.getElementById('fourCompanyCode').value;
 
     if (!companyCode) {

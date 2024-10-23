@@ -16,6 +16,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const receptionBtn = document.querySelector(".ReceptionBtn");
     receptionBtn.addEventListener("click", function () {
         console.log("접수 버튼이 클릭되었습니다.");
+        // 권한 체크를 직접 수행합니다.
+        const hasPermission = globalUserData.authorities.some(auth =>
+            auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+        );
+
+        // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+        if (!hasPermission) {
+            alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+            return; // 등록 과정 중단
+        }
 
         // 세션에서 환자 데이터 가져오기
         const selectedPatient = JSON.parse(sessionStorage.getItem('selectedPatient'));
@@ -108,6 +118,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 진료 시작 버튼 클릭 이벤트
     startTreatmentButton.addEventListener("click", function () {
+        // 권한 체크를 직접 수행합니다.
+        const hasPermission = globalUserData.authorities.some(auth =>
+            auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+        );
+
+        // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+        if (!hasPermission) {
+            alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+            return; // 등록 과정 중단
+        }
+
         const selectedRow = waitingPatientsTable.querySelector('tr.selected')
         console.log(selectedRow)
 
@@ -293,6 +314,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 진료 완료 버튼 클릭 시 모달 표시
     completeTreatmentButton.addEventListener("click", function () {
+        // 권한 체크를 직접 수행합니다.
+        const hasPermission = globalUserData.authorities.some(auth =>
+            auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+        );
+
+        // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+        if (!hasPermission) {
+            alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+            return; // 등록 과정 중단
+        }
         const selectedRow = treatmentPatientsTable.querySelector('tr.selected');
         console.log(selectedRow);
 
@@ -1002,6 +1033,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 접수 취소 버튼 클릭 시 모달 표시
     cancelReceptionButton.addEventListener("click", function () {
+        // 권한 체크를 직접 수행합니다.
+        const hasPermission = globalUserData.authorities.some(auth =>
+            auth.authority === 'ROLE_DOCTOR' || auth.authority === 'ROLE_NURSE'
+        );
+
+        // 권한이 없으면 경고 메시지를 표시하고 등록 과정을 중단합니다.
+        if (!hasPermission) {
+            alert("권한이 없습니다. 의사 또는 간호사만 환자를 등록할 수 있습니다.");
+            return; // 등록 과정 중단
+        }
+
         if (selectedRow) {
             const patientName = selectedRow.cells[2].textContent;
             patientNameElement.textContent = `환자 이름: ${patientName}`;
