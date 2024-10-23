@@ -2,10 +2,12 @@ package kroryi.his.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 
 @Setter
 @Getter
+@ToString
 public class ReservationDTO {
     private Long seq;
     private String reservationDate;

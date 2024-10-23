@@ -57,7 +57,7 @@
                 <tr>
                     <th>시간</th>
                     <th>환자이름</th>
-                    <th>내용</th>
+                    <th>내용</th>름
                 </tr>
                 </thead>
                 <tbody id="reservation-body">
@@ -556,7 +556,7 @@
             let indexNumber = document.getElementById('index-number').innerHTML.trim();
 
             // 보낼 데이터 객체로 변환
-            const data = {
+            const reservation_data = {
                 reservationDate: reservationDate,
                 department: department,
                 snsNotification: snsNotification,
@@ -567,57 +567,85 @@
                 reservationStatusCheck: reservationStatusCheck
             };
 
-            //
-            //
-            // 여기서 값 없는거 찾아서 되돌리는 alert 만들어야 함
-            //
-            //
-            // 인덱스 번호가 있는 경우 수정
-            if (indexNumber) {
-                // 인덱스 번호가 있기 때문에 객체에 seq(인덱스 번호) 값 추가
-                data.seq = indexNumber;
+            fetch('http://localhost:8080/api/main/selectedReservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reservation_data)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('중복 확인 요청 실패');
+                }
+                return response.json(); // JSON 데이터로 변환
+            })
+                .then(reservations => {
+                    // chartNum, 예약일자 중복 안되면 실행
+                    console.log(reservations.length)
+                    if (reservations.length === 0) {
+                        console.log(JSON.stringify(reservation_data))
+                        // 서버에 데이터 값 보내주기
+                        fetch('http://localhost:8080/api/main/insertReservationInformation', {
+                            method: 'POST', // POST 요청
+                            headers: {
+                                'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
+                            },
+                            body: JSON.stringify(reservation_data) // JSON 객체로 전송
+                        }).then(response => {
+                            // 응답을 JSON으로 변환
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        }).then(reservations => {
+                            const indexNumberElement = document.getElementById('index-number');
+                            reservations.forEach(res => {
+                                console.log(res.seq)
+                                console.log(res)
+                                const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
+                                console.log(dateOnly);
+                                test_22(dateOnly);
+                                indexNumberElement.innerHTML =res.seq;
+                            })
+                            // 날짜만 가져오기
+
+                        })
+                            .catch(error => {
+                                console.error('실패:', error);
+                            });
+                    } else {
+                        // chartNum, 예약일자 중복이면 실행
+                        // 인덱스 번호가 있는 경우 수정
+                        if (indexNumber) {
+                            // 인덱스 번호가 있기 때문에 객체에 seq(인덱스 번호) 값 추가
+                            reservation_data.seq = indexNumber;
+
+                            fetch('http://localhost:8080/api/main/updateReservationInformation', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(reservation_data)
+                            })
+                                .then(response => {
+
+                                    // 날짜만 가져오기
+                                    const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
+                                    test_22(dateOnly);
+                                    console.log("!!!!!!!!!!" + indexNumber)
+                                })
+                                .catch(error => {
+                                    console.error('실패:', error);
+                                });
+                        }
+                        // 중복이 있을 경우의 처리
+                    }
 
 
-                fetch('http://localhost:8080/api/main/updateReservationInformation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
                 })
-                    .then(response => {
-
-                        // 날짜만 가져오기
-                        const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
-                        test_22(dateOnly);
-                    })
-                    .catch(error => {
-                        console.error('실패:', error);
-                    });
-            }
-            // 인덱스 번호가 없는 경우 추가
-            else {
-
-                // 서버에 데이터 값 보내주기
-                fetch('http://localhost:8080/api/main/insertReservationInformation', {
-                    method: 'POST', // POST 요청
-                    headers: {
-                        'Content-Type': 'application/json' // JSON 형식으로 데이터 전송
-                    },
-                    body: JSON.stringify(data) // JSON 객체로 전송
-                })
-                    .then(response => {
-                        // 날짜만 가져오기
-                        const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
-                        console.log(dateOnly);
-                        test_22(dateOnly);
-                    })
-                    .catch(error => {
-                        console.error('실패:', error);
-                    });
-            }
-
-
+                .catch(error => {
+                    console.error('오류 발생:', error);
+                });
         }
 
         function deleteReservation() {
