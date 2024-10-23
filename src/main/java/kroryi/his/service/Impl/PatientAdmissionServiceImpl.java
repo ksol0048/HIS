@@ -4,18 +4,22 @@ import kroryi.his.domain.PatientAdmission;
 import kroryi.his.dto.PatientAdmissionDTO;
 import kroryi.his.repository.PatientAdmissionRepository;
 import kroryi.his.service.PatientAdmissionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
 public class PatientAdmissionServiceImpl implements PatientAdmissionService {
+    private static final Logger log = LoggerFactory.getLogger(PatientAdmissionServiceImpl.class);
     @Autowired
     private PatientAdmissionRepository patientAdmissionRepository;
 
@@ -93,6 +97,13 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
             throw new RuntimeException("환자를 찾을 수 없습니다."); // 예외 처리
         }
         patientAdmissionRepository.deleteById(Math.toIntExact(pid));
+    }
+
+    @Override
+    public PatientAdmission getLatestCompletionTime(Integer chartNum) {
+        PatientAdmission admissions = patientAdmissionRepository.findLatestByChartNum(chartNum);
+        log.info(admissions.toString());
+        return admissions;
     }
 
     private PatientAdmissionDTO convertToDTO(PatientAdmission admission) {

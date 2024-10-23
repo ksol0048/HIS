@@ -23,4 +23,8 @@ public interface PatientAdmissionRepository extends JpaRepository<PatientAdmissi
 
     @Query("SELECT p FROM PatientAdmission p WHERE p.chartNum = :chartNum AND DATE(p.receptionTime) = :receptionDate")
     Optional<PatientAdmission> findByChartNumAndReceptionDate(@Param("chartNum") Integer chartNum, @Param("receptionDate") LocalDate receptionDate);
+
+    @Query("SELECT pa FROM PatientAdmission pa WHERE pa.chartNum = :chartNum ORDER BY pa.completionTime DESC")
+    PatientAdmission findLatestByChartNum(@Param("chartNum") Integer chartNum);
+
 }
