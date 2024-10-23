@@ -10,6 +10,31 @@ let patientData = null; // 전역 변수 선언
 
 let selectedMemos = null;
 
+
+let globalUserData;
+
+window.globalUserData = {};
+function fetchUserSession() {
+    fetch('/api/user/session')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Assigning fetched data to the global variable
+            globalUserData = data;
+            console.log('Global user data:', globalUserData);
+        })
+        .catch(error => {
+            console.error('Error fetching user session:', error);
+        });
+}
+
+// Call the function to fetch user session
+fetchUserSession();
+
 function assignPatientValues(patient) {
     name.value = patient.name || '';
     firstPaResidentNum.value = patient.firstPaResidentNum || '';
