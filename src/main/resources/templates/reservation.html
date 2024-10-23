@@ -120,6 +120,7 @@
                 <div class="form-group">
                     <label for="doctor">진료의사</label>
                     <select id="doctor" name="doctor">
+                        <option value="-----">-----</option>
                         <option value="유의태">유의태</option>
                     </select>
                 </div>
@@ -395,9 +396,9 @@
         function rReset(reset) {
 
             if(reset) {
-                 const IndexElement = document.getElementById('index-number');
+                const IndexElement = document.getElementById('index-number');
                 IndexElement.innerHTML = '';
-                }
+            }
 
             const reservationDateElement = document.getElementById('reservation-date');
             reservationDateElement.value = '';
@@ -413,6 +414,12 @@
             // 차트번호
             const chartNumberElement = document.getElementById('chart-number');
             chartNumberElement.value = '';
+
+            const doctorElement = document.getElementById('doctor');
+            doctorElement.selectedIndex = 0;
+
+            const treatmentTypeElement = document.getElementById('treatment-type');
+            treatmentTypeElement.selectedIndex = 0;
 
             // 노트
             const patientNoteElement = document.getElementById('patient-note');
@@ -441,6 +448,8 @@
             const departmentElement = document.getElementById('department');
             const snsNotificationElement = document.getElementById('sns-notification');
             const chartNumberElement = document.getElementById('chart-number');
+            const doctorElement = document.getElementById('doctor');
+            const treatmentTypeElement = document.getElementById('treatment-type');
             const patientNoteElement = document.getElementById('patient-note');
             const reservationStatusCaElement = document.getElementById('reservation-status-ca');
             const reservationStatusBaElement = document.getElementById('reservation-status-ba');
@@ -469,6 +478,14 @@
             // 차트 번호
             if (chartNumberElement && responseData.length > 0) {
                 chartNumberElement.value = responseData[0].chartNumber;
+            }
+
+            if (doctorElement && responseData.length > 0) {
+                doctorElement.value = responseData[0].doctor; // 의사 값 설정
+            }
+
+            if (treatmentTypeElement && responseData.length > 0) {
+                treatmentTypeElement.value = responseData[0].treatmentType; // 치료 유형 값 설정
             }
 
             // 노트
@@ -514,6 +531,12 @@
             // 차트 번호
             let chartNumber = document.getElementById('chart-number').value;
 
+            // 의사
+            let doctor = document.getElementById('doctor').value;
+
+            // 치료 유형
+            let treatmentType = document.getElementById('treatment-type').value;
+
             // 환자 노트
             let patientNote = document.getElementById('patient-note').value;
 
@@ -536,6 +559,8 @@
                 department: department,
                 snsNotification: snsNotification,
                 chartNumber: chartNumber,
+                doctor: doctor,
+                treatmentType: treatmentType,
                 patientNote: patientNote,
                 reservationStatusCheck: reservationStatusCheck
             };
@@ -551,23 +576,23 @@
                 data.seq = indexNumber;
 
 
-                    fetch('http://localhost:8080/api/main/updateReservationInformation', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                        .then(response => {
+                fetch('http://localhost:8080/api/main/updateReservationInformation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
 
-                            // 날짜만 가져오기
-                            const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
-                            test_22(dateOnly);
-                        })
-                        .catch(error => {
-                            console.error('실패:', error);
-                        });
-                }
+                        // 날짜만 가져오기
+                        const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
+                        test_22(dateOnly);
+                    })
+                    .catch(error => {
+                        console.error('실패:', error);
+                    });
+            }
             // 인덱스 번호가 없는 경우 추가
             else {
 
@@ -580,11 +605,11 @@
                     body: JSON.stringify(data) // JSON 객체로 전송
                 })
                     .then(response => {
-                    // 날짜만 가져오기
-                    const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
-                    console.log(dateOnly);
-                    test_22(dateOnly);
-                })
+                        // 날짜만 가져오기
+                        const dateOnly = new Date(reservationDate).toLocaleDateString('en-CA');
+                        console.log(dateOnly);
+                        test_22(dateOnly);
+                    })
                     .catch(error => {
                         console.error('실패:', error);
                     });
