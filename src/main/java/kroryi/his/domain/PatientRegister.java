@@ -105,7 +105,7 @@ public class PatientRegister {
     @Column(name = "first_visit")
     private LocalDate firstVisit;
 
-    //최종내원일
+    /*//최종내원일
     @Column(name = "last_visit")
-    private LocalDate lastVisit;
+    private LocalDate lastVisit;*/
 }

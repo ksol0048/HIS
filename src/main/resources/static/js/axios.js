@@ -55,4 +55,11 @@ async function patientMaintenance(chartNum) {
     }
 }
 
+async function patientLastVisit(chartNum) {
+    console.log(chartNum)
+    const response = await axios.post(`/patient_search/patient_LastVisit/${chartNum}`)
+    console.log(response)
+    return response.data;
+}
+
 

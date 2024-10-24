@@ -44,4 +44,7 @@ public class PatientAdmission {
     @Column(name = "treat_status", length = 100)
     private String treatStatus;
 
+    public void setMessage(String s) {
+
+    }
 }

@@ -112,7 +112,6 @@ public class PatientRegisterServiceImpl implements PatientRegisterService {
         patientRegister.setCategory(patientDTO.getCategory());
         patientRegister.setTendency(patientDTO.getTendency());
         patientRegister.setFirstVisit(patientDTO.getFirstVisit());
-        patientRegister.setLastVisit(patientDTO.getLastVisit());
 
 
         return patientRegisterRepository.save(patientRegister);

@@ -14,6 +14,7 @@ let selectedMemos = null;
 let globalUserData;
 
 window.globalUserData = {};
+
 function fetchUserSession() {
     fetch('/api/user/session')
         .then(response => {
@@ -48,7 +49,6 @@ function assignPatientValues(patient) {
     category.value = patient.category || '';
     tendency.value = patient.tendency || '';
     firstVisit.value = patient.firstVisit || '';
-    lastVisit.value = patient.lastVisit || '';
     chartNum.value = patient.chartNum || ''; // Ensure a fallback here as well
 
     // 자택전화 나누기
@@ -84,6 +84,17 @@ if (patientInfo) {
 
     const ageInput = document.getElementById('age');
     if (window.location.href.includes("/patient_register")) {
+        patientLastVisit(parseInt(patientInfo.chartNum)).then(data => {
+            console.log(data);
+            if (data.completionTime) {
+                const completionTime = new Date(data.completionTime);
+                lastVisit.value = completionTime.toISOString().split('T')[0]; // "yyyy-MM-dd" 형식으로 변환
+            } else {
+                lastVisit.value = ''; // completionTime이 null일 경우 빈 문자열
+            }
+        });
+
+
         patientMaintenance(patientInfo.chartNum).then(patient => {
             console.log(patient);
             selectedMemos = patient.memos.sort((a, b) => {
@@ -133,7 +144,8 @@ document.querySelector("#addReplyBtn").addEventListener("click", (e) => {
 
                 row.addEventListener("click", () => {
                     if (selectedRow) {
-                        selectedRow.classList.remove('selected');``
+                        selectedRow.classList.remove('selected');
+                        ``
                     }
                     selectedRow = row;
                     selectedRow.classList.add('selected');
@@ -171,6 +183,16 @@ document.querySelector(".SearchBtn").addEventListener("click", () => {
 
         const ageInput = document.getElementById('age');
         if (window.location.href.includes("/patient_register")) {
+            patientLastVisit(parseInt(menu_chartNum)).then(data => {
+                console.log(data.completionTime)
+                if (data.completionTime) {
+                    const completionTime = new Date(data.completionTime);
+                    lastVisit.value = completionTime.toISOString().split('T')[0]; // "yyyy-MM-dd" 형식으로 변환
+                } else {
+                    lastVisit.value = ''; // completionTime이 null일 경우 빈 문자열
+                }
+            });
+
             patientData.forEach((patient, index) => {
                 if (menu_chartNum === patient.chartNum) {
                     selectedMemos = patient.memos.sort((a, b) => new Date(a.regDate) - new Date(b.regDate));
@@ -183,9 +205,9 @@ document.querySelector(".SearchBtn").addEventListener("click", () => {
                     ageInput.value = menu_age;
                 }
             })
-        }else if(window.location.href.includes("/reservation")){
-            departmentElement.value=menu_name;
-            chartNumberElement.value=menu_chartNum;
+        } else if (window.location.href.includes("/reservation")) {
+            departmentElement.value = menu_name;
+            chartNumberElement.value = menu_chartNum;
         }
 
 

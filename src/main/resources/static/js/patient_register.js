@@ -56,7 +56,6 @@ patient_register.addEventListener("click", (e) => {
         category: category.value,
         tendency: tendency.value,
         firstVisit: firstVisit.value,
-        lastVisit: lastVisit.value,
         memos: [] // 메모 데이터를 담을 배열
     };
 
@@ -76,6 +75,8 @@ patient_register.addEventListener("click", (e) => {
         category.value = result.category || '';
         tendency.value = result.tendency || '';
         firstVisit.value = result.firstVisit || '';
+
+
         lastVisit.value = result.lastVisit || '';
 
         // 자택전화 나누기
@@ -484,7 +485,6 @@ document.querySelector("#patient_del").addEventListener("click", () => {
         category.value = '';
         tendency.value = '';
         firstVisit.value = '';
-        lastVisit.value = '';
 
         homeNum1.value = '';
         homeNum2.value = '';

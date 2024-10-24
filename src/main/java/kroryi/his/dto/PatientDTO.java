@@ -36,7 +36,7 @@ public class PatientDTO{
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDate firstVisit;
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDate lastVisit;
+//    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDate lastVisit;
     private List<PatientMemoDTO> memos;
 }
