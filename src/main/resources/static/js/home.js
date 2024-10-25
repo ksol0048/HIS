@@ -66,6 +66,9 @@ async function fetchInitialCounts() {
 
 // 페이지 로드 시 호출
 document.addEventListener('DOMContentLoaded', fetchInitialCounts);
+function goToReception() {
+    window.location.href = "http://localhost:8080/reception";
+}
 
 
 

@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     // 대기 중 테이블에 추가
                     addPatientToWaitingTable({
-                        pid : data.data.pid,
+                        pid: data.data.pid,
                         chartNum: patientData.chartNum, // 차트 번호
                         paName: patientData.paName, // 환자 이름
                         treatStatus: "1", // 대기 상태
@@ -85,9 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("선택된 환자가 없습니다.");
         }
     });
-
-
-
 
 
     const startTreatmentButton = document.getElementById("startTreatmentButton");
@@ -130,24 +127,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const selectedRow = waitingPatientsTable.querySelector('tr.selected')
-        console.log(selectedRow)
 
-
-        Array.from(selectedRow.cells).forEach((cell, index) => {
-            console.log(`셀 인덱스 ${index}:`, cell.textContent);
-        });
 
         const chartNum = selectedRow.cells[1].textContent
         const paName = selectedRow.cells[2].textContent
         const receptionTime = selectedRow.cells[5].textContent
 
-
-        // 선택된 행의 의사 정보를 가져옴
         const selectedDoctor = selectedRow.querySelector('select').value
-        console.log('선택된 의사:', selectedDoctor) // 의사 확인 로그 추가
-
-        // 선택된 환자 정보 콘솔 출력
-        console.log('선택된 환자:', paName, '차트 번호:', chartNum)
 
         treatmentPatientInfo.textContent = `환자: ${paName}`
         const treatmentModal = new bootstrap.Modal(document.getElementById('treatmentModal'));
@@ -167,8 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const formattedReceptionTimeForDB = formatReceptionTimeForDB(receptionTime)
-
-            // 세션 스토리지에서 진료 시작 시간 가져오기
             const treatmentPatients = JSON.parse(sessionStorage.getItem('treatmentPatients')) || []
             const existingPatient = treatmentPatients.find(patient => patient.chartNum === chartNum)
             let viTime = existingPatient ? existingPatient.viTime : null // viTime 수정
@@ -216,23 +200,20 @@ document.addEventListener("DOMContentLoaded", function () {
                         viTime: viTime // viTime 수정
                     })
 
-                    // 대기 중 환자 테이블에서 해당 환자 제거
+
                     const rowIndex = Array.from(waitingPatientsTable.rows).indexOf(selectedRow)
                     deletePatientFromWaitingTable(rowIndex)
 
-                    // 대기 중 세션에서 해당 환자 제거
                     const waitingPatients = JSON.parse(sessionStorage.getItem('waitingPatients')) || []
                     const updatedWaitingPatients = waitingPatients.filter(patient => patient.chartNum !== chartNum)
                     sessionStorage.setItem('waitingPatients', JSON.stringify(updatedWaitingPatients))
 
-                    // 진료 중 세션에 환자 추가
                     const treatmentPatients = JSON.parse(sessionStorage.getItem('treatmentPatients')) || []
 
-                    // 중복 확인 및 추가
                     const isPatientAlreadyInSession = treatmentPatients.some(patient => patient.chartNum === chartNum)
                     if (!isPatientAlreadyInSession) {
                         treatmentPatients.push(patientData)
-                        sessionStorage.setItem('treatmentPatients', JSON.stringify(treatmentPatients)) // 세션에 저장
+                        sessionStorage.setItem('treatmentPatients', JSON.stringify(treatmentPatients))
                     } else {
                         console.log("이미 진료 중인 환자입니다.")
                     }
@@ -240,13 +221,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     const storedPatients = JSON.parse(sessionStorage.getItem('treatmentPatients')) || []
                     console.log('진료 중 세션에 저장된 환자 데이터:', storedPatients)
 
-                    // 모든 환자 데이터를 순회하며 선택된 의사를 확인
                     storedPatients.forEach(patient => {
                         console.log(`차트 번호: ${patient.chartNum}, 선택된 의사: ${patient.selectedDoctor}`)
                     })
 
                     updateWaitingPatientCount()
-                    alert("환자 진료가 시작되었습니다.")
                     treatmentModal.hide()
                 })
                 .catch(error => {
@@ -255,14 +234,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
         }
     });
-    // 모달 닫을 때 초기화
+
     const treatmentModalElement = document.getElementById('treatmentModal');
     treatmentModalElement.addEventListener('hidden.bs.modal', function () {
-        treatmentPatientInfo.textContent = ''; // 모달이 닫힐 때 환자 정보 초기화
+        treatmentPatientInfo.textContent = '';
     });
-
-
-
 
 
     function formatCompleteTime(completionTime) {
@@ -272,10 +248,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return 'N/A';
         }
 
-        const date = new Date(completionTime); // completionTime을 Date 객체로 변환
+        const date = new Date(completionTime);
         if (isNaN(date.getTime())) {
             console.log("진료 완료 시간이 잘못된 형식: ", completionTime);
-            return 'N/A'; // 유효하지 않은 날짜 처리
+            return 'N/A';
         }
 
         // UTC+6 시간으로 변환
@@ -291,6 +267,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("포맷된 진료 완료 시간: ", formattedTime);
         return formattedTime; // 포맷팅된 시간 반환
     }
+
     function formatRvTimeForDB(rvTime) {
         // rvTime이 유효한 날짜 문자열인지 확인
         const date = new Date(rvTime);
@@ -354,20 +331,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const receptionTime = selectedRow.cells[4].textContent;
         const viTime = selectedRow.cells[5].textContent;
         const rvTime = selectedRow.cells[6] ? selectedRow.cells[6].textContent : null; // rvTime이 포함된 열의 인덱스 조정 필요
-        console.log("rvTime:", rvTime);
-
-
-
-        console.log("차트 번호:", chartNum);
-        console.log("환자 이름:", paName);
-        console.log("주치의:", selectedDoctor);
-        console.log("접수 시간:", receptionTime);
-        console.log("completionTime:", viTime);
 
         // viTime 값 변환
         const formattedViTimeForDB = formatViTimeForDB(viTime);
         console.log("변환된 viTime 값:", formattedViTimeForDB);
-
 
         // receptionTime 변환
         const formattedReceptionTimeForDB = formatReceptionTimeForDB(receptionTime);
@@ -400,9 +367,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 treatStatus: "3", // 진료 완료 상태
                 mainDoc: selectedDoctor,
                 receptionTime: formattedReceptionTimeForDB, // 변환된 receptionTime 사용
-                viTime:formattedViTimeForDB, // viTime을 여기에서 사용
+                viTime: formattedViTimeForDB, // viTime을 여기에서 사용
                 rvTime: formatRvTimeForDB,
-                completionTime:completionTime.toISOString() // 추가된 진료 완료 시간
+                completionTime: completionTime.toISOString() // 추가된 진료 완료 시간
             };
 
             console.log("저장할 데이터:", dataToSend);
@@ -428,7 +395,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         paName: paName,
                         selectedDoctor: selectedDoctor,
                         receptionTime: formattedReceptionTimeForDB,
-                        completionTime:formattedCompletionTimeValue  // 필요하다면 추가
+                        completionTime: formattedCompletionTimeValue  // 필요하다면 추가
                     });
 
                     // 진료 중 환자 테이블에서 해당 환자 제거
@@ -447,14 +414,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         paName,
                         selectedDoctor,
                         receptionTime: formattedReceptionTimeForDB,
-                        completionTime:completionTimeKST  // 진료 완료 시간 추가 (UTC+9로 조정됨)
+                        completionTime: completionTimeKST  // 진료 완료 시간 추가 (UTC+9로 조정됨)
                     });
-                    console.log("세션에 저장되는 진료완료시간 :",completionTimeKST)
                     sessionStorage.setItem('completedPatients', JSON.stringify(completedPatients));
 
                     // 대기 환자 수 업데이트
                     updateWaitingPatientCount();
-                    alert("환자 진료가 완료되었습니다.");
                     completeModal.hide();
                 })
                 .catch(error => {
@@ -469,8 +434,6 @@ document.addEventListener("DOMContentLoaded", function () {
             completeInfo.textContent = ''; // 모달이 닫힐 때 초기화
         });
     });
-
-
 
     const formatViTimeForDB = (timeString) => {
         if (!timeString) return null;
@@ -497,7 +460,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const adjustedDate = new Date(now.getTime() + utcOffset * 60 * 1000); // UTC+9로 조정
 
         // ISO 문자열 반환
-        return adjustedDate.toISOString(); // 'YYYY-MM-DDTHH:mm:ss.sssZ' 형식으로 반환
+        return adjustedDate.toISOString();
     };
 
 
@@ -530,9 +493,6 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
 
-
-
-
     // 환자를 진료 중 환자 테이블에서 삭제하는 함수
     function deletePatientFromTreatmentTable(rowIndex) {
         if (rowIndex > -1) {
@@ -554,11 +514,11 @@ document.addEventListener("DOMContentLoaded", function () {
 // 대기 중 테이블에서 환자 삭제
     function deletePatientFromWaitingTable(rowIndex) {
         if (waitingPatientsTable.rows.length > rowIndex && rowIndex >= 0) {
-            waitingPatientsTable.deleteRow(rowIndex); // 선택한 행 삭제
-            updateRowNumbers(); // 삭제 후 행 번호 업데이트
-            updateWaitingPatientCount(); // 대기 환자 수 업데이트
+            waitingPatientsTable.deleteRow(rowIndex);
+            updateRowNumbers();
+            updateWaitingPatientCount();
         } else {
-            console.error(`Invalid row index: ${rowIndex}`); // 유효하지 않은 행 인덱스 오류 메시지
+            console.error(`Invalid row index: ${rowIndex}`);
         }
     }
 
@@ -567,12 +527,12 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateRowNumbers() {
         const rows = waitingPatientsTable.rows;
         for (let i = 0; i < rows.length; i++) {
-            rows[i].cells[0].innerText = String(i + 1); // 현재 행 번호로 첫 번째 셀 업데이트
+            rows[i].cells[0].innerText = String(i + 1);
         }
     }
 
     function formatRvTime(rvTime) {
-        if (!rvTime) return 'N/A'; // rvTime이 없으면 'N/A' 반환
+        if (!rvTime) return 'N/A';
 
         const date = new Date(rvTime);
         return date.toLocaleString([], {
@@ -586,11 +546,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function addPatientToWaitingTable(patient) {
         const row = waitingPatientsTable.insertRow();
         const currentRowCount = waitingPatientsTable.rows.length; // 현재 행 수
-
         const formattedRvTime = formatRvTime(patient.rvTime);
-
-        console.log("11111111111->", patient)
-
 
         row.innerHTML = `
         <td>${currentRowCount}</td>
@@ -608,12 +564,9 @@ document.addEventListener("DOMContentLoaded", function () {
             hour: '2-digit',
             minute: '2-digit'
         }) : 'N/A'}</td>
-        <td>${patient.pid}</td>
+        <td style="display: none;">${patient.pid}</td>
        
-        
-        
     `;
-        console.log("테이블에 표시되는 예약시간: ",formattedRvTime)
         row.addEventListener('click', () => {
             const previouslySelected = waitingPatientsTable.querySelector('tr.selected');
             if (previouslySelected) {
@@ -626,7 +579,7 @@ document.addEventListener("DOMContentLoaded", function () {
         existingPatients.push(patient); // 새로운 환자 추가
         sessionStorage.setItem('waitingPatients', JSON.stringify(existingPatients));
 
-        updateWaitingPatientCount(); // 대기 환자 수 업데이트
+        updateWaitingPatientCount();
     }
 
     // 페이지가 로드될 때 기존 환자 정보 로드
@@ -637,7 +590,7 @@ document.addEventListener("DOMContentLoaded", function () {
         waitingPatients.forEach(patient => {
             const existingRows = Array.from(waitingPatientsTable.rows);
             const alreadyExists = existingRows.some(row => {
-                return row.cells[1].innerText === patient.chartNum; // 차트 번호로 중복 검사
+                return row.cells[1].innerText === patient.chartNum;
             });
 
             // 환자 정보가 이미 대기 중이지 않으면 테이블에 추가
@@ -648,8 +601,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     mainDoc: patient.mainDoc || null,
                     rvTime: patient.rvTime || null,
                     receptionTime: patient.receptionTime || new Date().toISOString(),
-                    treatStatus: "1", // 대기 상태
-                    pid:patient.pid
+                    treatStatus: "1",
+                    pid: patient.pid
 
                 });
             }
@@ -658,8 +611,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // 대기 환자 수 업데이트
         updateWaitingPatientCount();
     });
-
-
 
 
     // 현재 시간을 포맷팅하는 함수
@@ -673,8 +624,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // 접수 시간을 포맷팅하는 함수
     const formatReceptionTime = (dateTimeString) => {
-        if (!dateTimeString || dateTimeString === 'N/A') return 'N/A'; // 유효하지 않은 시간 문자열 처리
-        console.log('formatReceptionTime에 입력된 값:', dateTimeString); // 입력 확인
+        if (!dateTimeString || dateTimeString === 'N/A') return 'N/A';
 
         // ISO 형식인지 확인
         if (dateTimeString.includes('T')) {
@@ -683,30 +633,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // ISO 형식이 아닌 경우, 기존 로직 사용
-        const parts = dateTimeString.split(' '); // period와 time 분리
+        const parts = dateTimeString.split(' ');
         if (parts.length !== 2) {
             console.error('시간 형식이 잘못되었습니다:', dateTimeString);
             return 'N/A'; // 형식 오류 처리
         }
 
-        const [period, time] = parts; // period와 time 분리
-        console.log('오전/오후:', period, '시간:', time); // 분리된 값 확인
+        const [period, time] = parts;
+        console.log('오전/오후:', period, '시간:', time);
 
         // 시간과 분 파싱
-        let [hours, minutes] = time.split(':').map(Number); // 시간과 분을 숫자로 변환
-        console.log('파싱된 시간:', hours, '파싱된 분:', minutes); // 파싱된 값 확인
+        let [hours, minutes] = time.split(':').map(Number);
+        console.log('파싱된 시간:', hours, '파싱된 분:', minutes);
 
         // 유효성 검사
         if (isNaN(hours) || isNaN(minutes)) {
             console.error('유효하지 않은 시간 또는 분:', hours, minutes);
-            return 'N/A'; // 유효하지 않은 경우 N/A 반환
+            return 'N/A';
         }
 
-        // 오전/오후에 따른 12시간 형식 변환
         if (period === '오후' && hours < 12) {
-            hours += 12; // 오후일 때 12를 더함
+            hours += 12;
         } else if (period === '오전' && hours === 12) {
-            hours = 0; // 오전 12시는 0으로 변환
+            hours = 0;
         }
 
         // 날짜 객체 생성
@@ -714,7 +663,7 @@ document.addEventListener("DOMContentLoaded", function () {
         date.setHours(hours, minutes);
 
         const formattedTime = formatCurrentTime(date);
-        console.log('포맷된 접수 시간:', formattedTime); // 포맷된 접수 시간 확인
+
         return formattedTime; // 포맷된 시간 반환
     };
 
@@ -723,16 +672,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const row = treatmentPatientsTable.insertRow(); // 진료 중 테이블에 새 행 추가
         treatmentPatientCount++; // 진료 중 환자 수 증가
-        console.log('현재 진료 중 환자 수:', treatmentPatientCount); // 환자 수 확인
 
         const formattedReceptionTime = formatReceptionTime(patient.receptionTime); // 접수 시간을 포맷팅
         const treatmentStartTime = patient.viTime
             ? formatCurrentTime(new Date(new Date(patient.viTime).setHours(new Date(patient.viTime).getHours() + 15)))
             : formatCurrentTime(new Date()); // 진료 시작 시간 포맷팅
-        console.log("세션 스토리지에서 가져온 treatmentPatients:", patient.viTime);
 
-
-        console.log('포맷된 접수 시간:', formattedReceptionTime); // 포맷된 접수 시간 확인
 
         // 새 행의 내용 설정
         row.innerHTML = `
@@ -744,10 +689,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <td>${treatmentStartTime || 'N/A'}</td> <!-- 포맷된 진료 시작 시간 -->
         <td style="display: none;">${patient.pid}</td>
     `;
-        console.log('환자의 receptionTime:', patient.receptionTime);
-        console.log('포맷된 receptionTime:', formattedReceptionTime);
-        console.log('진료시작시간', treatmentStartTime);
-        console.log('새로 추가된 행:', row); // 추가된 행 정보 확인
+
         updateTreatmentPatientCount(); // 환자 수 업데이트
 
         // 행 선택 기능 추가
@@ -792,9 +734,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     viTime = viTime instanceof Date && !isNaN(viTime) ? viTime.toISOString() : 'N/A';
                 }
 
-                // 콘솔에 viTime 출력
-                console.log("세션에서 가져온 viTime:", viTime);
-
                 // 환자 정보를 테이블에 추가
                 addPatientToTreatmentTable({
                     chartNum: patient.chartNum || 'N/A',
@@ -808,7 +747,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // 이미 존재하는 환자일 경우 viTime 업데이트
                 const existingRow = existingRows.find(row => row.cells[1].innerText === patient.chartNum);
                 if (existingRow) {
-                    existingRow.cells[5].innerText = patient.viTime; // 세션에서 가져온 진료 시작 시간으로 업데이트
+                    existingRow.cells[5].innerText = patient.viTime;
                 }
             }
         });
@@ -818,25 +757,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-
-
 // 진료 완료 환자를 완료 테이블에 추가하는 함수
     function addPatientToCompleteTable(patient) {
         const completePatientsTable = document.getElementById('completedPatientsTable');
         if (!completePatientsTable) {
-            console.error("Completed Patients Table not found!");
             return;
         }
 
         const tbody = completePatientsTable.getElementsByTagName('tbody')[0];
         if (!tbody) {
-            console.error("진료 완료 테이블의 tbody를 찾을 수 없습니다!");
             return;
         }
 
         completePatientCount++;
-        console.log("Patient's reception time:", patient.receptionTime);
-
         // 접수 시간 UTC+6으로 변환
         const formatReceptionTime = (dateTimeString) => {
             if (!dateTimeString || dateTimeString === 'N/A') return 'N/A';
@@ -901,11 +834,8 @@ document.addEventListener("DOMContentLoaded", function () {
             return `${amPm} ${hours.toString().padStart(2, '0')}:${minutes}`; // 포맷팅된 시간 반환
         };
 
-        console.log("전송할 진료 완료 시간:", patient.completionTime);
 
-        // completionTime 값을 가져와서 포맷팅
         const formattedCpTime = formatCompleteTime(patient.completionTime);
-        console.log('포맷된 진료 완료 시간', formattedCpTime);
 
         const formattedReceptionTime = formatReceptionTime(patient.receptionTime);
 
@@ -921,13 +851,6 @@ document.addEventListener("DOMContentLoaded", function () {
         <td style="display: none;">${patient.pid}</td>
     `;
 
-        console.log("테아블에 표시되는 진료완료시간: ",formattedCpTime);
-        console.log("완료 환자 테이블:", completePatientsTable);
-        console.log("tbody:", tbody);
-        console.log("진료 완료 테이블의 tbody 현재 내용:", tbody.innerHTML);
-
-        // 현재 tbody의 모든 행 데이터 출력
-        console.log("진료 완료 테이블의 현재 내용:");
         for (let i = 0; i < tbody.rows.length; i++) {
             const cells = tbody.rows[i].cells;
             const rowData = Array.from(cells).map(cell => cell.innerText).join(', ');
@@ -937,6 +860,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // 완료 환자 수 업데이트
         updateCompletePatientCount();
     }
+
 // 페이지 로드 시 completedPatients에서 진료 완료 시간 표시
     window.addEventListener('load', function () {
 
@@ -950,15 +874,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 receptionTime: patient.receptionTime || 'N/A',
                 completionTime: completionTime // 진료 완료 시간
             });
-
-            console.log('진료완료 접수시간', patient.receptionTime);
         });
 
     });
 
 
     function updateWaitingPatientCount() {
-        const count = waitingPatientsTable.rows.length ;
+        const count = waitingPatientsTable.rows.length;
         const header = document.querySelector("#waitingPatientsTable th[colspan='6']");
         header.textContent = `진료 대기 환자: ${count}명`;
 
@@ -967,12 +889,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateTreatmentPatientCount() {
         const count = treatmentPatientsTable.rows.length; // 현재 테이블의 행 개수
         const header = document.querySelector("#treatmentPatientsTable th[colspan='6']");
+        header.textContent = `진료 중 환자: ${count}명`; // 헤더 업데이트
 
-        if (header) {
-            header.textContent = `진료 중 환자: ${count}명`; // 헤더 업데이트
-        } else {
-            console.error("헤더를 찾을 수 없습니다. 선택자를 확인하세요.");
-        }
     }
 
     // 진료 완료 환자 수 업데이트하는 함수
@@ -1022,9 +940,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // 선택된 행 저장
         selectedRow = targetRow;
         selectedRow.classList.add("clicked");
-
-        console.log("Selected patient:", selectedRow.cells[2].textContent);
-        console.log("11111111111",selectedRow.cells[6].textContent);
     });
 
     // 접수 취소 버튼 클릭 시 모달 표시
@@ -1055,8 +970,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (selectedRow) {
 
             const pid = selectedRow.cells[6].textContent; // 숨겨진 pid 가져오기
-            console.log(selectedRow.cells[6].textContent);
-            console.log("Selected PID:", pid);
+
             // 데이터베이스에서 환자 접수 취소 요청
             fetch(`/api/patient-admission/${pid}`, {
                 method: 'DELETE',
@@ -1067,7 +981,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         updateRowIndexes(); // 행 번호 업데이트
                         updateWaitingPatientCount(); // 환자 수 업데이트
                         selectedRow = null; // 선택된 행 초기화
-                        console.log('Admission cancelled successfully.');
                     } else {
                         alert('환자 접수 취소 실패. 다시 시도하세요.');
                     }
@@ -1101,16 +1014,11 @@ document.getElementById('currentDate').addEventListener('change', function () {
 
     // 첫 번째 행(헤더)을 제외한 모든 행 삭제
     while (completedPatientsBody.rows.length > 0) {
-        console.log("삭제 전 행 수:", completedPatientsBody.rows.length);
         completedPatientsBody.deleteRow(0);
-        console.log("삭제 후 행 수:", completedPatientsBody.rows.length);
+
     }
 
-
-    console.log('비우기 후 테이블 행 수:', completedPatientsBody.rows.length);
-    console.log('비우기 전 테이블 내용:', completedPatientsBody);
     sessionStorage.removeItem('completedPatients');
-
 
 
     // API 호출하여 환자 정보를 가져오기
@@ -1123,7 +1031,6 @@ document.getElementById('currentDate').addEventListener('change', function () {
         })
         .then(data => {
 
-            console.log('API 응답 데이터:', data);
             const completedPatientsData = JSON.parse(sessionStorage.getItem('completedPatientsData')) || [];
             console.log('세션에서 가져온 데이터:', completedPatientsData);
 
@@ -1137,7 +1044,7 @@ document.getElementById('currentDate').addEventListener('change', function () {
 
             const completedPatientsBody = document.getElementById('completedPatientsBody');
             completedPatientsBody.innerHTML = '';
-            console.log("진료완료 티바디", completedPatientsBody);
+
 
             // 환자 데이터를 각 테이블에 추가
             data.forEach(patient => {
@@ -1170,7 +1077,6 @@ document.getElementById('currentDate').addEventListener('change', function () {
                             <td>${formattedReceptionTime}</td>
                         </tr>
                     `;
-                    console.log("대기 환자 추가:", patient); // 디버깅을 위한 로그
                 }
 
                 // 진료 중 환자 추가
@@ -1185,7 +1091,6 @@ document.getElementById('currentDate').addEventListener('change', function () {
                             <td>${formattedViTime}</td>
                         </tr>
                     `;
-                    console.log("진료 중 환자 추가:", patient); // 디버깅을 위한 로그
                 }
 
                 // 진료 완료 환자 추가
@@ -1200,8 +1105,6 @@ document.getElementById('currentDate').addEventListener('change', function () {
                             <td>${formattedCpTime}</td> <!-- 진료 완료 시간 -->
                         </tr>
                     `;
-                    console.log("진료 완료 환자 추가:", patient); // 디버깅을 위한 로그W
-                    console.log("진료완료 테이블의 DOM 상태:", completedPatientsBody);
                 }
             });
             // 진료 완료 테이블의 모든 행을 콘솔에 출력
@@ -1287,33 +1190,3 @@ document.getElementById('currentDate').addEventListener('change', function () {
     }
 
 });
-
-
-
-
-// 날짜 선택 시 이벤트 리스너
-document.getElementById('currentDate').addEventListener('change', function () {
-    const selectedDate = this.value; // 선택한 날짜 가져오기
-    console.log('선택한 날짜:', selectedDate); // 선택한 날짜 로그
-
-
-
-    fetch(`/api/patient-admission/date/${selectedDate}`)
-        .then(response => {
-            console.log('응답 상태:', response.status); // 응답 상태 로그
-            if (!response.ok) {
-                throw new Error('네트워크 응답이 올바르지 않습니다.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('가져온 데이터:', data); // 가져온 데이터 로그
-            // 테이블 업데이트 부분
-            // (여기에 값을 업데이트하는 로직이 있어야 합니다)
-        })
-        .catch(error => {
-            console.error('문제가 발생했습니다:', error);
-        });
-});
-
-

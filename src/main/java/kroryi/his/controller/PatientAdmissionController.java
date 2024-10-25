@@ -100,10 +100,6 @@ public class PatientAdmissionController {
         Optional<PatientAdmission> existingPatient = patientAdmissionService.findByChartNumAndReceptionTime(
                 patientAdmissionDTO.getChartNum(), receptionDateTime);
 
-        System.out.println("조회된 환자: " + existingPatient);
-        System.out.println("차트 번호: " + patientAdmissionDTO.getChartNum());
-        System.out.println("접수 시간: " + receptionDateTime);
-
         if (existingPatient.isPresent()) {
             PatientAdmission patient = existingPatient.get();
 
@@ -117,12 +113,6 @@ public class PatientAdmissionController {
 
                 // DB에 업데이트 수행 (여기서는 save가 아닌 update 메서드 사용)
                 patientAdmissionService.updatePatientAdmission(patient); // 업데이트 로직을 구현해야 합니다.
-
-                System.out.println("기존 환자 정보 업데이트: 차트 번호: " + patientAdmissionDTO.getChartNum() +
-                        ", 새로운 진료 시간: " + patient.getViTime() +
-                        ", 새로운 진료 상태: 2" +
-                        ", 새로운 의사: " + patient.getMainDoc());
-
                 return ResponseEntity.ok("환자의 진료 상태가 2로 업데이트되었습니다.");
             } else if (patient.getTreatStatus().equals("2")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("환자가 이미 진료 중입니다.");
@@ -143,8 +133,10 @@ public class PatientAdmissionController {
 
     //    진료완료
     @PutMapping("/completeTreatment")
-    public ResponseEntity<String> completeTreatment(@RequestBody PatientAdmissionDTO patientAdmissionDTO) {
+    public ResponseEntity<Map<String, String>> completeTreatment(@RequestBody PatientAdmissionDTO patientAdmissionDTO) {
         System.out.println("진료 완료 요청 수신: " + patientAdmissionDTO);
+
+        Map<String, String> response = new HashMap<>(); // 응답 메시지를 위한 Map 생성
 
         // 진료 완료 시간 처리
         LocalDateTime completionTime = LocalDateTime.now();
@@ -155,7 +147,8 @@ public class PatientAdmissionController {
         LocalDateTime viTime = patientAdmissionDTO.getViTime(); // 클라이언트로부터 받은 viTime
         if (viTime == null) {
             System.err.println("viTime이 null입니다.");
-            return ResponseEntity.badRequest().body("{\"message\": \"viTime은 필수입니다.\"}");
+            response.put("message", "viTime은 필수입니다.");
+            return ResponseEntity.badRequest().body(response);
         }
 
         // 환자 정보 조회: 차트 번호와 접수 시간을 기준으로
@@ -173,13 +166,16 @@ public class PatientAdmissionController {
 
                 patientAdmissionService.updatePatientAdmission(patient); // 업데이트 수행
 
-                return ResponseEntity.ok("{\"message\": \"환자가 진료 완료 상태로 등록되었습니다.\"}");
+                response.put("message", "환자가 진료 완료 상태로 등록되었습니다.");
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"환자는 이미 진료 완료 상태입니다.\"}");
+                response.put("message", "환자는 이미 진료 완료 상태입니다.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"환자를 찾을 수 없습니다.\"}");
+        response.put("message", "환자를 찾을 수 없습니다.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
 
