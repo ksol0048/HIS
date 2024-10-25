@@ -4,7 +4,7 @@ import kroryi.his.dto.ReservationDTO;
 
 import java.util.List;
 
-public interface ReservationService {
+public interface ReservationRegisterService {
     List<ReservationDTO> selectedDatePatientList(ReservationDTO dto);
     List<ReservationDTO> selectedByReservation(ReservationDTO dto);
     List<ReservationDTO> insertReservationInformation(ReservationDTO dto);

@@ -1,7 +1,7 @@
 const searchModal = new bootstrap.Modal(document.querySelector(".SearchModal"))
 const closeBtn = document.querySelector(".closeBtn")
 const patient_name_keyword = document.querySelector("#patient_name_keyword")
-const departmentElement = document.getElementById('department');
+let departmentElement = document.getElementById('departmentInput');
 const chartNumberElement = document.getElementById('chart-number');
 
 let selectedRow = null; // 클릭된 행을 저장할 변수
@@ -172,6 +172,7 @@ document.querySelector(".SearchBtn").addEventListener("click", () => {
         const menu_chartNum = selectedRow.querySelector("td:nth-child(5)").textContent;
         const menu_birthDate = selectedRow.querySelector("td:nth-child(6)").textContent;
 
+        console.log("dddddddddddddddd" ,menu_name)
         // HTML 요소에 데이터 삽입
         document.querySelector("#patientInfo").innerHTML = `
             <div class="text-center row">
@@ -206,8 +207,10 @@ document.querySelector(".SearchBtn").addEventListener("click", () => {
                 }
             })
         } else if (window.location.href.includes("/reservation")) {
-            departmentElement.value = menu_name;
-            chartNumberElement.value = menu_chartNum;
+            let department = document.getElementById('departmentInput');
+            let chartNumber = document.getElementById('chart-numberInput');
+            department.value = menu_name;
+            chartNumber.value = menu_chartNum;
         }
 
 
@@ -261,4 +264,3 @@ function test(selectedMemos) {
         });
     }
 }
-

@@ -49,13 +49,7 @@ public class HomeController {
 
     //    진료예약
     @GetMapping("/reservation")
-    public String reservation(Model model) {
-        List<String> doctorNames = patientRegisterService.getDoctorNames();
-        model.addAttribute("doctorNames", doctorNames); // 의사 이름을 모델에 추가
-        log.info("doctorNames!!!!!!!!!!"+doctorNames);
-
-        return "reservation";
-    }
+    public String reservation() { return "reservation"; }
 
     //    진료차트
     @GetMapping("/medical_chart")

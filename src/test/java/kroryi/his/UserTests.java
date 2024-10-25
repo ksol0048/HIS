@@ -5,7 +5,7 @@ import kroryi.his.dto.ReservationDTO;
 import kroryi.his.repository.MemberRepository;
 import kroryi.his.service.MemberService;
 import kroryi.his.service.PatientRegisterService;
-import kroryi.his.service.ReservationService;
+import kroryi.his.service.ReservationRegisterService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class UserTests {
     PatientRegisterService patientRegisterService;
 
     @Autowired
-    ReservationService reservationService;
+    ReservationRegisterService reservationService;
 
     @Test
     public void testSearchName(){
