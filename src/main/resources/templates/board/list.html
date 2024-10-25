@@ -2,6 +2,109 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout.html}">
 
 
+<div layout:fragment="list">
+    <div class="row m-3">
+        <form id="listForm" action="/board/list" method="get">
+            <div class="col">
+                <input type="hidden" name="size" th:value="${pageRequestDTO.size}">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <select name="type" class="form-select">
+                            <option value="">----</option>
+                            <option value="t" th:selected="${pageRequestDTO.type=='t'}">제목</option>
+                            <option value="c" th:selected="${pageRequestDTO.type=='c'}">내용</option>
+                            <option value="w" th:selected="${pageRequestDTO.type=='w'}">작성자</option>
+                            <option value="tc" th:selected="${pageRequestDTO.type=='tc'}">제목+내용</option>
+                            <option value="tcw" th:selected="${pageRequestDTO.type=='tcw'}">제목+내용+작성자</option>
+                        </select>
+                    </div>
+                    <input type="text" class="form-control" name="keyword" th:value="${pageRequestDTO.keyword}">
+
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary searchBtn" type="submit">검색</button>
+                        <button class="btn btn-outline-secondary clearBtn" type="button">리셋</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="card m-2">
+        <div class="card-header">
+            게시판
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">목록</h5>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">번호</th>
+                    <th scope="col">제목</th>
+                    <th scope="col">작성자</th>
+                    <th scope="col">등록일</th>
+                </tr>
+                </thead>
+                <tbody><!--th:with="link=${pageRequestDTO.getLink()}"-->
+                <tr th:each="dto:${responseDTO.dtoList}">
+                    <th scope="row">[[${dto.bno}]]</th>
+                    <td>[[${dto.title}]]</td>
+                    <td>[[${dto.writer}]]</td>
+                    <td>[[${#temporals.format(dto.regDate, 'yyyy-MM-dd')}]]</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!--<a th:href="|@{/board/register}|" class="text-decoration-none">
+                <button type="button" class="btn btn-primary">글등록</button>
+            </a>-->
+
+            <div class="float-end">
+                <ul class="pagination flex-wrap">
+                    <li class="page-item" th:if="${responseDTO.prev}">
+                        <a class="page-link" th:data-num="${responseDTO.start -1}">이전</a>
+                    </li>
+
+                    <th:block th:each="i:${#numbers.sequence(responseDTO.start,responseDTO.end)}">
+                        <li th:class="${responseDTO.page == i}?'page-item active':'page-item'">
+                            <a class="page-link" th:data-num="${i}">[[${i}]]</a>
+                        </li>
+                    </th:block>
+
+                    <li class="page-item" th:if="${responseDTO.next}">
+                        <a class="page-link" th:data-num="${responseDTO.end +1}">다음</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script layout:fragment="script" th:inline="javascript">
+        console.log("asdasdada")
+        document.querySelector(".pagination").addEventListener("click", (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            const target = e.target
+            console.log(target)
+            if (target.tagName !== "A") {
+                return
+            }
+            const num = target.getAttribute("data-num")
+
+            const formObj = document.getElementById("listForm")
+
+            formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`
+
+            formObj.submit();
+        }, false)
+
+        document.querySelector(".clearBtn").addEventListener("click", (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+
+            self.location = '/board/list'
+        }, false)
+    </script>
 </div>
+
+

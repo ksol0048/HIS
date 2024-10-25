@@ -3,7 +3,11 @@ package kroryi.his.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import kroryi.his.dto.BoardDTO;
 import kroryi.his.dto.MemberSecurityDTO;
+import kroryi.his.dto.PageRequestDTO;
+import kroryi.his.dto.PageResponseDTO;
+import kroryi.his.service.BoardService;
 import kroryi.his.service.PatientRegisterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HomeController {
     private final PatientRegisterService patientRegisterService;
+    private final BoardService boardService;
 
     @GetMapping("/home")
     public String home(@AuthenticationPrincipal UserDetails user, Model model, HttpSession session) {
@@ -70,7 +75,16 @@ public class HomeController {
     }
 
     @GetMapping("/board/list")
-    public String list() {
-        return "/board/list";
+    public String list(Model model, PageRequestDTO pageRequestDTO) {
+        PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
+
+//        PageResponseDTO<BoardListReplyCountDTO> responseDTO = boardService.listWithReplyCount(pageRequestDTO);
+//        PageResponseDTO<BoardListAllDTO> responseDTO = boardService.listWithAll(pageRequestDTO);
+
+        log.info("!!!!!!!!!!"+responseDTO);
+
+        model.addAttribute("responseDTO", responseDTO);
+
+        return "board/list";
     }
 }
