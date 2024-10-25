@@ -47,3 +47,24 @@ td, th {
 #patientTable tbody tr.selected {
     background-color: #afefeb !important; /* 선택된 행의 배경색 */
 }
+
+.post-number {
+    width: 150px;
+    text-align: center;
+}
+
+.post-title {
+    width: 300px;
+    flex-grow: 1; /* 제목을 나머지 공간을 차지하도록 확장 */
+    padding-left: 10px;
+}
+
+.post-author {
+    width: 150px;
+    text-align: center;
+}
+
+.post-date {
+    width: 150px;
+    text-align: center;
+}
