@@ -137,18 +137,29 @@ public class MemberSearchImpl extends
         QMember member = QMember.member;
         QMemberRoleSet roleSet = QMemberRoleSet.memberRoleSet;
 
+        log.info("searchWithAll1 --> {}", types);
+        log.info("searchWithAll2 --> {}", keyword);
+
         BooleanBuilder booleanBuilder = new BooleanBuilder();
-        if ((types != null && types.length > 0) && keyword != null) {
+        if (types != null && types.length > 0 && keyword != null) {
             for (String type : types) {
                 switch (type) {
+                    case "m":
+                        booleanBuilder.or(member.mid.like("%" + keyword + "%")); // mid 검색
+                        break;
                     case "n":
-                        booleanBuilder.or(member.name.contains(keyword));
+                        booleanBuilder.or(member.name.like("%" + keyword + "%")); // 이름 검색
                         break;
                     case "e":
-                        booleanBuilder.or(member.email.contains(keyword));
+                        booleanBuilder.or(member.email.like("%" + keyword + "%")); // 이메일 검색
                         break;
                     case "r":
-                        booleanBuilder.or(member.roleSet.any().roleSet.eq(MemberRole.valueOf(keyword)));
+                        try {
+                            booleanBuilder.or(member.roleSet.any().roleSet.eq(MemberRole.valueOf(keyword))); // 역할 검색
+                        } catch (IllegalArgumentException ex) {
+                            // MemberRole에 없는 값이 들어오면 예외가 발생하므로 이를 방지합니다.
+                            System.out.println("Invalid role value: " + keyword);
+                        }
                         break;
                 }
             }
