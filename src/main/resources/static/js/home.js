@@ -35,37 +35,39 @@ function goToMaterialManagementPage() {
 
 
 
-async function fetchInitialCounts() {
-    const today = new Date().toISOString().split('T')[0]; // 오늘 날짜를 yyyy-MM-dd 형식으로
-    const statuses = [1, 2, 3]; // 요청할 상태 배열
+document.addEventListener("DOMContentLoaded", function() {
+    const socket = new SockJS('/patientCount');
+    const stompClient = Stomp.over(socket);
 
-    try {
-        for (const status of statuses) {
-            const response = await fetch(`/completeTreatment/${status}/${today}`); // API 호출
+    stompClient.connect({}, function(frame) {
+        // console.log('WebSocket connected:', frame);
 
-            if (!response.ok) {
-                throw new Error(`환자 수 가져오기 실패: ${response.statusText}`);
-            }
+        // 환자 수 업데이트 메시지 구독
+        stompClient.subscribe('/topic/patientCount', function(message) {
 
-            const count = await response.json(); // 응답을 JSON으로 변환
-            console.log(`상태 ${status}에 ${count}명의 환자가 있습니다.`); // 콘솔에 출력
+            const data = JSON.parse(message.body);
+            const { status, count } = data;
 
-            // 각각의 상태에 따른 카운트 업데이트
-            if (status === 1) {
+            // 상태 및 카운트를 출력하여 확인
+            // console.log(`Status: ${status}, Count: ${count}`);
+
+            // UI 업데이트
+            if (status === "1") {
                 document.getElementById('home-waitingCount').textContent = count;
-            } else if (status === 2) {
+            } else if (status === "2") {
                 document.getElementById('home-inTreatmentCount').textContent = count;
-            } else if (status === 3) {
+            } else if (status === "3") {
                 document.getElementById('home-completedCount').textContent = count;
             }
-        }
-    } catch (error) {
-        console.error('에러 발생:', error); // 에러가 발생하면 콘솔에 출력
-    }
-}
+        });
+
+    }, function(error) {
+        console.error('WebSocket connection error:', error); // 연결 실패 시
+    });
+});
+
 
 // 페이지 로드 시 호출
-document.addEventListener('DOMContentLoaded', fetchInitialCounts);
 function goToReception() {
     window.location.href = "http://localhost:8080/reception";
 }

@@ -59,7 +59,6 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
         LocalDateTime startDate = date.atStartOfDay(); // 입력된 날짜의 00시 00분 00초
         LocalDateTime endDate = date.atTime(23, 59, 59);
 
-
         return patientAdmissionRepository.countByTreatStatusAndReceptionTimeBetween(count,startDate, endDate);
     }
 

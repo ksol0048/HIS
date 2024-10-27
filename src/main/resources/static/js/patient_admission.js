@@ -559,7 +559,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <option value="의사3">의사3</option>
             </select>
         </td>
-        <td>${formattedRvTime}</td>
+        <td>${formattedRvTime || ''}</td>
         <td>${patient.receptionTime ? new Date(patient.receptionTime).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit'
