@@ -1,4 +1,4 @@
-package kroryi.his.repository.search;
+package kroryi.his.service;
 
 import kroryi.his.domain.Member;
 import kroryi.his.dto.MemberListAllDTO;

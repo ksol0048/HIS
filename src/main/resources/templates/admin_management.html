@@ -44,17 +44,21 @@
                     <div class="row">
                         <div class="col">
                             <small>사용자 아이디</small>
-                            <input type="text" class="form-control txtCondition" id="txtId" value="" placeholder=""
+                            <input type="text" class="form-control txtCondition" id="txtSearchId" value="" placeholder=""
                                    required>
                         </div>
                         <div class="col">
                             <small>이름</small>
-                            <input type="text" class="form-control txtCondition" id="txtName" value="" placeholder=""
-                                   required>
+                            <input type="text" class="form-control txtCondition" id="txtSearchName" value="" placeholder="">
+                        </div>
+                        <div class="col">
+                            <small>E-mail</small>
+                            <input type="text" class="form-control txtCondition" id="txtSearchEmail" value="" placeholder="">
                         </div>
                         <div class="col">
                             <small>권한</small>
-                            <select id="cmbAuth" class="form-control">
+                            <select id="cmbSearchAuth" class="form-control">
+                                <option value="">------</option>
                                 <option value="0">관리자</option>
                                 <option value="1">의사</option>
                                 <option value="2">간호사</option>
@@ -64,19 +68,13 @@
                         <div class="col-md-3">
                             <small>날짜</small>
                             <input type="date" name="transactionStartDate" class="form-control"
-                                   id="transactionStartDate">
+                                   id="transactionSearchStartDate">
                         </div>
                     </div>
                     <div class="row m-3 ">
                         <div class="col d-flex align-items-center justify-content-end">
                             <button type="button" id="btnSearch" class="btn btn-primary">조회</button>
-                            <button type="reset" id="btnReset" class="btn btn-secondary">초기화</button>
-                            <!--                                <button type="button" id="btnEdit" class="btn btn-secondary mt-4">수정</button>-->
-                            <button type="button" id="btnDelete" class="btn btn-secondary" data-id="${user.id}">삭제
-                            </button>
-
-
-                            <!--                                <button type="button" id="btnSave" class="btn btn-success mt-4">저장</button>-->
+                            <button type="reset" id="btnSearchReset" class="btn btn-secondary">초기화</button>
                         </div>
                     </div>
                 </div>
