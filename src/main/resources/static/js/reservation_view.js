@@ -49,67 +49,6 @@ function ReservationDateList(selectedDate) {
 }
 
 
-function renderCalendar() {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-
-    const firstDay = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month + 1, 0).getDate();
-    const monthYearSelect = document.getElementById('monthYearSelect');
-    const calendarContent = document.getElementById('calendar-content');
-    monthYearSelect.innerText = `${year}년 ${month + 1}월`;
-    calendarContent.innerHTML = '';
-
-    let date = 1;
-    for (let i = 0; i < 6; i++) {
-        const row = document.createElement('tr');
-
-        for (let j = 0; j < 7; j++) {
-            const cell = document.createElement('td');
-            cell.classList.add('calendarDate');
-            if (i === 0 && j < firstDay) {
-                cell.innerHTML = '';
-            } else if (date > lastDate) {
-                break;
-            } else {
-                cell.innerHTML = date;
-                date++;
-            }
-            row.appendChild(cell);
-        }
-
-        calendarContent.appendChild(row);
-    }
-
-
-    // 캘린더 날짜 선택시 오늘 날짜 정보 받아오기
-    document.querySelectorAll('.calendarDate').forEach(function (calendarDate) {
-        calendarDate.addEventListener('click', function () {
-            // 클릭된 날짜의 텍스트 가져오기
-            const day = this.textContent;
-
-            // 저장한 날짜 텍스트, 날짜 형식으로 재변환
-            const selectedDate = `${year}-${month + 1}-${day}`;
-            console.log(selectedDate)
-
-            ReservationDateList(selectedDate);
-        });
-    });
-
-}
-
-function prevMonth() {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar();
-}
-
-function nextMonth() {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-}
-
-renderCalendar();
 
 // 예약 테이블 나오는 부분
 // 모든 의사 목록을 가져오는 함수
@@ -128,13 +67,6 @@ async function generateTimetable() {
     const doctors = await fetchDoctors(); // 의사 목록 가져오기
     const tableHead = document.querySelector("#timetable thead tr");
     const tableBody = document.querySelector("#timetable tbody");
-    const reservationTimes = [
-        "9:00", "9:30", "10:00", "10:30", "11:00",
-        "11:30", "12:00", "12:30", "13:00", "13:30",
-        "14:00", "14:30", "15:00", "15:30", "16:00",
-        "16:30", "17:00", "17:30", "18:00", "18:30",
-        "19:00", "19:30"
-    ];
 
     // 의사 헤더 셀 초기화
     tableHead.innerHTML = '<th>&nbsp;</th>'; // 기존 헤더 초기화

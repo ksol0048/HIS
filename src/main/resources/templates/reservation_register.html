@@ -5,211 +5,158 @@
     <title>예약 시스템</title>
 </head>
 <body>
-<div id="myTabContent" class="tab-content">
-    <div class="tab-pane fade show active" id="tab1" role="tabpanel">
-        <!-- 예약 -->
-        <div class="card m-2 mb-1">
-            <div class="card-header text-center">
-                예약
-            </div>
-            <div class="card-body">
-                <div class="container-fluid">
-                    <div class="row d-flex justify-content-center">
-                        <!-- 왼쪽 구간 (캘린더) -->
-                        <div class="col-md-4">
+<!-- 예약 -->
+        <div class="container-fluid">
+            <div class="row d-flex justify-content-center">
 
-                            <!-- 캘린더 구간 -->
-                            <div class="calendar">
-                                <div class="calendar-header">
-                                    <button onclick="prevMonth()">이전</button>
-                                    <span id="monthYear"></span>
-                                    <button onclick="nextMonth()">다음</button>
+                <!-- 중앙 구간 (예약 폼) -->
+                <div class="col-md-4" style="padding: 20px 50px;">
+                    <h2>예약 정보</h2>
+                    <div class="form-group">
+                        <label for="reservation-date">예약일자</label>
+                        <input type="date" id="reservation-date" name="reservation-date">
+                        <label for="test_time">예약시간</label>
+                        <select id="test_time"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="departmentInput">환자이름</label>
+                        <input type="text" id="departmentInput" name="department">
+                    </div>
+                    <div class="form-group">
+                        <label for="sns-notification">SNS 발송</label>
+                        <input type="checkbox" id="sns-notification" name="sns-notification">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chart-numberInput">차트번호</label>
+                        <input type="text" id="chart-numberInput" name="chart-number">
+                    </div>
+                    <div class="form-group">
+                        <label for="doctor">진료의사</label>
+                        <select id="doctor" name="doctor">
+                            <option value="-----">-----</option>
+                            <th:block th:each="doctor : ${doctorNames}">
+                                <option th:value="${doctor}" th:text="${doctor}"></option>
+                            </th:block>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="treatment-type">치료유형</label>
+                        <select id="treatment-type" name="treatment-type">
+                            <option value="일반">일반</option>
+                            <option value="수술">수술</option>
+                            <option value="리콜">리콜</option>
+                            <option value="신환">신환</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>노트</label>
+                        <input type="text" id="patient-note">
+                    </div>
+                    <div class="form-group">
+                        <label for="color-select">Color 선택</label>
+                        <select id="color-select" name="color-select">
+                            <option></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="reservation">예약 미이행</label>
+                        <div class="row">
+                            <div><input type="radio" id="reservation-status-ca" name="reservation-status">C/A</div>
+                            <div><input type="radio" id="reservation-status-ba" name="reservation-status">B/A</div>
+                            <div><input type="radio" id="reservation-status-none" name="reservation-status">없음</div>
+
+                        </div>
+                    </div>
+
+                    <!-- 삭제 수정과 신규를 구별하기 위한 인덱스 번호-->
+                    <div class="index-number" id="index-number">
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" onclick="saveUpdate()" class="btn btn-success"
+                                style="margin-bottom: 10px">저장
+                        </button>
+                        <button type="button" onclick="rReset(true)" class="btn btn-warning"
+                                style="margin-bottom: 10px">초기화
+                        </button>
+                        <button type="button" onclick="deleteReservation()" class="btn btn-danger"
+                                style="margin-bottom: 10px">삭제
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 오른쪽 구간 (진료목록) -->
+                <div class="col-md-4">
+                    <div class="container mt-5">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th style="width: 50%;">진료명</th>
+                                <th style="width: 22%;">구분</th>
+                                <th style="width: 14%;">수정</th>
+                                <th style="width: 14%;">삭제</th>
+                            </tr>
+                            </thead>
+                        </table>
+                        <h5>이곳을 클릭하여 새로운 용어를 추가하세요.</h5>
+                        <ul>
+                            <li>
+                                <div>check</div>
+                                <div>
+                                    <button class="btn btn-outline-primary">✔</button>
+                                    <button class="btn btn-outline-danger">✖</button>
                                 </div>
-                                <table class="table">
-                                    <thead>
-                                    <tr>
-                                        <th>일</th>
-                                        <th>월</th>
-                                        <th>화</th>
-                                        <th>수</th>
-                                        <th>목</th>
-                                        <th>금</th>
-                                        <th>토</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="calendar-body">
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- 예약목록, 개인 예약 현황 구간 -->
-                            <div class="d-flex mt-2">
-                                <button class="btn btn-primary me-2 button_test_1" type="button">예약 목록</button>
-                                <button class="btn btn-secondary button_test_2" type="submit">개인 예약 현황</button>
-                            </div>
-
-                            <!-- 해당 날짜 테이블 -->
-                            <table id="reservationTable" class="table table-hover mt-2">
-                                <thead>
-                                <tr>
-                                    <th>시간</th>
-                                    <th>환자이름</th>
-                                    <th>내용</th>
-                                </tr>
-                                </thead>
-                                <tbody id="reservation-body">
-                                </tbody>
-                            </table>
-
-                            <!-- 날짜 선택시 환자 데이터가 들어올 테이블 -->
-                            <table id="reservationTableList" class="table table-hover mt-2"></table>
-
-                        </div>
-
-                        <!-- 중앙 구간 (예약 폼) -->
-                        <div class="col-md-4" style="padding: 20px 50px;">
-                            <h2>예약 정보</h2>
-                            <div class="form-group">
-                                <label for="reservation-date">예약일자</label>
-                                <input type="datetime-local" id="reservation-date" name="reservation-date">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="departmentInput">환자이름</label>
-                                <input type="text" id="departmentInput" name="department">
-                            </div>
-                            <div class="form-group">
-                                <label for="sns-notification">SNS 발송</label>
-                                <input type="checkbox" id="sns-notification" name="sns-notification">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="chart-numberInput">차트번호</label>
-                                <input type="text" id="chart-numberInput" name="chart-number">
-                            </div>
-                            <div class="form-group">
-                                <label for="doctor">진료의사</label>
-                                <select id="doctor" name="doctor">
-                                    <option value="-----">-----</option>
-                                    <th:block th:each="doctor : ${doctorNames}">
-                                        <option th:value="${doctor}" th:text="${doctor}"></option>
-                                    </th:block>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="treatment-type">치료유형</label>
-                                <select id="treatment-type" name="treatment-type">
-                                    <option value="일반">일반</option>
-                                    <option value="수술">수술</option>
-                                    <option value="리콜">리콜</option>
-                                    <option value="신환">신환</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>노트</label>
-                                <input type="text" id="patient-note">
-                            </div>
-                            <div class="form-group">
-                                <label for="color-select">Color 선택</label>
-                                <select id="color-select" name="color-select">
-                                    <option></option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="reservation">예약 미이행</label>
-                                <div class="row">
-                                    <div><input type="radio" id="reservation-status-ca" name="reservation-status">C/A</div>
-                                    <div><input type="radio" id="reservation-status-ba" name="reservation-status">B/A</div>
-                                    <div><input type="radio" id="reservation-status-none" name="reservation-status">없음</div>
-
+                            </li>
+                            <li>
+                                <div>1주 ck</div>
+                                <div>
+                                    <button class="btn btn-outline-primary">✔</button>
+                                    <button class="btn btn-outline-danger">✖</button>
                                 </div>
-                            </div>
-
-                            <!-- 삭제 수정과 신규를 구별하기 위한 인덱스 번호-->
-                            <div class="index-number" id="index-number">
-                            </div>
-
-                            <div class="btn-group">
-                                <button type="button" onclick="saveUpdate()" class="btn btn-success" style="margin-bottom: 10px">저장</button>
-                                <button type="button" onclick="rReset(true)" class="btn btn-warning" style="margin-bottom: 10px">초기화</button>
-                                <button type="button" onclick="deleteReservation()" class="btn btn-danger" style="margin-bottom: 10px">삭제</button>
-                            </div>
-                        </div>
-
-                        <!-- 오른쪽 구간 (진료목록) -->
-                        <div class="col-md-4">
-                            <div class="container mt-5">
-                                <table class="table">
-                                    <thead>
-                                    <tr>
-                                        <th style="width: 50%;">진료명</th>
-                                        <th style="width: 22%;">구분</th>
-                                        <th style="width: 14%;">수정</th>
-                                        <th style="width: 14%;">삭제</th>
-                                    </tr>
-                                    </thead>
-                                </table>
-                                <h5>이곳을 클릭하여 새로운 용어를 추가하세요.</h5>
-                                <ul>
-                                    <li>
-                                        <div>check</div>
-                                        <div>
-                                            <button class="btn btn-outline-primary">✔</button>
-                                            <button class="btn btn-outline-danger">✖</button>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div>1주 ck</div>
-                                        <div>
-                                            <button class="btn btn-outline-primary">✔</button>
-                                            <button class="btn btn-outline-danger">✖</button>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div>2달뒤 check</div>
-                                        <div>
-                                            <button class="btn btn-outline-primary">✔</button>
-                                            <button class="btn btn-outline-danger">✖</button>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div>3개월 정기검진</div>
-                                        <div>
-                                            <button class="btn btn-outline-primary">✔</button>
-                                            <button class="btn btn-outline-danger">✖</button>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div>6개월 정기검진</div>
-                                        <div>
-                                            <button class="btn btn-outline-primary">✔</button>
-                                            <button class="btn btn-outline-danger">✖</button>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div>ext</div>
-                                        <div>
-                                            <button class="btn btn-outline-primary">✔</button>
-                                            <button class="btn btn-outline-danger">✖</button>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div>dr</div>
-                                        <div>
-                                            <button class="btn btn-outline-primary">✔</button>
-                                            <button class="btn btn-outline-danger">✖</button>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                            </li>
+                            <li>
+                                <div>2달뒤 check</div>
+                                <div>
+                                    <button class="btn btn-outline-primary">✔</button>
+                                    <button class="btn btn-outline-danger">✖</button>
+                                </div>
+                            </li>
+                            <li>
+                                <div>3개월 정기검진</div>
+                                <div>
+                                    <button class="btn btn-outline-primary">✔</button>
+                                    <button class="btn btn-outline-danger">✖</button>
+                                </div>
+                            </li>
+                            <li>
+                                <div>6개월 정기검진</div>
+                                <div>
+                                    <button class="btn btn-outline-primary">✔</button>
+                                    <button class="btn btn-outline-danger">✖</button>
+                                </div>
+                            </li>
+                            <li>
+                                <div>ext</div>
+                                <div>
+                                    <button class="btn btn-outline-primary">✔</button>
+                                    <button class="btn btn-outline-danger">✖</button>
+                                </div>
+                            </li>
+                            <li>
+                                <div>dr</div>
+                                <div>
+                                    <button class="btn btn-outline-primary">✔</button>
+                                    <button class="btn btn-outline-danger">✖</button>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 <script src="/js/reservation_register.js"></script>
 </body>
 </html>

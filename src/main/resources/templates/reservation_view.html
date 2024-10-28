@@ -5,91 +5,28 @@
     <title></title>
 </head>
 <body>
-<div id="myTabContent" class="tab-content">
-    <div class="tab-pane fade show active" id="tab1" role="tabpanel">
-        <!-- 예약-->
-        <div class="card m-2 mb-1">
-            <div class="card-header text-center">
-                예약
-            </div>
-            <div class="card-body">
-                <div class="container-fluid">
-                    <div class="row d-flex justify-content-center">
-                        <!-- 왼쪽 구간 (캘린더) -->
-                        <div class="col-md-4">
 
-                            <!-- 캘린더 구간 -->
-                            <div class="calendar">
-                                <div class="calendar-header">
-                                    <button onclick="prevMonth()">이전</button>
-                                    <span id="monthYearSelect"></span>
-                                    <button onclick="nextMonth()">다음</button>
-                                </div>
-                                <table class="table">
-                                    <thead>
-                                    <tr>
-                                        <th>일</th>
-                                        <th>월</th>
-                                        <th>화</th>
-                                        <th>수</th>
-                                        <th>목</th>
-                                        <th>금</th>
-                                        <th>토</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="calendar-content">
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- 예약목록, 개인 예약 현황 구간 -->
-                            <div class="d-flex mt-2">
-                                <button class="btn btn-primary me-2 button_test_1" type="button">예약 목록</button>
-                                <button class="btn btn-secondary button_test_2" type="submit">개인 예약 현황</button>
-                            </div>
-
-                            <!-- 해당 날짜 테이블 ? -->
-                            <table id="reservationTable" class="table table-hover mt-2">
-                                <thead>
-                                <tr>
-                                    <th>시간</th>
-                                    <th>환자이름</th>
-                                    <th>내용</th>
-                                </tr>
-                                </thead>
-                                <tbody id="reservation-body">
-                                </tbody>
-                            </table>
-
-                            <!-- 날짜 선택시 환자 데이터가 들어올 테이블 -->
-                            <table id="reservationTableList" class="table table-hover">
-
-                            </table>
-
-                        </div>
-
-                        <!-- 타임테이블 -->
-                        <div class="col-md-8">
-                            <div class="container-fluid p-3">
-                                <table class="table table-bordered" id="timetable">
-                                    <thead>
-                                    <tr>
-                                        <th>&nbsp;</th>
-                                        <!-- 동적으로 의사 헤더가 삽입됩니다 -->
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <!-- 동적으로 시간 슬롯이 생성됩니다 -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="container-fluid">
+    <div class="row d-flex justify-content-center">
+        <!-- 타임테이블 -->
+        <div class="col-md-8">
+            <div class="container-fluid p-3">
+                <table class="table table-bordered" id="timetable">
+                    <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <!-- 동적으로 의사 헤더가 삽입됩니다 -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- 동적으로 시간 슬롯이 생성됩니다 -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="/js/reservation_view.js"></script>
 </body>
