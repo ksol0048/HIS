@@ -78,6 +78,7 @@ public class PatientAdmissionController {
 
 
 
+
     // 대기 환자 목록 반환
     @GetMapping("/waiting")
     public ResponseEntity<List<PatientAdmission>> getWaitingPatients() {
