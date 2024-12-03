@@ -1,4 +1,4 @@
-<div align="center">
+![tjsdkek](https://github.com/user-attachments/assets/55c814af-7608-46bb-9c47-3804e743eda4)<div align="center">
  <img src="https://github.com/user-attachments/assets/36b0d180-6c07-4a53-8ca8-f2c70d6dfb93" width="400"/>
 
 <br/> [<img src="https://img.shields.io/badge/프로젝트 기간-2024.10.22~2024.11.14-green?style=flat&logo=&logoColor=white" />]()
@@ -19,8 +19,9 @@
 <div align="center">
 
 | **이재준** | **백지영** | **김관호** | **정수빈** | **송경섭** | **최선아** |
+
 | :------: |  :------: | :------: | :------: | :------: | :------: |
-| <img src="https://avatars.githubusercontent.com/u/106502312?v=4" height=150 width=150> |<img src="https://avatars.githubusercontent.com/u/112460466?v=4" height=150 width=150> | <img src="https://avatars.githubusercontent.com/u/112460506?v=4" height=150 width=150>| <img src="https://avatars.githubusercontent.com/u/76766459?v=4" height=150 width=150> | <img src="https://avatars.githubusercontent.com/u/76766459?v=4" height=150 width=150>| <img src="https://avatars.githubusercontent.com/u/76766459?v=4" height=150 width=150> |
+| <img src="https://avatars.githubusercontent.com/u/106502312?v=4" height=150 width=150> |<img src="https://avatars.githubusercontent.com/u/112460466?v=4" height=150 width=150> | <img src="https://avatars.githubusercontent.com/u/112460506?v=4" height=150 width=150>| <img src="https://avatars.githubusercontent.com/u/76766459?v=4" height=150 width=150> | <img src="https://avatars.githubusercontent.com/u/76766459?v=4" height=150 width=150>| <img src="https://github.com/user-attachments/assets/bbc79a4d-5457-43cd-aa32-54c78a0f1622" height=150 width=150> |
 | [GitHub](https://github.com/ksol0048) | [GitHub](https://github.com/bjy-98) | [GitHub](https://github.com/ho0911) | [GitHub](https://github.com/Bintori) | [GitHub](https://github.com/song424) | [GitHub](https://github.com/tjsdkek) |
   
 </div>
