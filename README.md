@@ -1,4 +1,4 @@
-![tjsdkek](https://github.com/user-attachments/assets/55c814af-7608-46bb-9c47-3804e743eda4)<div align="center">
+<div align="center">
  <img src="https://github.com/user-attachments/assets/36b0d180-6c07-4a53-8ca8-f2c70d6dfb93" width="400"/>
 
 <br/> [<img src="https://img.shields.io/badge/프로젝트 기간-2024.10.22~2024.11.14-green?style=flat&logo=&logoColor=white" />]()
