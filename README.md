@@ -256,6 +256,10 @@
     - 로그인이 되어 있지 않은 경우 : 로그인 화면
     - 로그인이 되어 있는 경우 : 홈 화면
 
+
+https://github.com/user-attachments/assets/dcd6c3ed-480a-4b37-8ed2-4be95b0caac4
+
+
 <br>
 
 ### [Layout/홈]
