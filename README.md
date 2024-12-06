@@ -331,6 +331,9 @@ https://github.com/user-attachments/assets/f30f6525-4245-4112-9897-d49f98313fd9
 - 하단 탭 메뉴 : 홈, 채팅, 게시물 작성, 프로필 아이콘을 클릭하면 각각 홈 피드, 채팅 목록, 게시글 작성 페이지, 내 프로필 페이지로 이동합니다.
 
 
+https://github.com/user-attachments/assets/0ca2602d-15f9-40c0-9551-57d18e379dec
+
+
 <br>
 
 ### [접수]
