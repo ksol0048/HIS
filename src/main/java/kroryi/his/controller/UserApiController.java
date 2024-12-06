@@ -1,21 +1,29 @@
 package kroryi.his.controller;
 
 import io.swagger.annotations.ApiOperation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import kroryi.his.domain.Member;
 import kroryi.his.domain.MemberRoleSet;
 import kroryi.his.dto.*;
 import kroryi.his.exception.UserNotFoundException;
+import kroryi.his.jwt.JwtUtil;
 import kroryi.his.repository.MemberRepository;
 import kroryi.his.repository.MemberRoleSetRepository;
 import kroryi.his.service.MemberRoleSetService;
 import kroryi.his.service.MemberService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,29 +44,32 @@ public class UserApiController {
     private final MemberRoleSetRepository memberRoleSetRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final JwtUtil jwtUtil;
+
+    private final AuthenticationManager authenticationManager;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        Optional<Member> user = memberService.getUserById(request.getUsername());
+        if (user != null && passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
+            String token = jwtUtil.generateToken(user.get().getMid());
+            return ResponseEntity.ok(new LoginResponse(token));
+        }
+        return ResponseEntity.badRequest().body("Invalid credentials");
+    }
     @GetMapping("/")
     @ResponseBody
     public List<MemberJoinDTO> getMembers() {
         return memberService.getMembers(); // DTO 리스트 반환
     }
 
-    @GetMapping("/paginglist")
-    @ResponseBody
-    public PageResponseDTO<MemberListAllDTO> getPagingList(PageRequestDTO pageRequestDTO, Model model, @RequestParam("page") int page) {
-        if (pageRequestDTO.getPage() < 1) {
-            pageRequestDTO.setPage(1);
-        }
-        log.info("Paging------> {}", pageRequestDTO);
-        PageResponseDTO<MemberListAllDTO> responseDTO =
-                memberService.listWithAll(pageRequestDTO);
-        return responseDTO; // DTO 리스트 반환
-    }
 
 
     @ApiOperation(value = "회원 등록 POST", notes = "POST 방식으로 회원 등록")
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Map<String, Object> saveUser(@Valid @RequestBody MemberJoinDTO memberJoinDTO, BindingResult bindingResult) throws BindException {
 
+        log.info("roleset->", memberJoinDTO.getRoles());
         if (bindingResult.hasErrors()) {
             throw new BindException(bindingResult);
         }
@@ -164,6 +175,62 @@ public class UserApiController {
     }
 
 
+
+    @GetMapping("/paginglist")
+    @ResponseBody
+    public PageResponseDTO<MemberListAllDTO> getPagingList(PageRequestDTO pageRequestDTO, Model model, @RequestParam("page") int page) {
+        if (pageRequestDTO.getPage() < 1) {
+            pageRequestDTO.setPage(1);
+        }
+        log.info("Paging------> {}", pageRequestDTO);
+        PageResponseDTO<MemberListAllDTO> responseDTO =
+                memberService.listWithAll(pageRequestDTO);
+        return responseDTO; // DTO 리스트 반환
+    }
+
+    // JWT를 사용한 회원 정보 관리
+
+    @GetMapping("/getProfile")
+    public ResponseEntity<?> getProfile(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7); // "Bearer " 제거
+        String username = jwtUtil.validateToken(token);
+        Optional<Member> user = memberService.getUserById(username);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateProfile(HttpServletRequest request, @RequestBody Member updatedUser) {
+        String token = request.getHeader("Authorization").substring(7);
+        String username = jwtUtil.validateToken(token);
+        Optional<Member> user = memberService.getUserById(username);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        user.get().setEmail(updatedUser.getEmail());
+        user.get().setSocial(updatedUser.getSocial());
+        memberRepository.save(user.get());
+
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteAccount(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        String username = jwtUtil.validateToken(token);
+        Optional<Member> user = memberRepository.findById(username);
+
+        if (user != null) {
+            memberRepository.delete(user.get());
+            return ResponseEntity.ok("User deleted successfully");
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+
+
+
     @RequestMapping("/admin/admin_management")
     public String main() {
 
@@ -222,3 +289,28 @@ public class UserApiController {
 
 }
 
+
+@Data
+@ToString
+class LoginRequest {
+    private String username;
+    private String password;
+
+
+    // Getters and setters
+}
+
+
+@Data
+@ToString
+class LoginResponse {
+    private String token;
+
+    public LoginResponse(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
+}

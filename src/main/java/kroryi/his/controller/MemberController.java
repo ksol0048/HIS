@@ -18,7 +18,7 @@ public class MemberController {
 
     @GetMapping("/login")
     public String loginGET(@RequestParam(required = false) String error, @RequestParam(required = false) String logout) {
-        log.info("로그인 컨트롤러");
+        log.info("로그인 컨트롤러------------");
         if (logout != null) {
             log.info("회원 로그아웃");
         }
