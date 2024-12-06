@@ -3,6 +3,8 @@ package kroryi.his.controller;
 import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import kroryi.his.domain.LoginRequest;
+import kroryi.his.domain.LoginResponse;
 import kroryi.his.domain.Member;
 import kroryi.his.domain.MemberRoleSet;
 import kroryi.his.dto.*;
@@ -13,6 +15,7 @@ import kroryi.his.repository.MemberRoleSetRepository;
 import kroryi.his.service.MemberRoleSetService;
 import kroryi.his.service.MemberService;
 import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
@@ -50,8 +53,8 @@ public class UserApiController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Optional<Member> user = memberService.getUserById(request.getUsername());
-        if (user != null && passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
+        Optional<Member> user = memberService.getUserById(request.getMid());
+        if (user.isPresent() && passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
             String token = jwtUtil.generateToken(user.get().getMid());
             return ResponseEntity.ok(new LoginResponse(token));
         }
@@ -290,27 +293,3 @@ public class UserApiController {
 }
 
 
-@Data
-@ToString
-class LoginRequest {
-    private String username;
-    private String password;
-
-
-    // Getters and setters
-}
-
-
-@Data
-@ToString
-class LoginResponse {
-    private String token;
-
-    public LoginResponse(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
-}
