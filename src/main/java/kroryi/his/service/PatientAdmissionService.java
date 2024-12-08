@@ -38,4 +38,7 @@ public interface PatientAdmissionService {
 
     long getPatientCountByDateAndStatus(String date, String status) throws ParseException;
 
+    List<PatientAdmission> getWaitingPatientsForToday(LocalDate today);
+    List<PatientAdmission> getTreatmentPatientsForToday(LocalDate today);
+    List<PatientAdmission> getCompletePatientsForToday(LocalDate today);
 }

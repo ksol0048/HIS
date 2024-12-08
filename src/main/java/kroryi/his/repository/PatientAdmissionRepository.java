@@ -34,4 +34,10 @@ public interface PatientAdmissionRepository extends JpaRepository<PatientAdmissi
     @Query("SELECT COUNT(p) FROM PatientAdmission p WHERE p.receptionTime >= :startDate AND p.receptionTime < :endDate AND p.treatStatus = :status")
     long countPatientsByDateAndStatus(@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("status") String status);
 
+    @Query("SELECT p FROM PatientAdmission p WHERE p.treatStatus = :treatStatus AND p.receptionTime >= :todayStart AND p.receptionTime < :todayEnd")
+    List<PatientAdmission> findByTreatStatusAndReceptionTimeIsToday(
+            @Param("treatStatus") String treatStatus,
+            @Param("todayStart") LocalDateTime todayStart,
+            @Param("todayEnd") LocalDateTime todayEnd);
+
 }

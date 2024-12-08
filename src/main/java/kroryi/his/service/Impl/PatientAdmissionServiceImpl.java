@@ -246,4 +246,34 @@ public class PatientAdmissionServiceImpl implements PatientAdmissionService {
         // 레파지토리 호출
         return patientAdmissionRepository.countPatientsByDateAndStatus(startDate, endDate, status);
     }
+
+    @Override
+    public List<PatientAdmission> getWaitingPatientsForToday(LocalDate today) {
+        // LocalDate를 LocalDateTime으로 변환 (오늘 시작과 끝 시간)
+        LocalDateTime todayStart = today.atStartOfDay(); // 00:00:00
+        LocalDateTime todayEnd = today.atTime(23, 59, 59); // 23:59:59
+
+        // 변환된 LocalDateTime을 사용하여 쿼리 실행
+        return patientAdmissionRepository.findByTreatStatusAndReceptionTimeIsToday("1", todayStart, todayEnd);
+    }
+
+    @Override
+    public List<PatientAdmission> getTreatmentPatientsForToday(LocalDate today) {
+        LocalDateTime todayStart = today.atStartOfDay(); // 00:00:00
+        LocalDateTime todayEnd = today.atTime(23, 59, 59); // 23:59:59
+
+        // 변환된 LocalDateTime을 사용하여 쿼리 실행
+        return patientAdmissionRepository.findByTreatStatusAndReceptionTimeIsToday("2", todayStart, todayEnd);
+    }
+
+    @Override
+    public List<PatientAdmission> getCompletePatientsForToday(LocalDate today) {
+        LocalDateTime todayStart = today.atStartOfDay(); // 00:00:00
+        LocalDateTime todayEnd = today.atTime(23, 59, 59); // 23:59:59
+
+        // 변환된 LocalDateTime을 사용하여 쿼리 실행
+        return patientAdmissionRepository.findByTreatStatusAndReceptionTimeIsToday("3", todayStart, todayEnd);
+    }
+
+
 }

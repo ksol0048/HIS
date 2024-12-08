@@ -124,32 +124,40 @@ public class PatientAdmissionController {
     // 대기 환자 목록 반환
     @GetMapping("/waiting")
     public ResponseEntity<List<PatientAdmission>> getPatientsWaiting() {
-        List<PatientAdmission> waitingPatients = patientAdmissionService.getWaitingPatients();
+        LocalDate today = LocalDate.now(); // 오늘 날짜 구하기
 
-        log.info("waitig---->{}", waitingPatients);
+        // 오늘 날짜에 대기 상태인 환자 목록을 가져옵니다.
+        List<PatientAdmission> waitingPatients = patientAdmissionService.getWaitingPatientsForToday(today);
+
+        log.info("waiting---->{}", waitingPatients);
 
         return ResponseEntity.ok(waitingPatients);
     }
 
-    // 진료 중 대기 환자 목록 반환
     @GetMapping("/treatment")
     public ResponseEntity<List<PatientAdmission>> getPatientsForTreatment() {
-        List<PatientAdmission> inTreatmentPatients  = patientAdmissionService.getTreatmentPatients();
+        LocalDate today = LocalDate.now(); // 오늘 날짜 구하기
 
-        log.info("getTreatmentPatients---->{}", inTreatmentPatients);
+        // 오늘 날짜에 진료 중 상태인 환자 목록을 가져옵니다.
+        List<PatientAdmission> inTreatmentPatients = patientAdmissionService.getTreatmentPatientsForToday(today);
 
-        return ResponseEntity.ok(inTreatmentPatients );
+        log.info("getTreatmentPatientsForToday---->{}", inTreatmentPatients);
+
+        return ResponseEntity.ok(inTreatmentPatients);
     }
+
 
 
     // 진료 중 대기 환자 목록 반환
     @GetMapping("/complete")
     public ResponseEntity<List<PatientAdmission>> getPatientsForComplete() {
-        List<PatientAdmission> inTreatmentPatients  = patientAdmissionService.getCompletePatients();
+        LocalDate today = LocalDate.now(); // 오늘 날짜 구하기
 
-        log.info("getCompletePatients---->{}", inTreatmentPatients);
+        List<PatientAdmission> inCompletePatients = patientAdmissionService.getTreatmentPatientsForToday(today);
 
-        return ResponseEntity.ok(inTreatmentPatients );
+        log.info("getCompletePatients---->{}", inCompletePatients);
+
+        return ResponseEntity.ok(inCompletePatients );
     }
 
 
