@@ -120,7 +120,7 @@ let completePatientCount = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
 
-
+    enableDragToTreatmentWithSelection(waitingPatientsTable, treatmentPatientsTable);
     // 오늘 날짜 기본값 설정 (한국 시간으로)
     const today = new Date();
 
@@ -225,10 +225,68 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(`중복된 환자 제외: ${newPatient.paName} (PID: ${newPatient.pid})`);
             }
         });
-    });
+    });function enableDragToTreatmentWithSelection(waitingPatientsTable, treatmentPatientsTable) {
+        // 대기 테이블 행 클릭 시 선택 설정
+        Array.from(waitingPatientsTable.rows).forEach(row => {
+            row.addEventListener('click', () => {
+                const previouslySelected = waitingPatientsTable.querySelector('tr.selected');
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected'); // 기존 선택 해제
+                }
+                row.classList.add('selected'); // 현재 행 선택
+            });
+
+            // 드래그 가능 설정
+            row.setAttribute('draggable', 'true');
+
+            // 드래그 시작 이벤트
+            row.addEventListener('dragstart', (event) => {
+                const isSelected = row.classList.contains('selected'); // 선택 여부 확인
+                if (!isSelected) {
+                    event.preventDefault(); // 선택되지 않은 행은 드래그 불가
+                    alert("행을 선택한 후 드래그하세요."); // 경고 메시지
+                    return;
+                }
+                const pid = row.querySelector('td:nth-child(7)').textContent; // PID 가져오기
+                event.dataTransfer.setData('text/plain', pid); // PID를 데이터로 저장
+                row.classList.add('dragging'); // 드래그 표시
+            });
+
+            // 드래그 종료 이벤트
+            row.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+            });
+        });
+
+        // 진료 중 테이블 드롭 이벤트
+        treatmentPatientsTable.addEventListener('dragover', (event) => {
+            event.preventDefault(); // 기본 동작 방지
+            treatmentPatientsTable.classList.add('dragover');
+        });
+
+        treatmentPatientsTable.addEventListener('dragleave', () => {
+            treatmentPatientsTable.classList.remove('dragover');
+        });
+
+        treatmentPatientsTable.addEventListener('drop', (event) => {
+            event.preventDefault();
+            treatmentPatientsTable.classList.remove('dragover');
+
+            const draggedPid = event.dataTransfer.getData('text/plain'); // 드래그된 PID
+            const draggedRow = Array.from(waitingPatientsTable.rows).find(row =>
+                row.querySelector('td:nth-child(7)')?.textContent === draggedPid
+            );
+
+            if (draggedRow) {
+                // 선택된 행을 기존 버튼 로직을 통해 진료 중 테이블로 이동
+                const startTreatmentButton = document.getElementById('startTreatmentButton');
+                startTreatmentButton.click(); // 버튼 클릭 이벤트 호출
+            }
+        });
+    }
 
 
-// 접수 버튼 클릭 이벤트
+
     receptionBtn.addEventListener("click", function () {
         console.log("접수 버튼이 클릭되었습니다.");
 
@@ -281,6 +339,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     // 응답에서 pid와 rvTime 값을 확인
                     if (data && data.data && data.data.pid) {
                         patientData.pid = data.data.pid;  // pid 설정
+                        // pid를 세션에 저장
+                        sessionStorage.setItem('patientPID', patientData.pid);  // pid를 세션에 저장
+                        console.log("세션에 저장된 PID:", patientData.pid);
                     } else {
                         console.error("pid가 서버 응답에 포함되지 않았습니다.");
                     }
@@ -304,7 +365,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     stompClient.send("/topic/waitingPatients", {}, JSON.stringify(patientData));
 
                     // 테이블에 추가
-                    // loadWaiting();  // rvTime이 설정된 후에 호출
                     updateWaitingPatientCount();
                 })
                 .catch(error => {
@@ -316,8 +376,6 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("선택된 환자가 없습니다.");
         }
     });
-
-
 
 
 
@@ -343,6 +401,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+
     // 진료 시작 버튼 클릭 이벤트
     startTreatmentButton.addEventListener("click", function () {
         const selectedRow = waitingPatientsTable.querySelector('tr.selected');
@@ -363,6 +422,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("선택된 환자가 없습니다. 환자를 선택한 후 다시 시도하세요.");
             return; // 등록 과정 중단
         }
+        console.log("선택된 환자의 데이터:", selectedRow.cells);
 
         console.log("Waiting Patients Table:", waitingPatientsTable.rows);
 
@@ -446,9 +506,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-    treatmentModalElement.addEventListener('hidden.bs.modal', function () {
-        treatmentPatientInfo.textContent = '';
-    });
+    // treatmentModalElement.addEventListener('hidden.bs.modal', function () {
+    //     treatmentPatientInfo.textContent = '';
+    // });
 
     // 진료 완료 버튼 클릭 시 모달 표시
     completeTreatmentButton.addEventListener("click", function () {
@@ -706,104 +766,113 @@ function formatRvTime(rvTime) {
 }
 
 
-// 대기 중 테이블에 환자 추가
+// 대기 환자 테이블 클릭 시
+waitingPatientsTable.addEventListener("click", function (event) {
+    const targetRow = event.target.closest("tr"); // 클릭한 셀의 행을 가져옴
+    if (!targetRow) return;
+
+    // 이전에 선택된 행의 선택 클래스를 제거
+    const previousSelectedRow = document.querySelector('.clicked');
+    if (previousSelectedRow && previousSelectedRow !== targetRow) {
+        previousSelectedRow.classList.remove("clicked");
+    }
+
+    // 클릭한 행에 클릭 클래스를 추가
+    targetRow.classList.add("clicked");
+
+    // data-pid가 설정되지 않았다면, 새로 설정
+    let pid = targetRow.getAttribute('data-pid');
+    if (!pid) {
+        pid = targetRow.cells[6]?.textContent?.trim();  // PID가 없으면 셀에서 가져옴
+        if (pid) {
+            targetRow.setAttribute('data-pid', pid); // PID를 data-pid에 설정
+        }
+    }
+
+    // 세션에서 PID 값을 바로 읽기
+    const pidFromSession = sessionStorage.getItem('patientPID');
+    if (pidFromSession) {
+        console.log("세션에서 읽은 PID:", pidFromSession); // 바로 읽은 PID 값
+        // 여기서 즉시 DOM에 표시하거나 필요한 작업을 진행할 수 있습니다.
+
+        // 예: PID 값을 DOM에 표시
+        const pidValueElement = document.getElementById("pidValue");
+        if (pidValueElement) {
+            pidValueElement.textContent = pidFromSession; // PID 값을 표시
+        }
+    } else {
+        console.warn("세션에 저장된 PID가 없습니다.");
+    }
+
+    // PID 값을 세션에 저장
+    if (pid) {
+        sessionStorage.setItem('selectedPID', pid); // 세션에 PID 저장
+        console.log("선택된 PID:", pid); // PID 확인용 로그
+    } else {
+        console.warn("PID를 찾을 수 없습니다. 선택된 행:", targetRow);
+    }
+});
+
+
+
 function addPatientToWaitingTable(patient) {
-    // 대기 테이블에 추가된 환자 목록을 확인 (pid 기반으로 중복 체크)
     const existingRows = waitingPatientsTable.getElementsByTagName('tr');
     const isDuplicate = Array.from(existingRows).some(row => {
-        const pidCell = row.querySelector('td:nth-child(7)'); // 7번째 열 (pid 열)
-        return pidCell && pidCell.textContent === patient.pid.toString(); // pid 비교
+        const pidCell = row.querySelector('td:nth-child(7)');
+        return pidCell && pidCell.textContent === patient.pid.toString();
     });
 
     if (isDuplicate) {
-        // console.log(`환자 ${patient.paName} (pid: ${patient.pid})는 이미 대기 목록에 존재합니다. 추가하지 않습니다.`);
         return; // 중복된 환자는 추가하지 않음
     }
 
-    // 새로운 환자 데이터 추가
     const row = waitingPatientsTable.insertRow();
-    const currentRowCount = existingRows.length + 1; // 새로운 행 번호
-    const formattedRvTime = formatRvTime(patient.rvTime);
-
-    const doctorOptions = doctorNames.map(name => `<option value="${name}">${name}</option>`).join('');
-
+    row.setAttribute('data-pid', patient.pid); // PID 속성 추가
+    const currentRowCount = existingRows.length + 1;
+    const pid = row.getAttribute('data-pid');
+    if (pid) {
+        sessionStorage.setItem('selectedPID', pid); // 세션에 PID 저장
+        console.log("새로 추가된 PID:", pid);
+    } else {
+        console.warn("PID를 찾을 수 없습니다. 추가된 행:", row);
+    }
     row.innerHTML = `
         <td>${currentRowCount}</td>
         <td>${patient.chartNum || 'N/A'}</td>
         <td>${patient.paName || 'N/A'}</td>
         <td>
             <select>
-                ${doctorOptions}
+                ${doctorNames.map(name => `<option value="${name}">${name}</option>`).join('')}
             </select>
         </td>
-        <td>${formattedRvTime || ''}</td>
+        <td>${formatRvTime(patient.rvTime) || ''}</td>
         <td>${patient.receptionTime ? new Date(patient.receptionTime).toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit'
     }) : 'N/A'}</td>
         <td style="display: none;">${patient.pid}</td>
     `;
-    console.log("환자 pid:", patient.pid);
-    console.log("접수 시간:", patient.receptionTime);
-    console.log("예약 시간:", formattedRvTime);
 
-    // 클릭 이벤트 추가
-    row.addEventListener('click', () => {
-        // 선택된 행이 있으면 선택 해제
-        const previouslySelected = waitingPatientsTable.querySelector('tr.selected');
-        if (previouslySelected) {
-            previouslySelected.classList.remove('selected');
-        }
-        // 현재 행 선택
-        row.classList.add('selected');
-    });
+    // PID 확인
+    const pidCheck = row.getAttribute('data-pid');
+    if (!pidCheck) {
+        console.warn("PID 설정 실패! 행:", row);
+    } else {
+        console.log("PID 설정 성공! PID:", pidCheck);
+    }
 
-    // 드래그 앤 드롭 이벤트 추가
-    // row.setAttribute('draggable', 'true'); // 행을 드래그할 수 있도록 설정
-    //
-    // // 드래그 시작 시
-    // row.addEventListener('dragstart', (event) => {
-    //     event.dataTransfer.setData('text/plain', patient.pid); // 환자 PID를 드래그 데이터로 설정
-    //     row.classList.add('dragging'); // 드래그 중인 행을 표시
-    // });
-    //
-    // // 드래그 종료 시
-    // row.addEventListener('dragend', () => {
-    //     row.classList.remove('dragging'); // 드래그 종료 후 행 상태 복원
-    // });
-    //
-    // // 다른 행으로 드래그가 가능하도록
-    // row.addEventListener('dragover', (event) => {
-    //     event.preventDefault(); // 기본 동작(예: 다른 행 위로 드래그하는 것)을 방지
-    //     row.classList.add('dragover'); // 드래그 중인 행이 해당 행 위에 있을 때 표시
-    // });
-    //
-    // row.addEventListener('dragleave', () => {
-    //     row.classList.remove('dragover'); // 드래그가 다른 행을 벗어날 때 상태 제거
-    // });
-    //
-    // // 드래그된 행을 실제로 다른 행으로 놓을 때
-    // row.addEventListener('drop', (event) => {
-    //     event.preventDefault();
-    //     row.classList.remove('dragover'); // 드래그가 끝난 후 표시 제거
-    //
-    //     const draggedPid = event.dataTransfer.getData('text/plain'); // 드래그된 환자의 PID
-    //
-    //     // draggedPid를 통해 해당 행을 찾기
-    //     const draggedRow = Array.from(waitingPatientsTable.rows).find(r => {
-    //         return r.cells[6] && r.cells[6].textContent === draggedPid.toString(); // PID가 일치하는 행 찾기
-    //     });
-    //
-    //     if (draggedRow && draggedRow !== row) {
-    //         // 드래그된 행을 현재 행 위치에 삽입
-    //         row.parentNode.insertBefore(draggedRow, row); // 기존 행 위치 변경
-    //         updateRowNumbers(); // 행 번호 업데이트
-    //     }
-    // });
+    // 세션 스토리지에 PID 저장
+    sessionStorage.setItem('currentPID', patient.pid);  // 환자 PID 저장
+    console.log("세션에 저장된 PID:", patient.pid);
+
+    // 로그 확인
+    console.log("새로 추가된 행:", row);
+    console.log("새로 추가된 PID:", row.getAttribute('data-pid')); // PID 설정 확인
 
     updateWaitingPatientCount(); // 대기 환자 수 업데이트
     updateRowNumbers(); // 행 번호 업데이트
 }
+
 
 
 // 현재 시간을 포맷팅하는 함수
@@ -867,7 +936,7 @@ function addPatientToTreatmentTable(patient) {
     // 중복 체크: pid로 기존 환자 확인
     const isPatientAlreadyAdded = treatmentPatients.some(p => p.pid === patient.pid);
     if (isPatientAlreadyAdded) {
-        // console.log(`중복된 환자 제외: ${patient.paName} (PID: ${patient.pid})`);
+        console.log(`중복된 환자 제외: ${patient.paName} (PID: ${patient.pid})`);
         return; // 중복된 환자라면 함수를 종료
     }
 
@@ -1048,7 +1117,6 @@ async function updateWaitingPatientCount() {
     const status1Count = data.status1; // 진료 대기 환자 수
     const header = document.querySelector("#waitingPatientsTable th[colspan='6']");
     header.textContent = `진료 대기 환자: ${status1Count}명`;
-    console.log("44444444444444",status1Count)
 }
 
 async function updateTreatmentPatientCount() {
@@ -1056,8 +1124,6 @@ async function updateTreatmentPatientCount() {
     const status2Count = data.status2; // 진료 중 환자 수
     const header = document.querySelector("#treatmentPatientsTable th[colspan='6']");
     header.textContent = `진료 중 환자: ${status2Count}명`;
-    console.log("55555555555555",status2Count)
-
 }
 
 async function updateCompletePatientCount() {
@@ -1065,9 +1131,8 @@ async function updateCompletePatientCount() {
     const status3Count = data.status3; // 진료 완료 환자 수
     const header = document.querySelector('#completedPatientsTable th[colspan="6"]');
     header.textContent = `진료 완료 환자: ${status3Count}명`;
-    console.log("6666666666666666666",status3Count)
-
 }
+
 
 
 function cancelReception() {
@@ -1111,7 +1176,6 @@ function cancelReception() {
     });
 
     // 접수 취소 버튼 클릭 시 모달 표시
-    // 취소 버튼 클릭 이벤트
     cancelReceptionButton.addEventListener("click", function () {
         // 권한 체크를 직접 수행합니다.
         const hasPermission = globalUserData.authorities.some(auth =>
@@ -1125,7 +1189,7 @@ function cancelReception() {
         }
 
         if (selectedRow) {
-            const patientName = selectedRow.cells[2].textContent;
+            const patientName = selectedRow.cells[2]?.textContent || "";
             patientNameElement.textContent = `환자 이름: ${patientName}`;
             cancelModal.show();
         } else {
@@ -1133,44 +1197,47 @@ function cancelReception() {
         }
     });
 
-// 모달에서 '예' 버튼 클릭 시 행 삭제 및 데이터베이스에서 삭제
     confirmCancelBtn.addEventListener("click", function () {
-        console.log("----------->", selectedRow)
-        if (selectedRow) {
-            const pid = selectedRow.cells[6].textContent; // 숨겨진 pid 가져오기
-
-            // 데이터베이스에서 환자 접수 취소 요청
-            fetch(`/api/patient-admission/${pid}`, {
-                method: 'DELETE',
-            })
-                .then(response => {
-                    if (response.ok) {
-                        selectedRow.remove(); // 선택된 행 삭제
-                        updateRowIndexes(); // 행 번호 업데이트
-                        updateWaitingPatientCount(); // 환자 수 업데이트
-
-                        // 세션 스토리지에서 PID가 같은 환자 데이터 제거
-                        selectedRow = null; // 선택된 행 초기화
-                    } else {
-                        alert('환자 접수 취소 실패. 다시 시도하세요.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('서버와의 통신 중 오류가 발생했습니다.');
-                });
-
-            // 모달 닫기
-            cancelModal.hide();
+        if (!selectedRow) {
+            alert("선택된 행이 없습니다. 다시 시도하세요.");
+            return;
         }
-    });
 
+        // 세션에서 PID 가져오기
+        const pid = sessionStorage.getItem('selectedPID');
+        if (!pid) {
+            alert("PID 정보를 찾을 수 없습니다. 다시 시도하세요.");
+            return;
+        }
+
+        // 서버에 접수 취소 요청
+        fetch(`/api/patient-admission/${pid}`, {
+            method: 'DELETE',
+        })
+            .then(response => {
+                if (response.ok) {
+                    selectedRow.remove(); // 선택된 행 삭제
+                    selectedRow = null; // 초기화
+                    updateRowIndexes(); // 행 번호 업데이트
+                    updateWaitingPatientCount(); // 환자 수 업데이트
+                } else {
+                    alert('환자 접수 취소 실패. 다시 시도하세요.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버와의 통신 중 오류가 발생했습니다.');
+            });
+
+        cancelModal.hide();
+    });
 
     // '아니요' 버튼 클릭 시 모달 닫기
     closeModalBtn.addEventListener("click", function () {
         cancelModal.hide();
     });
 }
+
 
 
 
