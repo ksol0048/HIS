@@ -120,7 +120,7 @@ let completePatientCount = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    enableDragToTreatmentWithSelection(waitingPatientsTable, treatmentPatientsTable);
+    // enableDragToTreatmentWithSelection(waitingPatientsTable, treatmentPatientsTable);
     // 오늘 날짜 기본값 설정 (한국 시간으로)
     const today = new Date();
 
@@ -225,65 +225,66 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(`중복된 환자 제외: ${newPatient.paName} (PID: ${newPatient.pid})`);
             }
         });
-    });function enableDragToTreatmentWithSelection(waitingPatientsTable, treatmentPatientsTable) {
-        // 대기 테이블 행 클릭 시 선택 설정
-        Array.from(waitingPatientsTable.rows).forEach(row => {
-            row.addEventListener('click', () => {
-                const previouslySelected = waitingPatientsTable.querySelector('tr.selected');
-                if (previouslySelected) {
-                    previouslySelected.classList.remove('selected'); // 기존 선택 해제
-                }
-                row.classList.add('selected'); // 현재 행 선택
-            });
-
-            // 드래그 가능 설정
-            row.setAttribute('draggable', 'true');
-
-            // 드래그 시작 이벤트
-            row.addEventListener('dragstart', (event) => {
-                const isSelected = row.classList.contains('selected'); // 선택 여부 확인
-                if (!isSelected) {
-                    event.preventDefault(); // 선택되지 않은 행은 드래그 불가
-                    alert("행을 선택한 후 드래그하세요."); // 경고 메시지
-                    return;
-                }
-                const pid = row.querySelector('td:nth-child(7)').textContent; // PID 가져오기
-                event.dataTransfer.setData('text/plain', pid); // PID를 데이터로 저장
-                row.classList.add('dragging'); // 드래그 표시
-            });
-
-            // 드래그 종료 이벤트
-            row.addEventListener('dragend', () => {
-                row.classList.remove('dragging');
-            });
-        });
-
-        // 진료 중 테이블 드롭 이벤트
-        treatmentPatientsTable.addEventListener('dragover', (event) => {
-            event.preventDefault(); // 기본 동작 방지
-            treatmentPatientsTable.classList.add('dragover');
-        });
-
-        treatmentPatientsTable.addEventListener('dragleave', () => {
-            treatmentPatientsTable.classList.remove('dragover');
-        });
-
-        treatmentPatientsTable.addEventListener('drop', (event) => {
-            event.preventDefault();
-            treatmentPatientsTable.classList.remove('dragover');
-
-            const draggedPid = event.dataTransfer.getData('text/plain'); // 드래그된 PID
-            const draggedRow = Array.from(waitingPatientsTable.rows).find(row =>
-                row.querySelector('td:nth-child(7)')?.textContent === draggedPid
-            );
-
-            if (draggedRow) {
-                // 선택된 행을 기존 버튼 로직을 통해 진료 중 테이블로 이동
-                const startTreatmentButton = document.getElementById('startTreatmentButton');
-                startTreatmentButton.click(); // 버튼 클릭 이벤트 호출
-            }
-        });
-    }
+    });
+    // function enableDragToTreatmentWithSelection(waitingPatientsTable, treatmentPatientsTable) {
+    //     // 대기 테이블 행 클릭 시 선택 설정
+    //     Array.from(waitingPatientsTable.rows).forEach(row => {
+    //         row.addEventListener('click', () => {
+    //             const previouslySelected = waitingPatientsTable.querySelector('tr.selected');
+    //             if (previouslySelected) {
+    //                 previouslySelected.classList.remove('selected'); // 기존 선택 해제
+    //             }
+    //             row.classList.add('selected'); // 현재 행 선택
+    //         });
+    //
+    //         // 드래그 가능 설정
+    //         row.setAttribute('draggable', 'true');
+    //
+    //         // 드래그 시작 이벤트
+    //         row.addEventListener('dragstart', (event) => {
+    //             const isSelected = row.classList.contains('selected'); // 선택 여부 확인
+    //             if (!isSelected) {
+    //                 event.preventDefault(); // 선택되지 않은 행은 드래그 불가
+    //                 alert("행을 선택한 후 드래그하세요."); // 경고 메시지
+    //                 return;
+    //             }
+    //             const pid = row.querySelector('td:nth-child(7)').textContent; // PID 가져오기
+    //             event.dataTransfer.setData('text/plain', pid); // PID를 데이터로 저장
+    //             row.classList.add('dragging'); // 드래그 표시
+    //         });
+    //
+    //         // 드래그 종료 이벤트
+    //         row.addEventListener('dragend', () => {
+    //             row.classList.remove('dragging');
+    //         });
+    //     });
+    //
+    //     // 진료 중 테이블 드롭 이벤트
+    //     treatmentPatientsTable.addEventListener('dragover', (event) => {
+    //         event.preventDefault(); // 기본 동작 방지
+    //         treatmentPatientsTable.classList.add('dragover');
+    //     });
+    //
+    //     treatmentPatientsTable.addEventListener('dragleave', () => {
+    //         treatmentPatientsTable.classList.remove('dragover');
+    //     });
+    //
+    //     treatmentPatientsTable.addEventListener('drop', (event) => {
+    //         event.preventDefault();
+    //         treatmentPatientsTable.classList.remove('dragover');
+    //
+    //         const draggedPid = event.dataTransfer.getData('text/plain'); // 드래그된 PID
+    //         const draggedRow = Array.from(waitingPatientsTable.rows).find(row =>
+    //             row.querySelector('td:nth-child(7)')?.textContent === draggedPid
+    //         );
+    //
+    //         if (draggedRow) {
+    //             // 선택된 행을 기존 버튼 로직을 통해 진료 중 테이블로 이동
+    //             const startTreatmentButton = document.getElementById('startTreatmentButton');
+    //             startTreatmentButton.click(); // 버튼 클릭 이벤트 호출
+    //         }
+    //     });
+    // }
 
 
 
@@ -306,22 +307,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (selectedPatient) {
             console.log("가져온 환자 정보:", selectedPatient);
 
-            // 서버에 저장하기 위해 환자 데이터 객체 생성
+            // 서버로 보낼 데이터 생성
             const patientData = {
                 chartNum: selectedPatient.chartNum,
                 paName: selectedPatient.name || "N/A",
                 mainDoc: null,
-                rvTime: null,  // 예약 시간이 설정될 때 이 값이 서버에서 올바르게 채워짐
+                rvTime: null,
                 receptionTime: new Date().toISOString(),
-                // pid는 서버에서 받아올 예정
             };
 
-            // 환자 등록을 위한 AJAX 요청
             fetch("/api/patient-admission/register", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(patientData)
             })
                 .then(response => {
@@ -330,54 +327,47 @@ document.addEventListener("DOMContentLoaded", function () {
                             throw new Error(text || '환자 접수 실패');
                         });
                     }
-                    return response.json();  // 응답을 JSON 형태로 파싱
+                    return response.json();
                 })
                 .then(data => {
-                    // 서버에서 받은 응답 확인
-                    console.log("서버 응답으로 받은 데이터:", data);
+                    console.log("서버 응답:", data);
 
-                    // 응답에서 pid와 rvTime 값을 확인
                     if (data && data.data && data.data.pid) {
-                        patientData.pid = data.data.pid;  // pid 설정
-                        // pid를 세션에 저장
-                        sessionStorage.setItem('patientPID', patientData.pid);  // pid를 세션에 저장
-                        console.log("세션에 저장된 PID:", patientData.pid);
+                        patientData.pid = data.data.pid;
+
+                        // 테이블에 추가
+                        addPatientToWaitingTable(patientData);
+
+                        // WebSocket으로 알림 전송
+                        stompClient.send("/topic/waitingPatients", {}, JSON.stringify(patientData));
+
+                        alert("환자 접수가 완료되었습니다.");
                     } else {
-                        console.error("pid가 서버 응답에 포함되지 않았습니다.");
+                        console.error("서버 응답에 PID가 포함되지 않았습니다.");
                     }
-
-                    if (data.rvTime) {
-                        patientData.rvTime = data.rvTime;  // rvTime 설정
-                        console.log("서버에서 받은 rvTime:", data.rvTime);  // rvTime 값 출력
-                    } else {
-                        console.error("rvTime이 서버 응답에 포함되지 않았습니다.");
-                    }
-
-                    // 대기 테이블에 추가할 환자 데이터
-                    console.log("대기 테이블에 추가할 환자 데이터:", patientData);
-
-                    alert("환자 접수가 완료되었습니다.");
-
-                    // 환자 리스트 갱신 함수 호출 (rvTime이 설정된 이후에 호출)
-                    callPatientListRender();
-
-                    // WebSocket을 통해 대기 환자 데이터 브로드캐스트
-                    stompClient.send("/topic/waitingPatients", {}, JSON.stringify(patientData));
-
-                    // 테이블에 추가
-                    updateWaitingPatientCount();
                 })
                 .catch(error => {
                     console.error("에러 발생:", error);
-                    alert(error.message);
+                    alert("환자 접수 중 문제가 발생했습니다.");
                 });
         } else {
-            console.log("세션에서 환자 정보가 없습니다.");
             alert("선택된 환자가 없습니다.");
         }
     });
 
 
+    waitingPatientsTable.addEventListener('click', (event) => {
+        const targetRow = event.target.closest('tr');
+        if (targetRow) {
+            console.log("클릭된 행:", targetRow);
+            const previouslySelected = waitingPatientsTable.querySelector('tr.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected');
+            }
+            targetRow.classList.add('selected');
+            console.log("현재 선택된 행:", targetRow);
+        }
+    });
 
     treatmentPatientsTable.addEventListener('click', (event) => {
         const targetRow = event.target.closest('tr'); // 클릭한 행 찾기
